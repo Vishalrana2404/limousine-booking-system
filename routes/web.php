@@ -34,10 +34,8 @@ Route::get('/clear-cache', function () {
     return "Cache, Config, Routes, and Views Cleared!";
 });
 
-
 Route::get('/link-storage', function () {
     Artisan::call('storage:link');
-
     return "Storage Linking Successful.";
 });
 
