@@ -1,0 +1,41 @@
+/************************ reset css starts here ************************/
+* {margin: 0;padding: 0;}
+body, html {position: relative}
+html {height: 100%;}
+ol, ul {list-style: none}
+blockquote, q {quotes: none}
+blockquote:after, blockquote:before, q:after, q:before {content: ''}
+table {border-collapse: collapse;border-spacing: 0}
+.btn:active:focus, .btn:focus, a:focus, button:focus {outline: 0;text-decoration: none;box-shadow: 0 0 !important;}
+input::-ms-clear, input::-ms-reveal {display: none;}
+input {filter: none;}
+
+textarea {resize: none;}
+select {-webkit-appearance: none;-moz-appearance: none;}
+select::-ms-expand {display: none;}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {-webkit-appearance: none;margin: 0;}
+input[type=number] {-moz-appearance:textfield;}
+input[type=file], input[type=file]::-webkit-file-upload-button {cursor: pointer;}
+input[type=checkbox] {cursor: pointer;}
+::selection {color: $white;background-color: $theme-color;}
+::-moz-selection {color: $white;background-color: $theme-color;}
+.form-control:-moz-placeholder {opacity: 1;color: $placeholder-color;}
+.form-control::-webkit-input-placeholder {opacity: 1;color: $placeholder-color;}
+.form-control::-moz-placeholder {opacity: 1;color: $placeholder-color;}
+.form-control:-ms-input-placeholder {opacity: 1 !important;color: $placeholder-color;}
+.form-control::-ms-input-placeholder {opacity: 1;color: $placeholder-color;}
+.form-control::placeholder {opacity: 1;color: $placeholder-color;}
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+// input:-webkit-autofill:active  {@include prefix(box-shadow, 0 0 0 30px #fff inset !important);}
+a, a:hover, a:focus {text-decoration: none;}
+a {color: $theme-color;
+  &:hover, &:focus {color: $theme-orange;}
+  &.line {display: inline-block;text-decoration: underline;}
+}
+p, h1, h2, h3, h4, h5, h6, label {margin-bottom: 0;}
+button:focus, .form-control:focus, input:focus {outline: none;}
+button{background:transparent; border:none;}
+.form-control:focus{box-shadow: 0 0;border:1px solid $theme-color;}

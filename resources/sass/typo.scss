@@ -1,0 +1,23 @@
+// Mixin
+@import 'mixin';
+@include font-face(Inter, "../fonts/Inter-ExtraLight", 200, normal);
+@include font-face(Inter, "../fonts/Inter-Light", 300, normal);
+@include font-face(Inter, "../fonts/Inter-Regular", normal, normal);
+@include font-face(Inter, "../fonts/Inter-Medium", 500, normal);
+@include font-face(Inter, "../fonts/Inter-SemiBold", 600, normal);
+@include font-face(Inter, "../fonts/Inter-Bold", 700, normal);
+@include font-face(Inter, "../fonts/Inter-ExtraBold", 800, normal);
+@include font-face(Inter, "../fonts/Inter-Black", 900, normal);
+
+
+
+.f-extra-light ,.f-light, .normal, .medium, .semibold, .bold, .extrabold,.interextralarge, body {font-family: Inter,sans-serif;font-optical-sizing: auto;font-variation-settings: "slnt" 0;}
+
+.f-extra-light {font-weight: 200;}
+.f-light {font-weight: 300;}
+.normal, body {font-weight: 400;}
+.medium {font-weight: 500;}
+.semibold {font-weight: 600;}
+.bold {font-weight: 700;}
+.extrabold{font-weight: 800;}
+.interextralarge{font-weight: 900;}

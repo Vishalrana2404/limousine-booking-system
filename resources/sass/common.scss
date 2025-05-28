@@ -1,0 +1,654 @@
+// Font Family
+@import 'typo';
+
+// Variables
+@import 'variables';
+
+// Mixin
+@import 'mixin';
+
+// reset
+@import 'reset';
+
+/*********heading css starts*********/
+.head-xl {
+    font-size: 48px;
+    line-height: 59px;
+}
+
+.head-lg {
+    font-size: 42px;
+    line-height: 57px;
+}
+
+
+.head-md {
+    font-size: 24px;
+    line-height: 27px;
+}
+
+.head-sm, .content-header .head-sm {
+    font-size: 20px;
+}
+
+.head-xs {
+    font-size: 18px;
+}
+
+.text-md {
+    font-size: 16px;
+}
+
+.text-sm {
+    font-size: 14px;
+}
+
+.text-xs {
+    font-size: 12px;
+}
+
+.radius-0 {
+    @include prefix(border-radius, 0px);
+}
+
+.radius-2 {
+    @include prefix(border-radius, 2px);
+}
+
+.radius-4 {
+    @include prefix(border-radius, 4px);
+}
+
+.radius-6 {
+    @include prefix(border-radius, 6px);
+}
+
+.radius-20 {
+    @include prefix(border-radius, 20px);
+}
+
+.radius-10 {
+    @include prefix(border-radius, 10px);
+}
+
+.radius-50 {
+    @include prefix(border-radius, 50px);
+}
+
+.radius-round {
+    @include prefix(border-radius, 50%);
+}
+
+.theme-color {
+    color: $theme-text-black;
+}
+
+.dark-color {
+    color: $black;
+}
+/*********heading css ends*********/
+
+/*********Theme custom styling Start here*********/
+input[type="checkbox"]{
+    accent-color: #000;
+}
+.form-check-input:checked{
+    background-color: $black;
+    border-color: $black;
+}
+#loader {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 99999;
+  }
+.notification-dropdown{
+    a.dropdown-item:hover .ticket-id {
+        text-decoration: underline;
+    }
+   .dropdown-item:active, a.dropdown-item:focus{
+        background-color: $border;
+    }
+}
+.loader-icon {
+    @include cover-image("loader.gif");
+    @include center(true);
+    @include wh(40px, 40px);
+    background-size: cover;
+  }
+  .dropdown-item.active, .dropdown-item:active{
+    background-color: $black;
+    color: $white;
+  }
+  textarea.textarea-sm{
+    max-height: 38px;
+  }
+  .login-card-body .input-group .form-control:focus~.input-group-prepend .input-group-text, .login-card-body .input-group .form-control:focus~.input-group-append .input-group-text, .register-card-body .input-group .form-control:focus~.input-group-prepend .input-group-text, .register-card-body .input-group .form-control:focus~.input-group-append .input-group-text {
+    border-color: #000000;
+}
+.custom-sidebar .nav-sidebar .nav-item .nav-link.active, .custom-sidebar .nav-sidebar .nav-item .nav-link.active {
+    background-color: #E9ECEF;
+    color: #191919;
+}
+[class*="sidebar-light-"] .nav-sidebar > .nav-item > .nav-link.active {
+    box-shadow: none;
+}
+.user-panel img {
+    height: 40px;
+    width: 40px;
+}
+.cell-width-300{
+    max-width: 300px;
+}
+.cell-width-250{
+    max-width: 250px;
+}
+.cell-width-200{
+    max-width: 200px;
+}
+.cell-min-width-200{
+    min-width: 200px;
+}
+.cell-min-width-400{
+    min-width: 400px;
+}
+
+.content-header{
+    padding: 15px 20px;
+}
+.no-box-shadow{
+    box-shadow: none;
+}
+.content-wrapper{
+    background-color: $white;
+}
+.content-wrapper > .content{
+    padding: 14px 24px;
+}
+.btn{
+    border-width: 2px;
+}
+.btn-outline-primary{
+    color: $black;
+    border-color: $black;
+    &:hover{
+        background-color: $black;
+        border-color: $black;
+    }
+}
+.btn-outline-primary:not(:disabled):not(.disabled):active{
+    background-color: $black;
+    border-color: $black;
+}
+.back-btn{
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.form-control{
+    color: $theme-text-black;
+    font-size: 14px;
+    &::placeholder{
+        color: #7c7c7c;
+    }
+    &:focus{
+        color: $theme-text-black;
+        border: 1px solid $black;
+    }
+}
+.list-number{list-style-type: decimal;}
+.list-bullet{list-style-type: disc;}
+.step-list-item{padding: 3px 0;}
+.invalid-feedback{font-weight: normal; @extend .text-xs;}
+.invalid-feedback strong{
+    @extend .normal;
+}
+.custom-control-input:checked ~ .custom-control-label::before{
+    border-color: $black;
+    background-color: $black;
+}
+label:not(.form-check-label):not(.custom-file-label){
+    font-weight: 500;
+    font-size: 14px;
+    padding-bottom: 9px;
+}
+::selection {
+    color: $white;
+    background-color: $black;
+  }
+  .card-header > .card-tools{
+    margin-right: auto;
+  }
+//   rotate arrow icon
+  .nav-sidebar .menu-open > .nav-link svg.right, .nav-sidebar .menu-open > .nav-link i.right, .nav-sidebar .menu-is-opening > .nav-link svg.right, .nav-sidebar .menu-is-opening > .nav-link i.right{
+    -webkit-transform: rotate(90deg);
+    transform: rotate(90deg);
+  }
+.large-table{
+    min-width: 2400px;
+}
+.xl-table{
+    width: 3000px;
+}
+.icon {
+    vertical-align: middle;
+    display: inline-block;
+}
+.icon-nav{
+    margin-right: .2rem;
+    text-align: center;
+}
+.dash-icon {
+    @include wh(16px, 16px);
+    @include cover-image("dashboard-icon.svg");
+    background-repeat: no-repeat;
+}
+.bookings-archives-icon {
+    @include wh(16px, 16px);
+    @include cover-image("bookings-archives-icon.svg");
+    background-repeat: no-repeat;
+}
+.reports-icon {
+    @include wh(16px, 16px);
+    @include cover-image("reports-icon.svg");
+    background-repeat: no-repeat;
+}
+
+.book-icon {
+    @include wh(18px, 18px);
+    @include cover-image("car.svg");
+    background-repeat: no-repeat;
+}
+.custom-sidebar .nav-sidebar .nav-item a{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.sidebar-mini.sidebar-collapse .brand-text{
+    display: none;
+}
+.drive-icon {
+    @include wh(18px, 18px);
+    @include cover-image("driver-icon.svg");
+    background-repeat: no-repeat;
+}
+
+.vehicles-icon {
+    @include wh(18px, 18px);
+    @include cover-image("traffic.svg");
+    background-repeat: no-repeat;
+}
+.bookings-icon {
+    @include wh(18px, 18px);
+    @include cover-image("bookings.svg");
+    background-repeat: no-repeat;
+}
+
+.hotel-icon {
+    @include wh(18px, 18px);
+    @include cover-image("hotel.svg");
+    background-repeat: no-repeat;
+}
+
+.user-icon {
+    @include wh(18px, 18px);
+    @include cover-image("user.svg");
+    background-repeat: no-repeat;
+}
+
+.drive-icon {
+    @include wh(18px, 18px);
+    @include cover-image("driver-icon.svg");
+    background-repeat: no-repeat;
+}
+
+.report-icon {
+    @include wh(18px, 18px);
+    @include cover-image("report.svg");
+    background-repeat: no-repeat;
+}
+
+.logo-icon {
+    @include wh(18px, 18px);
+    @include cover-image("file.svg");
+    background-repeat: no-repeat;
+}
+
+.setting-icon {
+    @include wh(18px, 18px);
+    @include cover-image("setting.svg");
+    background-repeat: no-repeat;
+}
+
+.profile-icon {
+    @include wh(40px, 40px);
+    @include cover-image("profile.svg");
+    background-repeat: no-repeat;
+}
+
+.profile-icon-sm {
+    @include wh(20px, 20px);
+    @include cover-image("profile.svg");
+    background-repeat: no-repeat;
+}
+
+.notification-icon {
+    @include wh(22px, 22px);
+    @include cover-image("notification.svg");
+    background-repeat: no-repeat;
+}
+
+.plus-icon {
+    @include wh(18px, 18px);
+    @include cover-image("plus.svg");
+    background-repeat: no-repeat;
+}
+
+.logs-icon {
+    @include wh(18px, 18px);
+    @include cover-image("logs.svg");
+    background-repeat: no-repeat;
+}
+
+.clients-icon {
+    @include wh(18px, 18px);
+    @include cover-image("people-outline.svg");
+    background-repeat: no-repeat;
+}
+
+
+.upload-icon {
+    @include wh(24px, 24px);
+    @include cover-image("upload-icon.svg");
+    background-repeat: no-repeat;
+}
+
+.custom-sidebar {
+    background: $white;
+
+    .nav-sidebar {
+        .nav-item {
+            a {
+                color: $theme-text-black;
+            }
+
+            &:hover>.nav-link {
+                color: $theme-text-black;
+            }
+
+            .nav-link {
+                &:hover {
+                    background: rgba(32,33,36,0.059);
+                }
+            }
+
+            .nav-treeview {
+                .nav-item>.nav-link {
+                    color: $theme-text-black;
+                }
+            }
+
+            p {
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+            .nav-link.active {
+                background-color: rgba(32,33,36,0.059);
+                color: $theme-text-black;
+            }
+        }
+
+        .nav-item.menu-open>.nav-link {
+            color: $theme-text-black;
+        }
+
+    }
+
+}
+.bg-pending-badge{
+    background: #FAEDC4;
+    color: #A47D06;
+    padding: 6px 20px;
+    @extend .radius-10;
+}
+.bg-completed-badge{
+    background: #00C851;
+    color: #FFFFFF;
+    padding: 6px 20px;
+    @extend .radius-10;
+}
+.bg-canceled-badge{
+    background: #FF0000;
+    color: #FFFFFF;
+    padding: 6px 20px;
+    @extend .radius-10;
+}
+.pending-status td{
+    background-color: #FFD4D4;
+}
+.cancelled-status td{
+    background-color: #d4d1d1;
+}
+.completed-status td{
+    background-color: #9df57b;
+}
+
+.requested-to-cancel td{
+    background-color: #c2394b;
+}
+.sticky-column{
+    position: sticky;
+    left: 0;
+}
+
+.sticky-column:first-child {
+    left: 0;
+}
+
+.sticky-column:nth-child(2) {
+    left: 50px;
+}
+
+
+.sticky-column:nth-child(3) {
+    left: 120px;
+}
+.driverOffDayTable{
+    th, td{
+        text-align: center;
+    }
+}
+.custom-checkbox .custom-control-input:disabled:checked ~ .custom-control-label::before{
+    background-color: #000000a3;
+    border-color: #00000059;
+}
+.custom-checkbox .custom-control-input:disabled ~ .custom-control-label::before{
+    background-color: #a8a8a8;
+    border-color: #a8a8a8;
+}
+.bg-accepted-badge{
+    background: #D0E1FD;
+    color: #3B82F6;
+    padding: 6px 20px;
+    @extend .radius-10;
+}
+.nav-treeview .nav-item > .nav-link{
+    padding-left: 32px;
+}
+// For Date Picker
+.daterangepicker .ranges li.active{
+    background-color: $theme-text-black;
+}
+.daterangepicker td.in-range{
+    background-color: rgba(0, 0, 0, 0.059);
+}
+.daterangepicker td.active, .daterangepicker td.active:hover{
+    background-color: $theme-text-black;
+}
+.btn-primary{
+    background-color: $black;
+    border-color: $black;
+    &:hover{
+        background-color: rgba(0, 0, 0, 0.7);
+        border-color: rgba(0, 0, 0, 0.3);
+    }
+}
+.fc .fc-scrollgrid-liquid a{
+    color: $black;
+}
+.fc .fc-toolbar.fc-header-toolbar{
+    padding: 1rem 0;
+}
+.fc .fc-button-primary{
+    background-color: $black;
+    border-color: $black;
+}
+.fc-daygrid-day-number{
+    flex-grow: 1;
+    .dayContent{
+        display: flex;
+        justify-content: space-around;
+    }
+}
+.card{
+    border-radius: 7px;
+}
+.border-right {
+    border-right: 1px solid $border;
+}
+
+.border-bottom {
+    border-bottom: 1px solid $border;
+}
+
+.border-top {
+    border-top: 1px solid $border;
+}
+
+.notification {
+    padding: 2px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $theme-text-black;
+    color: $white;
+    @include absolute-100($r: -12px, $t: 2px, $w: 20px, $h: 20px);
+}
+
+a:hover,
+a:focus {
+    color: $theme-text-black;
+}
+
+.login-logo,
+.register-logo {
+    a {
+        color: $black;
+    }
+
+}
+
+.theme-btn {
+    background-color: $theme-text-black;
+    font-size: 14px;
+    height: 38px;
+    color: #fff;
+    border-radius: 5px;
+    &:hover {
+        background-color: $black;
+    }
+}
+
+
+.inner-theme-btn {
+    background-color: $theme-text-black;
+    font-size: 14px;
+    height: 38px;
+    color: $white;
+    min-width: 120px;
+    font-weight: 600;
+    border-radius: 5px;
+    padding: 5px 10px;
+    display: inline-block;
+    text-align: center;
+    line-height: 28px;
+
+    &:hover, &:focus {
+        color: $white;
+    }
+}
+
+.upload-design {
+    @include wh($w: 45px, $h: 45px);
+    min-width: 45px;
+    position: absolute;
+    bottom: -30px;
+    left: 0;
+    text-align: center;
+    right: 0;
+    border: 1px solid $black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $white;
+    margin: 0 auto;
+    @include prefix(border-radius, 50px);
+}
+
+.custom-nav {
+    .nav-pills {
+        .nav-link.active {
+            background-color: #DEE2E6;
+            color: $theme-text-black;
+        }
+
+        :not(.active):hover {
+            color: $theme-text-black;
+        }
+    }
+
+}
+.table-scroll-height{
+    height: calc(100vh - 210px);
+}
+.custom-table{
+    .table {
+        @extend .text-sm;
+        td{
+            padding: 7px 10px;
+        }
+        thead tr:nth-child(1) th {
+            background-color: #EFF3F8;
+            @extend .no-box-shadow;
+            @extend .text-sm;
+            @extend .semibold;
+            padding: 7px 10px;
+        }
+    }
+}
+.main-footer {
+    font-weight: normal;
+    font-size: 12px;
+    a {
+    color: $theme-text-black;
+    }
+    strong{
+        font-weight: normal;
+    }
+}
+.fa{
+    line-height: 1.5;
+}
+.fa-sort{
+    cursor: pointer;
+}
