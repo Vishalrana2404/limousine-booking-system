@@ -43,6 +43,7 @@
                             <th>No Of Child Seat Required</th>
                             <th>Child 1 Age</th>
                             <th>Child 2 Age</th>
+                            <th>Meet And Greet</th>
                             <th><span title="Acceptable Formats: jpg, jpeg, png, gif, doc, docx, txt, pdf, xls, xlsx"
                                     class="fa fa-info-circle" aria-hidden="true"></span> Attachment</th>
                             <th>Cross Border Service</th>
@@ -345,12 +346,12 @@
                                             class="form-control multiple_guest_name @error('multiple_guest_name[.' . $index.'][0]') is-invalid @enderror"
                                             placeholder="Name of Guest(s)" autocomplete="off" autofocus>
                                             <button type="button" class="col-sm-3 multiple-add-guest" style="bottom: 8px;"><span class="fa fa-plus mt-3"></span></button>
-                                        @error('multiple_guest_name.' . $index)
-                                            <span class="invalid-feedback" role="alert">
-                                                <strong>{{ $message }}</strong>
-                                            </span>
-                                        @enderror
                                     </div>
+                                    @error('multiple_guest_name.' . $index)
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
                                 </td>
                                 <td>
                                     <div class="d-flex gap-2 guestContactContainer">
@@ -680,6 +681,22 @@
                                             <option value="6 yo">6 yo</option>
                                         </select>
                                         @error('multiple_child_2_age.' . $index)
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        <select name="multiple_meet_and_greet[]"
+                                            id="meet_and_greet_{{ $index }}"
+                                            class="form-control form-select custom-select multiple_meet_and_greet @error('multiple_meet_and_greet.' . $index) is-invalid @enderror"
+                                            autocomplete="off">
+                                            <option value="YES" disabled>Yes</option>
+                                            <option value="NO" selected>No</option>
+                                        </select>
+                                        @error('multiple_meet_and_greet.' . $index)
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
                                             </span>

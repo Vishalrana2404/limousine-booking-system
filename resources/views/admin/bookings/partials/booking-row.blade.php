@@ -249,14 +249,14 @@
           {{ $booking->client_instructions ?? 'N/A' }}</td>
 
       <!-- <td class="text-truncate">{{ CustomHelper::formatSingaporeDate($booking->created_at) ?? 'N/A' }}</td> -->
-      @if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']))
+      <!-- @if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']))
           <td data-name="driver_remark" data-old="{{ $booking->driver_remark }}" class="text-truncate cell-width-300"
               title="{{ $booking->driver_remark }}">
               {{ $booking->driver_remark ?? 'N/A' }}</td>
           <td class="text-truncate">{!! $dispatch !!}</td>
           <td data-name="internal_remark" data-old="{{ $booking->internal_remark }}"
               class="text-truncate cell-width-300" title="{{ $booking->internal_remark }}">
-              {{ $booking->internal_remark ?? 'N/A' }}</td>
+              {{ $booking->internal_remark ?? 'N/A' }}</td> -->
           <!-- <td class="text-truncate">{{ $fullName ?? 'N/A' }}</td> -->
-      @endif
+      <!-- @endif -->
   </tr>

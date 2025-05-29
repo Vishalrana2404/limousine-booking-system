@@ -20,12 +20,13 @@
                     <th style="width: 40px">Action</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="sortableVehicleClass">
                 @forelse($vehicleClassData as $key => $vehicleClass)
                     @php
                         $isChecked = $vehicleClass->status === 'ACTIVE' ? 'checked' : '';
                     @endphp
                     <tr data-vehicle-class-id="{{ $vehicleClass->id }}">
+                        <input type="hidden" name="sequence_no" id="sequence_no" value="{{ $vehicleClass->sequence_no }}">
                         <td>
                             <div class="custom-control custom-checkbox">
                                 <input class="custom-control-input vehicleClassTableCheckbox cellCheckbox"
@@ -46,7 +47,6 @@
                         <td class="text-truncate cell-width-200"
                             title="{{ $vehicleClass->total_luggage ? $vehicleClass->total_luggage : 'N/A' }}">
                             {{ $vehicleClass->total_luggage ? $vehicleClass->total_luggage : 'N/A' }}</td>
-
                         <td>
                             <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
                                 <input type="checkbox" class="custom-control-input vehicleClassStatusToggal"

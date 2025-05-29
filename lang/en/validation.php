@@ -250,6 +250,9 @@ return [
             'pattern' => "The field must be a decimal with precision of 10 and scale of 2.",
             'regex' => "The field must be a decimal with precision of 10 and scale of 2.",
         ],
+        "point_of_contact" => [
+            'required' => 'Please assign atleast 1 Point Of Contact person.'
+        ],
         'fixed_multiplier' => 'Please select fixed or multiplier.',
         'type' => 'Please select a driver type.',
         'gender' => 'Please select a gender.',
@@ -353,6 +356,9 @@ return [
         'child_seat_required' => [
             'required' => "Please select an option.",
         ],
+        'meet_and_greet' => [
+            'required' => "Please select an option.",
+        ],
         'guest_name' => [
             'required' => "Please enter the name of the guest(s).",
             'min' => 'Name must be at least 3 characters long.',
@@ -369,6 +375,9 @@ return [
             'required' => "Please enter the flight details.",
             'min' => 'Flight details must be at least 3 characters long.',
             'max' => 'Flight details must not exceed 50 characters.',
+        ],
+        'client_instructions' => [
+            'required' => "Please input client instructions for pick up location.",
         ],
         'attachment' => [
             "extension" =>  "Please upload a file with a valid type (jpg, jpeg, png, gif, doc, docx, txt, pdf, xls, xlsx)",

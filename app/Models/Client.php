@@ -24,6 +24,11 @@ class Client extends Model
         return $this->belongsTo(User::class, 'updated_by_id');
     }
 
+    public function clientHotelLinkageLogs()
+    {
+        return $this->hasMany(HotelLinkageLogs::class, 'client_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class,'user_id');

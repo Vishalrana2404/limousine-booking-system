@@ -91,4 +91,6 @@ interface VehicleClassInterface
      *
      */
     public function getVehicleClassByIds(array $vehicleClassIds, string $status = null): Collection;
+
+    public function updateVehicleClassSequence(int $id, int $sequence, int $loggedUserId): bool;
 }

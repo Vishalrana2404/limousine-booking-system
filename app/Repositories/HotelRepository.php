@@ -4,9 +4,13 @@ namespace App\Repositories;
 
 use App\Models\Hotel;
 use App\Models\User;
+use App\Models\HotelPOC;
+use App\Models\Client;
+use App\Models\HotelLinkageLogs;
 use App\Repositories\Interfaces\HotelInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Carbon\Carbon;
 
 /**
  * Class HotelRepository
@@ -21,7 +25,10 @@ class HotelRepository implements HotelInterface
      * @param Hotel $model The User model instance.
      */
     public function __construct(
-        protected Hotel $model
+        protected Hotel $model,
+        protected HotelPOC $hotelPocModel,
+        protected Client $clientModel,
+        protected HotelLinkageLogs $hotelLogModel
     ) {
     }
     /**
@@ -136,6 +143,12 @@ class HotelRepository implements HotelInterface
                 case 'sortName':
                     $value = strtolower($innerQuery->name ?? 'zzzz');
                     break;
+                case 'sortIsHeadOffice':
+                    $value = strtolower($innerQuery->is_head_office ?? 'zzzz');
+                    break;
+                case 'sortHeadOffice':
+                    $value = strtolower($innerQuery->linkedHeadOffice->name ?? 'zzzz');
+                    break;
                 case 'sortStatus':
                     $value = strtolower($innerQuery->status ?? 'zzzz');
                     break;
@@ -223,5 +236,182 @@ class HotelRepository implements HotelInterface
     {
         return $this->model->where('status', 'ACTIVE')->get();
     }
-    
+
+    public function getHeadOfficeHotelsData(): Collection
+    {
+        return $this->model->where('status', 'ACTIVE')->where('is_head_office', '1')->get();
+    }
+
+    public function updateHotelPOC(int $hotelId, int $loggedUserId, array $pocData = null): bool
+    {
+        $pocData = $pocData ?? [];
+
+        // Get existing client_ids for this hotel
+        $existingPOCs = $this->hotelPocModel
+            ->where('hotel_id', $hotelId)
+            ->pluck('client_id')
+            ->toArray();
+
+        // Determine new POCs to insert
+        $toInsert = array_diff($pocData, $existingPOCs);
+
+        // Determine POCs to delete
+        $toDelete = array_diff($existingPOCs, $pocData);
+
+        // Delete removed POCs
+        if (!empty($toDelete)) {
+            $this->hotelPocModel
+                ->where('hotel_id', $hotelId)
+                ->whereIn('client_id', $toDelete)
+                ->delete();
+        }
+
+        // Insert new POCs
+        foreach ($toInsert as $pocClientId) {
+            $checkClient = $this->clientModel->where('id', $pocClientId)->where('hotel_id', $hotelId)->first();
+
+            if($checkClient)
+            {
+                $this->hotelPocModel->create([
+                    'hotel_id' => $hotelId,
+                    'client_id' => $pocClientId,
+                    'created_by_id' => $loggedUserId,
+                ]);
+            }
+        }
+
+        return true;
+    }
+
+    public function createHotelLinkageLogs($hotel, $hotelData, $point_of_contact, $loggedUserId)
+    {
+        $logs = [];
+
+        // 1. Head Office status changes
+        if ($hotel->is_head_office == 0 && $hotelData['is_head_office'] == 1) {
+            $logs[] = [
+                'user_id'        => $loggedUserId,
+                'message'        => 'as Head Office',
+                'hotel_id'       => $hotel->id,
+                'log_type'       => 'head_office',
+                'client_id'      => null,
+                'head_office_id' => null,
+                'created_by_id'  => $loggedUserId,
+                'updated_by_id'  => null,
+                'created_at'     => now(),
+                'updated_at'     => now(),
+            ];
+        } elseif ($hotel->is_head_office == 1 && $hotelData['is_head_office'] == 0) {
+            $logs[] = [
+                'user_id'        => $loggedUserId,
+                'message'        => 'from Head Office',
+                'hotel_id'       => $hotel->id,
+                'log_type'       => 'head_office',
+                'client_id'      => null,
+                'head_office_id' => null,
+                'created_by_id'  => $loggedUserId,
+                'updated_by_id'  => null,
+                'created_at'     => now(),
+                'updated_at'     => now(),
+            ];
+        }
+
+        // 2. Linked Head Office changes
+        if (is_null($hotel->linked_head_office) && !empty($hotelData['linked_head_office'])) {
+            $logs[] = [
+                'user_id'        => $loggedUserId,
+                'message'        => 'to Head Office',
+                'hotel_id'       => $hotel->id,
+                'log_type'       => 'head_office',
+                'client_id'      => null,
+                'head_office_id' => $hotelData['linked_head_office'],
+                'created_by_id'  => $loggedUserId,
+                'updated_by_id'  => null,
+                'created_at'     => now(),
+                'updated_at'     => now(),
+            ];
+        } elseif (!is_null($hotel->linked_head_office) && empty($hotelData['linked_head_office'])) {
+            $logs[] = [
+                'user_id'        => $loggedUserId,
+                'message'        => 'from Head Office',
+                'hotel_id'       => $hotel->id,
+                'log_type'       => 'head_office',
+                'client_id'      => null,
+                'head_office_id' => $hotel->linked_head_office,
+                'created_by_id'  => $loggedUserId,
+                'updated_by_id'  => null,
+                'created_at'     => now(),
+                'updated_at'     => now(),
+            ];
+        }
+
+        // 3. Point of Contact (POC) changes
+        $existingPOCs = $this->hotelPocModel->where('hotel_id', $hotel->id)->pluck('client_id')->toArray();
+        $newPOCs = $point_of_contact ?? [];
+
+        // Added clients
+        $addedClients = array_diff($newPOCs, $existingPOCs);
+        foreach ($addedClients as $clientId) {
+            $logs[] = [
+                'user_id'        => $loggedUserId,
+                'message'        => 'as POC',
+                'hotel_id'       => $hotel->id,
+                'log_type'       => 'poc',
+                'client_id'      => $clientId,
+                'head_office_id' => null,
+                'created_by_id'  => $loggedUserId,
+                'updated_by_id'  => null,
+                'created_at'     => now(),
+                'updated_at'     => now(),
+            ];
+        }
+
+        // Removed clients
+        $removedClients = array_diff($existingPOCs, $newPOCs);
+        foreach ($removedClients as $clientId) {
+            $logs[] = [
+                'user_id'        => $loggedUserId,
+                'message'        => 'from POC',
+                'hotel_id'       => $hotel->id,
+                'log_type'       => 'poc',
+                'client_id'      => $clientId,
+                'head_office_id' => null,
+                'created_by_id'  => $loggedUserId,
+                'updated_by_id'  => null,
+                'created_at'     => now(),
+                'updated_at'     => now(),
+            ];
+        }
+
+        // Save all logs in bulk
+        if (!empty($logs)) {
+            $this->hotelLogModel->insert($logs);
+        }
+    }
+
+    public function getHotelLinkageLogs(int $hotelId): Collection
+    {
+        $logs = $this->hotelLogModel
+            ->where('hotel_id', $hotelId)
+            ->with(['user', 'hotel', 'client.user'])
+            ->orderBy('id', 'desc')
+            ->get();
+
+        // Group by date (Y-m-d) and sort the groups in descending order
+        $groupedLogs = $logs->groupBy(function ($log) {
+            return date('Y-m-d', strtotime($log->created_at));
+        })->sortKeysDesc();
+
+        foreach ($groupedLogs as $date => $logsOnDate) {
+            foreach ($logsOnDate as $log) {
+                if (!empty($log->head_office_id)) {
+                    $log->headOffice = $this->model->find($log->head_office_id);
+                } else {
+                    $log->headOffice = [];
+                }
+            }
+        }
+
+        return $groupedLogs;
+    }
 }

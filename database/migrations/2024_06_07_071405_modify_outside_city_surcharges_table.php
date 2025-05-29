@@ -17,7 +17,7 @@ class ModifyOutsideCitySurchargesTable extends Migration
             // Drop latitude and longitude columns
             $table->dropColumn(['longitude', 'latitude','region']);
             // Add coordinates column to store polygon coordinates
-            $table->json('coordinates')->after('region')->nullable();
+            $table->json('coordinates')->after('id')->nullable();
         });
     }
 

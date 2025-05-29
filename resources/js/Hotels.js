@@ -21,7 +21,8 @@ export default class Hotels extends BaseClass {
             this.validateHotelCreateUpdateForm
         );
         $(document).on("keyup", "#search", this.handleFilter);
-        $(document).on("click", "#sortName, #sortStatus", this.handleSorting);
+        $(document).on("change", "#is_head_office, #linked_head_office", this.handleHeadOffice);
+        $(document).on("click", "#sortName, #sortIsHeadOffice, #sortHeadOffice, #sortStatus", this.handleSorting);
         $(document).on("click", ".fa-trash", this.handleDeleteModal);
         $(document).on(
             "click",
@@ -49,6 +50,21 @@ export default class Hotels extends BaseClass {
             "#hotelPagination .pagination a",
             this.handlePagnation
         );
+    }
+
+    handleHeadOffice = ({target}) => {
+        const targetVal = parseInt($(target).val());
+        if ($(target).hasClass("isHeadOffice")) {
+            if(targetVal == "1")
+            {
+                $('#linked_head_office').val('');
+                $('#linked_head_office').prop('disabled', true);
+            }else{                
+                $('#linked_head_office').prop('disabled', false);
+            }
+        }else{
+            $('#is_head_office').val('0');
+        }
     }
 
     handlePagnation = (event) => {
@@ -324,10 +340,13 @@ export default class Hotels extends BaseClass {
                     minlength: 3,
                     maxlength: 50,
                 },
-                term_conditions: {
+                "point_of_contact[]": {
                     required: true,
-                    minlength: 3,
                 },
+                // term_conditions: {
+                //     required: true,
+                //     minlength: 3,
+                // },
                 status: {
                     required: true,
                 },
@@ -386,10 +405,13 @@ export default class Hotels extends BaseClass {
                     minlength: this.languageMessage.name.min,
                     maxlength: this.languageMessage.name.max,
                 },
-                term_conditions: {
-                    required: this.languageMessage.term_conditions.required,
-                    minlength: this.languageMessage.term_conditions.min,
+                "point_of_contact[]": {
+                    required: this.languageMessage.point_of_contact.required,
                 },
+                // term_conditions: {
+                //     required: this.languageMessage.term_conditions.required,
+                //     minlength: this.languageMessage.term_conditions.min,
+                // },
                 status: {
                     required: this.languageMessage.status.required,
                 },

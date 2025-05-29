@@ -76,10 +76,64 @@
                                                 @enderror
                                             </div>
                                         </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="is_head_office">Assign Head Office</label>
+                                                <select name="is_head_office" id="is_head_office"
+                                                    class="form-control form-select custom-select @error('is_head_office') is-invalid @enderror isHeadOffice">
+                                                    <option value="1" {{ $hotel->is_head_office == '1' ? 'selected' : '' }}>Yes</option>
+                                                    <option value="0"  {{ $hotel->is_head_office == '0' ? 'selected' : '' }}>No</option>
+                                                </select>
+                                                @error('is_head_office')
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $message }}</strong>
+                                                    </span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="col-md-12">
+                                                <label for="linked_head_office" >Link To Head Office</label>
+                                                <select name="linked_head_office" id="linked_head_office"
+                                                    class="form-control form-select custom-select @error('linked_head_office') is-invalid @enderror linkToHeadOffice" {{ $hotel->is_head_office == '1' ? 'disabled' : '' }}>
+                                                    <option value="">Select Head Office</option>
+                                                    @if(!empty($headOffices))
+                                                        @foreach($headOffices as $headOffice)
+                                                            <option value="{{ $headOffice->id }}" {{ $hotel->linked_head_office == $headOffice->id ? 'selected' : '' }}>{{ $headOffice->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                            @error('linked_head_office')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="col-md-12">
+                                                <label for="point_of_contact">Point Of Contact</label>
+                                                <select name="point_of_contact[]" id="point_of_contact" multiple class="form-control @error('point_of_contact') is-invalid @enderror">
+                                                    <option value="">Select Clients</option>
+                                                    @if(!empty($clients))
+                                                        @foreach($clients as $client)
+                                                            <option value="{{ $client->id }}"
+                                                                @if($hotel->pointOfContact->where('client_id', $client->id)->isNotEmpty()) selected @endif>
+                                                                {{ $client->user->first_name . ' ' . $client->user->last_name }}
+                                                            </option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                            @error('point_of_contact')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                            @enderror
+                                        </div>
                                          <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="termConditions">Term & Conditions <span
-                                                        class="text-danger">*</span></label>
+                                                <label for="termConditions">Term & Conditions</label>
                                                 <textarea id="termConditions" name="term_conditions" rows="5"
                                                     class="form-control @error('term_conditions') is-invalid @enderror" placeholder="Term & Conditions"
                                                     autocomplete="off" autofocus>{{ $hotel->term_conditions}}</textarea>
@@ -604,6 +658,19 @@
                                             @enderror
                                         </div>
                                     </div>
+
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h3 class="head-sm medium">Hotel Linkage Logs</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    @include('admin.logs.partials.hotel-logs')
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -615,5 +682,14 @@
         const props = {
             routes: {},
         }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            new Choices('#point_of_contact', {
+                removeItemButton: true,
+                placeholder: true,
+                searchEnabled: true
+            });
+        });
     </script>
 @endsection

@@ -89,14 +89,21 @@
                 </div>
                 <div class="container-fluid mt-2">
                     <div class="row align-items-center g-3">  
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <select id="driversList" class="form-control form-select custom-select">
                                 <option value="">Select Driver</option>
                                 @foreach ($driverData as $drivers)
                                     <option value="{{ $drivers->id }}">{{ $drivers->name }}</option>
                                 @endforeach
                             </select>
-                        </div>
+                        </div> 
+                        <div class="col-md-2">
+                            <select id="driverTypeList" class="form-control form-select custom-select">
+                                <option value="">Select Driver Type</option>
+                                <option value="INHOUSE">In-House</option>
+                                <option value="OUTSOURCE">Out-Source</option>
+                            </select>
+                        </div>     
                         <div class="col-md-3">
                             <select id="hotelsList" class="form-control form-select custom-select">
                                 <option value="">Select Corporate</option>
@@ -105,7 +112,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <select id="usersList" class="form-control form-select custom-select">
                                 <option value="">Select Booked By</option>
                                 @foreach ($usersData as $user)
@@ -122,7 +129,7 @@
                                     <option value="{{ $event->id }}">{{ $event->name }}</option>
                                 @endforeach
                             </select>
-                        </div>     
+                        </div> 
                     </div>
                 </div>
             </div>

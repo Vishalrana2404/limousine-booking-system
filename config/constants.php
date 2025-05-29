@@ -57,6 +57,7 @@ return [
         'Sales',
         'Marketing',
         'Operations',
+        'Supervisor',
         'Customer Service'
     ],
     'entities' => [
@@ -82,6 +83,10 @@ return [
         // ['id' => 5, 'name' => 'Changi Airport Jet Query', 'is_instant_acceptable' => false],
         // ['id' => 6, 'name' => 'Changi Airport VIP Complex', 'is_instant_acceptable' => false],
         ['id' => 7, 'name' => 'Selater Airport', 'is_instant_acceptable' => true],
-        ['id' => 8, 'name' => 'Others', 'is_instant_acceptable' => false]
+        ['id' => 8, 'name' => 'Woodlands Checkpoint', 'is_instant_acceptable' => true],
+        ['id' => 9, 'name' => 'Tanah Merah Ferry Terminal', 'is_instant_acceptable' => true],
+        ['id' => 10, 'name' => 'Singapore Cruise Centre', 'is_instant_acceptable' => true],
+        ['id' => 11, 'name' => 'Marina Bay Cruise Centre', 'is_instant_acceptable' => true],
+        ['id' => 12, 'name' => 'Others', 'is_instant_acceptable' => false]
     ]
 ];

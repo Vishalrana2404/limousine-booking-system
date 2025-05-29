@@ -25,7 +25,7 @@ class AddEditHotelRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:50|min:3',
-            'term_conditions' => 'required|min:3',
+            // 'term_conditions' => 'required|min:3',
             'status' => 'required|string',
             //rule for billing Agreement
             'per_trip_arr' => 'nullable|regex:/^\d{1,8}(\.\d{1,2})?$/',
@@ -57,8 +57,8 @@ class AddEditHotelRequest extends FormRequest
         return [
             'name.required' => __("validation.required"),
             'name.string' => __("validation.string"),
-            'term_conditions.required' => __("validation.custom.term_conditions.required"),
-            'term_conditions.min' => __("validation.custom.term_conditions.min"),
+            // 'term_conditions.required' => __("validation.custom.term_conditions.required"),
+            // 'term_conditions.min' => __("validation.custom.term_conditions.min"),
 
             'name.max' => __("validation.max.string"),
             'name.min' => __("validation.min.string"),

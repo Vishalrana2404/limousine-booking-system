@@ -21,6 +21,8 @@ export default class Bookings extends BaseClass {
         this.handleOnLoad();
 
         $(document).on("click", "#addGuest", this.handleAddGuest);
+        $(document).on("change", "#vehicleType", this.handleMeetAndGreet);
+        $(document).on("change", ".multiple_vehicle_type_id", this.handleMultipleMeetAndGreet);
         $(document).on("click", "#addStop", this.handleAddStop);
         $(document).on("click", ".multiple-add-stop", this.handleMultipleAddStop);
         $(document).on("click", ".remove-guest", this.handleRemoveGuest);
@@ -132,7 +134,55 @@ export default class Bookings extends BaseClass {
             }
         });
     }
+
+    handleMeetAndGreet = () => {
+        const selectedOption = $('#vehicleType option:selected');
     
+        if(selectedOption)
+        {
+            const seatingCapacity = parseInt(selectedOption.data('seating-capacity'), 10);
+    
+            if (seatingCapacity > 13) {
+                $('#meetAndGreetYes').prop('disabled', false);
+            } else {
+                $('#meetAndGreetYes').prop('disabled', true);
+    
+                if ($('#meetAndGreetYes').is(':checked')) {
+                    $('#meetAndGreetYes').prop('checked', false);
+                    $('#meetAndGreetNo').prop('checked', true);
+                }
+            }
+        } else {
+            $('#meetAndGreetYes').prop('disabled', true);
+
+            if ($('#meetAndGreetYes').is(':checked')) {
+                $('#meetAndGreetYes').prop('checked', false);
+                $('#meetAndGreetNo').prop('checked', true);
+            }
+        }
+    }
+    
+    handleMultipleMeetAndGreet = ({ target }) => {
+        const selectedOption = $(target).find('option:selected');
+        const seatingCapacity = parseInt(selectedOption.data('seating-capacity'), 10);
+
+        const id = $(target).attr('id');
+        const index = id.split('_')[1];
+
+        const meetAndGreetSelect = $('#meet_and_greet_' + index);
+        const yesOption = meetAndGreetSelect.find('option[value="YES"]');
+        const noOption = meetAndGreetSelect.find('option[value="NO"]');
+
+        if (!isNaN(seatingCapacity) && seatingCapacity > 13) {
+            yesOption.prop('disabled', false);
+        } else {            
+            if (meetAndGreetSelect.val() === 'YES') {
+                meetAndGreetSelect.val('NO');
+            }
+            yesOption.prop('disabled', true);
+        }
+    }
+
     handleClientForEventError = () => { 
         if($('#clientIdForEvent').val() == '')
         {
@@ -570,12 +620,19 @@ export default class Bookings extends BaseClass {
                     }
                 } else {
                     const oldValue = isDropdown ? oldId : old;
-                    if (newValue && newValue !== oldValue) {
+
+                    if(fieldName === 'driver_id')
+                    {
                         formData.append(fieldName, newValue);
                         this.sendPostRequest(url, formData, bookingId);
-                    } else {
-                        if (this.previousCell) {
-                            this.revertOldValue();
+                    }else{
+                        if (newValue && newValue !== oldValue) {
+                            formData.append(fieldName, newValue);
+                            this.sendPostRequest(url, formData, bookingId);
+                        } else {
+                            if (this.previousCell) {
+                                this.revertOldValue();
+                            }
                         }
                     }
                 }
@@ -942,6 +999,7 @@ export default class Bookings extends BaseClass {
         }
     };
     sendPostRequest = (url, formData, bookingId) => {
+        console.log('adfadf')
         $("#loader").show();
         axios
             .post(url, formData)
@@ -1195,13 +1253,13 @@ export default class Bookings extends BaseClass {
                         .show();
             }
         } else if ($(target).hasClass("pickupLocationId")) {
-            if (targetVal === 8) {
+            if (targetVal === 12) {
                 $(target).closest("tr").find(".pickUpLocationTextbox").show();
             } else {
                 $(target).closest("tr").find(".pickUpLocationTextbox").hide();
             }
         } else if ($(target).hasClass("dropOffLocationId")) {
-            if (targetVal === 8) {
+            if (targetVal === 12) {
                 $(target).closest("tr").find(".dropOffLocationTextBox").show();
             } else {
                 $(target).closest("tr").find(".dropOffLocationTextBox").hide();
@@ -1533,14 +1591,14 @@ export default class Bookings extends BaseClass {
             $(e).rules("add", {
                 required: {
                     depends: function (element) {
+                        const $row = $(e).closest("tr");
+                        const serviceTypeId = $row.find(".multiple_service_type_id").val();
+                        const pickupLocationId = $row.find(".multiple_pick_up_location_id").val();
+
                         return (
-                            $.inArray(
-                                $(e)
-                                    .closest("tr")
-                                    .find(".multiple_service_type_id")
-                                    .val(),
-                                ["1", "3"]
-                            ) != -1
+                            serviceTypeId === "3" ||
+                            (serviceTypeId === "1" &&
+                                ["1", "2", "3", "4", "5"].includes(pickupLocationId))
                         );
                     },
                 },
@@ -1678,6 +1736,23 @@ export default class Bookings extends BaseClass {
                     required: this.languageMessage.guest_name.required,
                     minlength: this.languageMessage.guest_name.min,
                     maxlength: this.languageMessage.guest_name.max,
+                },
+            });
+        });
+        
+        $(".multiple_client_instructions").each((i, e) => {
+            $(e).rules("add", {
+                required: {
+                    depends: function () {
+                        const $row = $(e).closest("tr");
+                        const serviceTypeId = $row.find(".multiple_service_type_id").val();
+                        const pickupLocationId = $row.find(".multiple_pick_up_location_id").val();
+
+                        return serviceTypeId === "1" && pickupLocationId === "12";
+                    },
+                },
+                messages: {
+                    required: this.languageMessage.client_instructions.required,
                 },
             });
         });
@@ -1968,6 +2043,14 @@ export default class Bookings extends BaseClass {
                                 <option value="6 yo">6 yo</option>
                             </select>
                         </div>
+                    </td>                    
+                    <td>
+                        <div class="d-flex gap-2">
+                            <select name="multiple_meet_and_greet[]" id="meet_and_greet_${index}" class="form-control form-select custom-select multiple_meet_and_greet" autocomplete="off">
+                                <option value="YES" disabled>Yes</option>
+                                <option value="NO" selected>No</option>
+                            </select>
+                        </div>
                     </td>
                     <td>
                         <div class="d-flex gap-2">
@@ -2029,6 +2112,7 @@ export default class Bookings extends BaseClass {
                     $(
                         "#totalLuggageDiv, #totalPaxDiv, #flightDetailDiv"
                     ).show();
+                    $("#clientInstructionsSpan").hide();
                     break;
                 case 4:
                     $("#pickupLocationDropdown").hide();
@@ -2044,6 +2128,7 @@ export default class Bookings extends BaseClass {
                     $(
                         "#totalLuggageDiv, #totalPaxDiv, #flightDetailDiv"
                     ).show();
+                    $("#clientInstructionsSpan").hide();
                     break;
                 case 5:
                     $("#pickupLocationDropdown").hide();
@@ -2059,6 +2144,7 @@ export default class Bookings extends BaseClass {
                     $(
                         "#totalLuggageDiv, #totalPaxDiv, #flightDetailDiv"
                     ).hide();
+                    $("#clientInstructionsSpan").hide();
                     break;
                 default:
                     $("#pickupLocationDropdown").hide();
@@ -2074,15 +2160,39 @@ export default class Bookings extends BaseClass {
                     $(
                         "#totalLuggageDiv, #totalPaxDiv, #flightDetailDiv"
                     ).show();
+                    $("#clientInstructionsSpan").hide();
             }
         } else if ($(target).attr("id") === "pickupLocationId") {
-            if (parseInt($(target).val()) === 8) {
-                $("#pickupLocationTextBox").show();
-            } else {
-                $("#pickupLocationTextBox").hide();
+            switch (parseInt($(target).val())) {
+                case 8:
+                    $("#flightDetailSpan").hide();
+                    $("#clientInstructionsSpan").hide();
+                    break;
+                case 9:
+                    $("#flightDetailSpan").hide();
+                    $("#clientInstructionsSpan").hide();
+                    break;
+                case 10:
+                    $("#flightDetailSpan").hide();
+                    $("#clientInstructionsSpan").hide();
+                    break;
+                case 11:
+                    $("#flightDetailSpan").hide();
+                    $("#clientInstructionsSpan").hide();
+                    break;
+                case 12:
+                    $("#pickupLocationTextBox").show();
+                    $("#clientInstructionsSpan").show();
+                    $("#flightDetailSpan").hide();
+                    break;
+                default:
+                    $("#pickupLocationTextBox").hide();
+                    $("#clientInstructionsSpan").hide();
+                    $("#flightDetailSpan").show();
             }
+
         } else if ($(target).attr("id") === "dropoffLocationId") {
-            if (parseInt($(target).val()) === 8) {
+            if (parseInt($(target).val()) === 12) {
                 $("#dropOffLocationTextBox").show();
                 
             } else {
@@ -2258,13 +2368,14 @@ export default class Bookings extends BaseClass {
                 flight_detail: {
                     required: {
                         depends: function (element) {
+                            const serviceTypeId = $("#serviceTypeId").val();
+                            const pickupLocationId = $("#pickupLocationId").val();
+
                             return (
-                                $.inArray($("#serviceTypeId").val(), [
-                                    "1",
-                                    "3",
-                                ]) != -1
+                                serviceTypeId === "3" ||
+                                (serviceTypeId === "1" && ["1", "2", "3", "4", "5"].includes(pickupLocationId))
                             );
-                        },
+                        }
                     },
                     minlength: 3,
                     maxlength: 50,
@@ -2343,11 +2454,24 @@ export default class Bookings extends BaseClass {
                 child_seat_required: {
                     required: true
                 },
+                meet_and_greet: {
+                    required: true
+                },
                 "guest_name[]": {
                     required: true,
                     minlength: 3,
                     maxlength: 100,
                 },
+                client_instructions: {
+                    required: {
+                        depends: function (element) {
+                            return (
+                                $("#serviceTypeId").val() === "1" &&
+                                $("#pickupLocationId").val() === "12"
+                            );
+                        }
+                    },
+                }
             },
             messages: {
                 departure_time: {
@@ -2419,11 +2543,17 @@ export default class Bookings extends BaseClass {
                 child_seat_required: {
                     required: this.languageMessage.child_seat_required.required,
                 },
+                meet_and_greet: {
+                    required: this.languageMessage.meet_and_greet.required,
+                },
                 "guest_name[]": {
                     required: this.languageMessage.guest_name.required,
                     minlength: this.languageMessage.guest_name.min,
                     maxlength: this.languageMessage.guest_name.max,
                 },
+                client_instructions: {
+                    required: this.languageMessage.client_instructions.required,
+                }
                 // Add custom error messages for other fields here
             },
             errorElement: "span",

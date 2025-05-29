@@ -69,21 +69,37 @@ class VehicleClassService
      */
     public function createVehicleClass($requestData, $log_headers)
     {
-
         DB::beginTransaction();
         try {
             $loggedUserId = Auth::user()->id;
             $vehicleClassData = [];
-            // Extract vehicle class data from request
+
+            // Fetch the max sequence_no and add 1
+            $maxSequence = VehicleClass::max('sequence_no');
+            $nextSequenceNo = $maxSequence ? $maxSequence + 1 : 1;
+
+            // Prepare vehicle class data
             $vehicleClassData['name'] = $requestData['name'];
             $vehicleClassData['seating_capacity'] = $requestData['seating_capacity'];
             $vehicleClassData['total_luggage'] = $requestData['total_luggage'];
             $vehicleClassData['total_pax'] = $requestData['total_pax'];
             $vehicleClassData['status'] = $requestData['status'];
+            $vehicleClassData['sequence_no'] = $nextSequenceNo; // Assign next sequence_no
             $vehicleClassData['created_by_id'] = $loggedUserId;
+
             // Add vehicle class using repository
             $vehicleClass = $this->vehicleClassRepository->addVehicleClass($vehicleClassData);
-            $this->activityLogService->addActivityLog('create', VehicleClass::class, json_encode([]), json_encode($vehicleClassData), $log_headers['headers']['Origin'], $log_headers['headers']['User-Agent']);
+
+            // Log activity
+            $this->activityLogService->addActivityLog(
+                'create',
+                VehicleClass::class,
+                json_encode([]),
+                json_encode($vehicleClassData),
+                $log_headers['headers']['Origin'],
+                $log_headers['headers']['User-Agent']
+            );
+
             DB::commit();
             return $vehicleClass;
         } catch (\Exception $e) {
@@ -91,6 +107,7 @@ class VehicleClassService
             throw new \Exception($e->getMessage());
         }
     }
+
 
     /**
      * Update an existing vehicle class.
@@ -206,6 +223,23 @@ class VehicleClassService
             DB::rollback();
 
             // Throw an exception with the error message
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    public function updateSequence(array $requestData = [])
+    {
+        try {
+            if (!is_array($requestData)) {
+                return false;
+            }
+
+            foreach ($requestData as $item) {
+                $loggedUserId = Auth::user()->id;
+                $this->vehicleClassRepository->updateVehicleClassSequence($item['id'], $item['sequence_no'], $loggedUserId);
+            }
+            return true;
+        } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
     }

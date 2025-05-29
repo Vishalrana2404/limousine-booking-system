@@ -16,6 +16,7 @@ class VehicleClass extends Model
         'seating_capacity',
         'total_luggage',
         'total_pax',
+        'sequence_no',
         'status'
     ];
 

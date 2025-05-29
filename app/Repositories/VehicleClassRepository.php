@@ -27,7 +27,7 @@ class VehicleClassRepository implements VehicleClassInterface
      * Get data for vehicles class.
      *
      */
-    public function getVehicleClass(string $search = '', int $page = 1, string $sortField = 'id', string $sortDirection = 'asc'): LengthAwarePaginator
+    public function getVehicleClass(string $search = '', int $page = 1, string $sortField = 'sequence_no', string $sortDirection = 'asc'): LengthAwarePaginator
     {
         // Filter vehicle class based on the provided parameters
         $vehicleClassQuery = $this->filterVehicleClassResult($search);
@@ -82,7 +82,7 @@ class VehicleClassRepository implements VehicleClassInterface
      * @param string $sortDirection The direction for sorting vehicle class ('asc' or 'desc', optional, default is 'asc').
      * @return Collection The sorted collection of vehicle class.
      */
-    private function sortVehicleClass(Collection $vehicleClassQuery, string $sortField = 'id', string $sortDirection = 'asc')
+    private function sortVehicleClass(Collection $vehicleClassQuery, string $sortField = 'sequence_no', string $sortDirection = 'asc')
     {
         $sortFunction = $sortDirection == 'asc' ? 'sortBy' : 'sortByDesc';
         return $vehicleClassQuery->$sortFunction(function ($innerQuery) use ($sortField) {
@@ -103,7 +103,7 @@ class VehicleClassRepository implements VehicleClassInterface
                     $value = strtolower($innerQuery->status ?? '');
                     break;
                 default:
-                    $value = $innerQuery->id;
+                    $value = $innerQuery->sequence_no;
                     break;
             }
             return $value;
@@ -138,7 +138,7 @@ class VehicleClassRepository implements VehicleClassInterface
      */
     public function getVehicleClasses(): Collection
     {
-        return $this->model->where('status', 'Active')->get();
+        return $this->model->where('status', 'Active')->orderBy('sequence_no', 'asc')->get();
     }
 
     /**
@@ -233,5 +233,13 @@ class VehicleClassRepository implements VehicleClassInterface
         }
         // Execute the query and return the result
         return $query->get();
+    }
+
+   public function updateVehicleClassSequence(int $id, int $sequence, int $loggedUserId): bool
+    {
+        return VehicleClass::where('id', $id)->update([
+            'sequence_no' => $sequence,
+            'updated_by_id' => $loggedUserId
+        ]) > 0;
     }
 }

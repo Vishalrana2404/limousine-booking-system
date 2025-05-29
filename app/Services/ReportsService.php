@@ -43,6 +43,7 @@ class ReportsService
             $sortField = $requestData['sortField'] ?? 'id';
             $pickupDateRange = $requestData['pickupDateRange'] ?? null;
             $driverId = $requestData['driverId'] ?? null;
+            $driverType = $requestData['driverType'] ?? null;
             $hotelId = $requestData['hotelId'] ?? null;
             $eventId = $requestData['eventId'] ?? null;
             $userId = $requestData['userId'] ?? null;
@@ -69,7 +70,7 @@ class ReportsService
                 $startDate = null;
                 $endDate = null;
             }
-            return $this->bookingRepository->getBookingsForReports($loggedUser, $startDate, $endDate, $search, $searchByBookingId, $page, $sortField, $sortDirection, $driverId, $hotelId, $eventId, $userId, $noPagination, true);
+            return $this->bookingRepository->getBookingsForReports($loggedUser, $startDate, $endDate, $search, $searchByBookingId, $page, $sortField, $sortDirection, $driverId, $driverType, $hotelId, $eventId, $userId, $noPagination, true);
         } catch (\Exception $e) {
             // Throw an exception with the error message if an error occurs
             throw new \Exception($e->getMessage());

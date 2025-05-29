@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\User;
 use App\Models\ClientMultiCorporates;
 use App\Models\UserType;
+use App\Models\ClientLinkageLogs;
 use App\Repositories\Interfaces\ClientInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -24,6 +25,7 @@ class ClientRepository implements ClientInterface
      */
     public function __construct(
         protected Client $model,
+        protected ClientLinkageLogs $clientLinkageLogsModel,
         protected ClientMultiCorporates $clientMultiCorporateModel
     ) {
     }
@@ -282,6 +284,21 @@ class ClientRepository implements ClientInterface
         return $query;
     }
 
+    public function getHotelClients(int $hotel_id = null)
+    {
+        $clients = $this->filterHotelClients($hotel_id)->get();
+
+        return $clients;
+    }
+
+    private function filterHotelClients(int $hotel_id = null)
+    {
+        $query = $this->model->query();
+        $query->where('hotel_id', $hotel_id)->with('user');
+
+        return $query;
+    }
+
     public function getClientsByLinkedHotel(int $client_id = null)
     {
         $clients = $this->filterClientResultByLinkedHotel($client_id)->get();
@@ -299,15 +316,101 @@ class ClientRepository implements ClientInterface
     }
     public function addClientHotel(array $data): ClientMultiCorporates
     {
+        $entryExists = $this->clientMultiCorporateModel->where('client_id', $data['client_id'])->where('hotel_id', $data['hotel_id'])->first();
+
+        if(empty($entryExists))
+        {
+            $log = [
+                'user_id'        => $data['created_by_id'],
+                'client_id'      => $data['client_id'],
+                'hotel_id'       => $data['hotel_id'],
+                'message'        => 'linked',
+                'log_type'       => 'to',
+                'created_by_id'  => $data['created_by_id'],
+                'updated_by_id'  => null,
+            ];
+            $this->clientLinkageLogsModel->create($log);
+        }
+        
         return $this->clientMultiCorporateModel->create($data);
     }
-    public function deleteOldClientHotel(int $clientId): bool
+    public function syncClientHotels(array $hotelIds, int $clientId, int $loggedUserId, string $status): void
     {
-        return $this->clientMultiCorporateModel->where('client_id', $clientId)->delete();
+        // Get current hotel IDs from DB
+        $existingHotels = $this->clientMultiCorporateModel
+            ->where('client_id', $clientId)
+            ->pluck('hotel_id')
+            ->toArray();
+
+        $newHotels = $hotelIds;
+        
+        // Determine hotels to unlink (present in DB, but not in new list)
+        $toUnlink = array_diff($existingHotels, $newHotels);
+        
+        // Determine hotels to link (present in new list, but not in DB)
+        $toLink = array_diff($newHotels, $existingHotels);
+
+        // Unlink old hotels and log
+        foreach ($toUnlink as $hotelId) {
+            $this->clientMultiCorporateModel
+                ->where('client_id', $clientId)
+                ->where('hotel_id', $hotelId)
+                ->delete();
+
+            $log = [
+                'user_id'        => $loggedUserId,
+                'client_id'      => $clientId,
+                'hotel_id'       => $hotelId,
+                'message'        => 'unlinked',
+                'log_type'       => 'from',
+                'created_by_id'  => $loggedUserId,
+                'updated_by_id'  => null,
+            ];
+            $this->clientLinkageLogsModel->create($log);
+        }
+
+        // Link new hotels and log
+        foreach ($toLink as $hotelId) {
+            $data = [
+                'client_id'      => $clientId,
+                'hotel_id'       => $hotelId,
+                'status'         => $status,
+                'created_by_id'  => $loggedUserId,
+            ];
+
+            $this->clientMultiCorporateModel->create($data);
+
+            $log = [
+                'user_id'        => $loggedUserId,
+                'client_id'      => $clientId,
+                'hotel_id'       => $hotelId,
+                'message'        => 'linked',
+                'log_type'       => 'to',
+                'created_by_id'  => $loggedUserId,
+                'updated_by_id'  => null,
+            ];
+            $this->clientLinkageLogsModel->create($log);
+        }
     }
 
     public function getActiveClientsData(): Collection
     {
         return $this->model->where('status', 'ACTIVE')->with('user')->get();
+    }
+
+    public function getClientLinkageLogs(int $clientId): Collection
+    {
+        $logs = $this->clientLinkageLogsModel
+            ->where('client_id', $clientId)
+            ->with(['user', 'hotel', 'client.user'])
+            ->orderBy('id', 'desc')
+            ->get();
+
+        // Group by date (Y-m-d) and sort the groups in descending order
+        $groupedLogs = $logs->groupBy(function ($log) {
+            return date('Y-m-d', strtotime($log->created_at));
+        })->sortKeysDesc();
+
+        return $groupedLogs;
     }
 }

@@ -252,6 +252,18 @@
                     </div>
                 </div>
             </div>
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h3 class="head-sm medium">Client Linkage Logs</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            @include('admin.logs.partials.client-logs')
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
     </div>
 </form>

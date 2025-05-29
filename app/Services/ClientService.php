@@ -77,6 +77,17 @@ class ClientService
         }
     }
 
+    public function getHotelClients($hotel_id)
+    {
+        try {
+            // Get paginated client data using the client repository
+            return $this->clientRepository->getHotelClients($hotel_id);
+        } catch (\Exception $e) {
+            // Throw an exception with the error message if an error occurs
+            throw new \Exception($e->getMessage());
+        }
+    }
+
     public function getClientsByLinkedHotel($hotel_id)
     {
         try {
@@ -256,20 +267,12 @@ class ClientService
 
             $clientId = $client->id;
             // Prepare Client Multi Hotels Data
-            $this->clientRepository->deleteOldClientHotel($clientId);
-            if(!empty($requestData['multi_hotel_id']) && count($requestData['multi_hotel_id']))
-            {
-                foreach($requestData['multi_hotel_id'] as $client_hotel_data)
-                {
-                    if(!empty($client_hotel_data) && !empty($clientId)){
-                        $clientHotelData['client_id'] = $clientId;
-                        $clientHotelData['hotel_id'] = $client_hotel_data;
-                        $clientHotelData['status'] = $requestData['status'];
-                        $clientHotelData['created_by_id'] = $loggedUserId;
-                        $clientHotel = $this->clientRepository->addClientHotel($clientHotelData);
-                    }
-                }
-            }
+            $this->clientRepository->syncClientHotels(
+                $requestData['multi_hotel_id'] ?? [],
+                $clientId,
+                $loggedUserId,
+                $requestData['status'] ?? 'active'
+            );
 
             $this->activityLogService->addActivityLog('create', User::class, $oldUserData, json_encode($userData), $log_headers['headers']['Origin'], $log_headers['headers']['User-Agent']);
             $this->activityLogService->addActivityLog('create', Client::class, $oldClientData, json_encode($clientData), $log_headers['headers']['Origin'], $log_headers['headers']['User-Agent']);
@@ -288,6 +291,17 @@ class ClientService
         try {
             // Retrieve all clients from the repository
             return $this->clientRepository->getActiveClientsData();
+        } catch (\Exception $e) {
+            // Throw an exception with the error message if an error occurs
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    public function getClientLinkageLogs($clientId)
+    {
+        try {
+            // Retrieve all hotels from the repository
+            return $this->clientRepository->getClientLinkageLogs($clientId);
         } catch (\Exception $e) {
             // Throw an exception with the error message if an error occurs
             throw new \Exception($e->getMessage());

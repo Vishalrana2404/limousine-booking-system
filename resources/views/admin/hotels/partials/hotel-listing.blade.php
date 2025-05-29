@@ -10,6 +10,8 @@
                            </div>
                        </th>
                        <th>Name <i class="fa fa-sort ml-1 theme-color" id="sortName" aria-hidden="true"></i></th>
+                       <th>Is HeadOffice <i class="fa fa-sort ml-1 theme-color" id="sortIsHeadOffice" aria-hidden="true"></i></th>
+                       <th>Head Office Name <i class="fa fa-sort ml-1 theme-color" id="sortHeadOffice" aria-hidden="true"></i></th>
                        <th>Status<i class="fa fa-sort ml-1 theme-color" id="sortStatus" aria-hidden="true"></i></th>
                        <th style="width: 40px">Action</th>
                    </tr>
@@ -30,6 +32,10 @@
                            </td>
                            <td class="text-truncate cell-width-200" title="{{ $hotel->name ?? 'N/A' }}">
                                {{ $hotel->name ?? 'N/A' }}</td>
+                           <td class="text-truncate cell-width-200" title="{{ $hotel->is_head_office == '1' ? 'Yes' : 'N/A' }}">
+                               {{ $hotel->is_head_office == '1' ? 'Yes' : '' }}</td>
+                           <td class="text-truncate cell-width-200" title="{{ $hotel->linkedHeadOffice->name ?? 'N/A' }}">
+                               {{ $hotel->linkedHeadOffice->name ?? '' }}</td>
                            <td>
                                <div
                                    class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">

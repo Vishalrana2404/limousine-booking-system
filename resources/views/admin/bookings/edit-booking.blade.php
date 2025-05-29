@@ -698,6 +698,27 @@
                                             </div>
                                         </div>
                                     </li>
+                                    <li class="list-group-item" id="meetAndGreetContainer">
+                                        <p class="small mb-3">*Seating capacity > 13seater</p>
+                                        <div class="form-group row row-gap-2 mb-0">
+                                            <label class="col-sm-6 col-form-label" for="meet_and_greet">Meet And Greet? <span class="text-danger">*</span></label>
+                                            <div class="col-sm-6">
+                                                <div class="form-check">
+                                                    <input class="form-check-input @error('meet_and_greet') is-invalid @enderror" type="radio" name="meet_and_greet" id="meetAndGreetYes" value="yes" autocomplete="off" autofocus {{ $booking->meet_and_greet == 'YES' ? 'checked' : '' }} {{ !empty($booking->vehicle_type_id) && $vehicleTypes->where('id', $booking->vehicle_type_id)->first()->seating_capacity > 13 ? '' : 'disabled' }}>
+                                                    <label class="form-check-label" for="meetAndGreetYes">Yes</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input @error('meet_and_greet') is-invalid @enderror" type="radio" name="meet_and_greet" id="meetAndGreetNo" value="no" autocomplete="off" autofocus {{ $booking->meet_and_greet == 'NO' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="meetAndGreetNo">No</label>
+                                                </div>
+                                                @error('meet_and_greet')
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $message }}</strong>
+                                                    </span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </li>
                                 </ul>
                             </div>
                         </div>

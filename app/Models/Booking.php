@@ -62,6 +62,7 @@ class Booking extends Model
         'no_of_seats_required',
         'child_1_age',
         'child_2_age',
+        'meet_and_greet',
         'additional_stops'
     ];
 

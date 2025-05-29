@@ -72,7 +72,7 @@ class VehicleClassController extends Controller
     public function save(AddVehicleClassRequest $request)
     {
         try {
-            $log_headers = $this->getHttpData($request);
+            $log_headers =  $this->getHttpData($request);
             // Create a new vehicle class using the VehicleClassService
             $this->vehicleClassService->createVehicleClass($request->all(), $log_headers);
             $this->helper->alertResponse(__('message.vehicle_class_created_successfully'), 'success');
@@ -205,5 +205,26 @@ class VehicleClassController extends Controller
 
         // Return the view for viewing a vehicle class's details, passing necessary data
         return view('admin.vehicle-class.view-vehicle-class', compact('vehicle_class'));
+    }
+
+    public function updateSequence(Request $request)
+    {
+        try {
+            $sortedData = $request->input('sortedData');
+            $sequenceUpdate = $this->vehicleClassService->updateSequence($sortedData);
+            
+            if($sequenceUpdate)
+            {
+                return response()->json(['message' => 'Sequence updated successfully']);
+            }else{
+                return response()->json(['message' => 'Invalid data format'], 422);
+            }
+        }catch (\Exception $e) {
+            // Handle any exceptions that occur
+            $this->handleException($e);
+
+            // Generate and return a response indicating the error that occurred
+            return $this->handleResponse([], $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR, []);
+        }
     }
 }

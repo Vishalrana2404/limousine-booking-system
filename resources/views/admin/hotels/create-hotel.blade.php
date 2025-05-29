@@ -78,8 +78,41 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="termConditions">Term & Conditions <span
-                                                        class="text-danger">*</span></label>
+                                                <label for="is_head_office">Assign Head Office</label>
+                                                <select name="is_head_office" id="is_head_office"
+                                                    class="form-control form-select custom-select @error('is_head_office') is-invalid @enderror isHeadOffice">
+                                                    <option value="1" >Yes</option>
+                                                    <option value="0" selected>No</option>
+                                                </select>
+                                                @error('is_head_office')
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $message }}</strong>
+                                                    </span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="col-md-12">
+                                                <label for="linked_head_office" >Link To Head Office</label>
+                                                <select name="linked_head_office" id="linked_head_office"
+                                                    class="form-control form-select custom-select @error('linked_head_office') is-invalid @enderror linkToHeadOffice">
+                                                    <option value="">Select Head Office</option>
+                                                    @if(!empty($headOffices))
+                                                        @foreach($headOffices as $headOffice)
+                                                            <option value="{{ $headOffice->id }}">{{ $headOffice->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                            @error('linked_head_office')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="termConditions">Term & Conditions</label>
                                                 <textarea id="termConditions" name="term_conditions" rows="5"
                                                     class="form-control @error('term_conditions') is-invalid @enderror" placeholder="Term & Conditions"
                                                     autocomplete="off" autofocus>{{ old('term_conditions') }}</textarea>

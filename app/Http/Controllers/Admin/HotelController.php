@@ -9,6 +9,7 @@ use App\Http\Requests\BulkHotelStatusUpdateRequest;
 use App\Http\Requests\DeleteHotelRequest;
 use App\Models\Hotel;
 use App\Services\HotelService;
+use App\Services\ClientService;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use App\Services\VehicleClassService;
@@ -18,6 +19,7 @@ class HotelController extends Controller
     public function __construct(
         private VehicleClassService $vehicleClassService,
         private HotelService $hotelService,
+        private ClientService $clientService,
         private CustomHelper $helper
     ) {
     }
@@ -36,6 +38,7 @@ class HotelController extends Controller
         try {
             // Retrieve hotels data from the hotelService
             $hotelData = $this->hotelService->getHotelData($request->query());
+            $hotelData->load('officesOfHeadOffice');
             return view('admin.hotels.index', compact('hotelData'));
         } catch (\Exception $e) {
             // Display an alert message for the user
@@ -61,8 +64,9 @@ class HotelController extends Controller
     public function create(Request $request)
     {
         $vehicleClasses = $this->vehicleClassService->getVehicleClass();
+        $headOffices = $this->hotelService->getHeadOfficeHotels();
 
-        return view('admin.hotels.create-hotel', compact('vehicleClasses'));
+        return view('admin.hotels.create-hotel', compact('vehicleClasses', 'headOffices'));
     }
     /**
      * Save a newly created hotel.
@@ -101,11 +105,13 @@ class HotelController extends Controller
      */
     public function edit(Hotel $hotel)
     {
-        $hotel = $hotel->load(['billingAgreement']);
+        $hotel = $hotel->load(['billingAgreement', 'pointOfContact']);
         $corporateFairBillings = $hotel->load(['fairBilling']);
         $vehicleClasses = $this->vehicleClassService->getVehicleClass();
-        
-        return view('admin.hotels.update-hotel', compact('hotel', 'corporateFairBillings', 'vehicleClasses'));
+        $clients = $this->clientService->getHotelClients($hotel->id);
+        $headOffices = $this->hotelService->getHeadOfficeHotels()->where('id', '!=', $hotel->id)->values();
+        $hotelLinkageLogs = $this->hotelService->getHotelLinkageLogs($hotel->id);
+        return view('admin.hotels.update-hotel', compact('hotel', 'corporateFairBillings', 'vehicleClasses', 'headOffices', 'clients', 'hotelLinkageLogs'));
     }
     /**
      * Update the specified hotel.
@@ -123,7 +129,7 @@ class HotelController extends Controller
     {
         try {
             $log_headers = $this->getHttpData($request);
-            $this->hotelService->updateHotel($request->all(), $hotel, $log_headers);
+            $this->hotelService->updateHotel($request->all(), $hotel, $log_headers);  
 
             $this->helper->alertResponse(__('message.hotel_updated'), 'success');
             return redirect('hotels');

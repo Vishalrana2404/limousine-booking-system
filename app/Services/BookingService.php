@@ -261,6 +261,7 @@ class BookingService
                 $bookingData['child_1_age'] = NULL;
                 $bookingData['child_2_age'] = NULL;
             }
+            $bookingData['meet_and_greet'] = $requestData['meet_and_greet'];
             $bookingData['guest_name'] = $guestname;
             $bookingData['additional_stops'] = $additional_stops;
             $bookingData['status'] = $status;
@@ -393,6 +394,7 @@ class BookingService
                     $bookingData['child_1_age'] = NULL;
                     $bookingData['child_2_age'] = NULL;
                 }
+                $bookingData['meet_and_greet'] = $requestData['multiple_meet_and_greet'][$key] ?? NULL;
                 $bookingData['guest_name'] = $guestname;
                 $bookingData['additional_stops'] = $additionalStops;
                 $bookingData['status'] = $status;
@@ -514,15 +516,24 @@ class BookingService
                 //  elseif (!$booking->driver_id) {
                 //     $this->addDriverNotification($booking, $driverData);
                 // }
+                if (isset($requestData['vehicle_id'])){
+                    $bookingData['vehicle_id'] = $requestData['vehicle_id'];
+                }else{
+                    $bookingData['vehicle_id'] = NULL;
+                }
+            }else{
+                $bookingData['driver_id'] = NULL;
+                $bookingData['vehicle_id'] = NULL;
             }
             if(($userTypeSlug === 'client-staff' ||  $userTypeSlug === 'client-admin'))
             {
                 $bookingData['status'] = Booking::PENDING;
             }
-            if (isset($requestData['driver_contact']))
+            if (isset($requestData['driver_contact'])){
                 $bookingData['driver_contact'] = $requestData['driver_contact'];
-            if (isset($requestData['vehicle_id']))
-                $bookingData['vehicle_id'] = $requestData['vehicle_id'];
+            }else{
+                $bookingData['driver_contact'] = NULL;
+            }
             if (isset($requestData['client_instructions']))
                 $bookingData['client_instructions'] = $requestData['client_instructions'];
     
@@ -544,6 +555,7 @@ class BookingService
                 $bookingData['child_1_age'] = NULL;
                 $bookingData['child_2_age'] = NULL;
             }
+            $bookingData['meet_and_greet'] = $requestData['meet_and_greet'];
     
             $bookingData['additional_stops'] = $additional_stops;
     
@@ -803,10 +815,24 @@ class BookingService
                     // elseif (!$booking->driver_id) {
                     //     $this->addDriverNotification($booking, $driverData);
                     // }
+                }else{
+                    $bookingData['driver_id'] = NULL;
+                    $bookingData['vehicle_id'] = NULL;
+                    $bookingData['driver_remark'] = NULL;
+                }
+                if (isset($requestData['vehicle_id']) && !empty($requestData['vehicle_id']))
+                {
+                    $bookingData['vehicle_id'] = $requestData['vehicle_id'];
+                }else{
+                    $bookingData['vehicle_id'] = NULL;
+                }
+                if (isset($requestData['driver_remark']) && !empty($requestData['driver_remark']))
+                {
+                    $bookingData['driver_remark'] = $requestData['driver_remark'];
+                }else{
+                    $bookingData['driver_remark'] = NULL;
                 }
 
-                if (isset($requestData['vehicle_id']) && !empty($requestData['vehicle_id']))
-                    $bookingData['vehicle_id'] = $requestData['vehicle_id'];
                 if (isset($requestData['vehicle_type_id']) && !empty($requestData['vehicle_type_id']))
                     $bookingData['vehicle_type_id'] = $requestData['vehicle_type_id'];
                 if (isset($requestData['status']) && !empty($requestData['status'])){
@@ -815,8 +841,6 @@ class BookingService
                 }
                 if (isset($requestData['client_instructions']) && !empty($requestData['client_instructions']))
                     $bookingData['client_instructions'] = $requestData['client_instructions'];
-                if (isset($requestData['driver_remark']) && !empty($requestData['driver_remark']))
-                    $bookingData['driver_remark'] = $requestData['driver_remark'];
             
                 $linkedClients = !empty($booking->linked_clients) ? explode(',', $booking->linked_clients) : [];
                 $this->bookingLogService->addLogMessages($bookingData, $booking, Auth::user(), $linkedClients);

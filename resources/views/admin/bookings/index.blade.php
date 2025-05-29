@@ -111,15 +111,15 @@
                                         aria-hidden="true"></i></th>
                                 <!-- <th>Booked On<i class="fa fa-sort ml-1 text-dark" id="sortBookingDate"
                                         aria-hidden="true"></i></th> -->
-                                @if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']))
+                                <!-- @if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']))
                                     <th>Driver Remarks<i class="fa fa-sort ml-1 text-dark" id="sortDriverRemark"
                                             aria-hidden="true"></i></th>
                                     <th>Dispatch</th>
                                     <th>Comment<i class="fa fa-sort ml-1 text-dark" id="sortComment" aria-hidden="true"></i>
-                                    </th>
+                                    </th> -->
                                     <!-- <th>Last Edit<i class="fa fa-sort ml-1 text-dark" id="sortLastEdit"
                                             aria-hidden="true"></i></th> -->
-                                @endif
+                                <!-- @endif -->
                             </tr>
                         </thead>
                         <tbody>

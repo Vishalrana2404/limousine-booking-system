@@ -203,8 +203,10 @@ class ClientController extends Controller
         $entities = config('constants.entities');
         // Retrieve user type data
         $userTypeData = $this->userTypeService->getUserType(UserType::CLIENT);
+
+        $clientLinkageLogs = $this->clientService->getClientLinkageLogs($client->id);
         // Return the view for updating a client with the necessary data
-        return view('admin.client.update-client', compact('userTypeData', 'clientData', 'entities','hotels'));
+        return view('admin.client.update-client', compact('userTypeData', 'clientData', 'entities','hotels', 'clientLinkageLogs'));
     }
 
 

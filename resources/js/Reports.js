@@ -18,6 +18,7 @@ export default class DriverSchedule extends BaseClass {
         this.handleOnLoad();
 
         $(document).on("change", "#driversList", this.handleDriverFilter);
+        $(document).on("change", "#driverTypeList", this.handleDriverTypeFilter);
         $(document).on("change", "#hotelsList", this.handleHotelsFilter);
         $(document).on("change", "#eventsList", this.handleEventsFilter);
         $(document).on("change", "#usersList", this.handleUsersFilter);
@@ -42,6 +43,7 @@ export default class DriverSchedule extends BaseClass {
                 const hotelId = $("#hotelsList").val();
                 const eventId = $("#eventsList").val();
                 const driverId = $("#driversList").val();
+                const driverType = $("#driverTypeList").val();
                 const userId = $("#usersList").val();
                 const search = $("#search").val();
                 const searchByBookingId = $("#search_by_booking_id").val();
@@ -51,6 +53,7 @@ export default class DriverSchedule extends BaseClass {
                     hotelId: hotelId,
                     eventId: eventId,
                     driverId: driverId,
+                    driverType: driverType,
                     userId: userId,
                     search: search,
                     searchByBookingId: searchByBookingId
@@ -124,6 +127,7 @@ export default class DriverSchedule extends BaseClass {
             const sortOrder = $("#sortOrder").val() === "asc" ? "desc" : "asc";
             let pickupDateRange = $("#pickupDate").val();
             const driverId = $("#driversList").val();
+            const driverType = $("#driverTypeList").val();
             const hotelId = $("#hotelsList").val();
             const userId = $("#usersList").val();
             const eventId = $("#eventsList").val();
@@ -134,6 +138,7 @@ export default class DriverSchedule extends BaseClass {
                 search: $("#search").val(),
                 searchByBookingId: $("#search_by_booking_id").val(),
                 driverId: driverId,
+                driverType: driverType,
                 hotelId: hotelId,
                 userId: userId,
                 eventId: eventId,
@@ -291,6 +296,7 @@ export default class DriverSchedule extends BaseClass {
             const hotelId = $("#hotelsList").val();
             const eventId = $("#eventsList").val();
             const driverId = $("#driversList").val();
+            const driverType = $("#driverTypeList").val();
             const userId = $("#usersList").val();
             const search = $("#search").val();
             const searchByBookingId = $("#search_by_booking_id").val();
@@ -304,6 +310,42 @@ export default class DriverSchedule extends BaseClass {
                 hotelId: hotelId,
                 eventId: eventId,
                 driverId: driverId,
+                driverType: driverType,
+                userId: userId,
+                search: search,
+                searchByBookingId: searchByBookingId
+            };
+
+            const queryParams = $.param(params);
+            const url =
+                this.props.routes.filterReports + "?" + queryParams;
+            this.handleFilterRequest(url);
+        } catch (error) {
+            this.handleException(error);
+        }
+    };
+
+    handleDriverTypeFilter = (startDate, endDate) => {
+        try {
+            let pickupDateRange = $("#pickupDate").val();
+            const driverType = $("#driverTypeList").val();
+            const hotelId = $("#hotelsList").val();
+            const eventId = $("#eventsList").val();
+            const driverId = $("#driversList").val();
+            const userId = $("#usersList").val();
+            const search = $("#search").val();
+            const searchByBookingId = $("#search_by_booking_id").val();
+
+            if (startDate && endDate) {
+                pickupDateRange = startDate + " - " + endDate;
+            }
+
+            const params = {
+                pickupDateRange: pickupDateRange,
+                hotelId: hotelId,
+                eventId: eventId,
+                driverId: driverId,
+                driverType: driverType,
                 userId: userId,
                 search: search,
                 searchByBookingId: searchByBookingId
@@ -321,6 +363,7 @@ export default class DriverSchedule extends BaseClass {
     handleHotelsFilter = (startDate, endDate) => {
         try {
             let pickupDateRange = $("#pickupDate").val();
+            const driverType = $("#driverTypeList").val();
             const hotelId = $("#hotelsList").val();
             const eventId = $("#eventsList").val();
             const driverId = $("#driversList").val();
@@ -337,6 +380,7 @@ export default class DriverSchedule extends BaseClass {
                 hotelId: hotelId,
                 eventId: eventId,
                 driverId: driverId,
+                driverType: driverType,
                 userId: userId,
                 search: search,
                 searchByBookingId: searchByBookingId
@@ -354,6 +398,7 @@ export default class DriverSchedule extends BaseClass {
     handleEventsFilter = (startDate, endDate) => {
         try {
             let pickupDateRange = $("#pickupDate").val();
+            const driverType = $("#driverTypeList").val();
             const hotelId = $("#hotelsList").val();
             const eventId = $("#eventsList").val();
             const driverId = $("#driversList").val();
@@ -370,6 +415,7 @@ export default class DriverSchedule extends BaseClass {
                 hotelId: hotelId,
                 eventId: eventId,
                 driverId: driverId,
+                driverType: driverType,
                 userId: userId,
                 search: search,
                 searchByBookingId: searchByBookingId
@@ -387,6 +433,7 @@ export default class DriverSchedule extends BaseClass {
     handleUsersFilter = (startDate, endDate) => {
         try {
             let pickupDateRange = $("#pickupDate").val();
+            const driverType = $("#driverTypeList").val();
             const hotelId = $("#hotelsList").val();
             const eventId = $("#eventsList").val();
             const driverId = $("#driversList").val();
@@ -403,6 +450,7 @@ export default class DriverSchedule extends BaseClass {
                 hotelId: hotelId,
                 eventId: eventId,
                 driverId: driverId,
+                driverType: driverType,
                 userId: userId,
                 search: search,
                 searchByBookingId: searchByBookingId
@@ -420,6 +468,7 @@ export default class DriverSchedule extends BaseClass {
     handleSearchFilter = (startDate, endDate) => {
         try {
             let pickupDateRange = $("#pickupDate").val();
+            const driverType = $("#driverTypeList").val();
             const hotelId = $("#hotelsList").val();
             const eventId = $("#eventsList").val();
             const driverId = $("#driversList").val();
@@ -436,6 +485,7 @@ export default class DriverSchedule extends BaseClass {
                 hotelId: hotelId,
                 eventId: eventId,
                 driverId: driverId,
+                driverType: driverType,
                 userId: userId,
                 search: search,
                 searchByBookingId: searchByBookingId
@@ -483,6 +533,7 @@ export default class DriverSchedule extends BaseClass {
             let pickupDateRange = $("#pickupDate").val();
             let format = $("#exportFormat").val();
             const hotelId = $("#hotelsList").val();
+            const driverType = $("#driverTypeList").val();
             const eventId = $("#eventsList").val();
             const driverId = $("#driversList").val();
             const search = $("#search").val();
@@ -516,6 +567,7 @@ export default class DriverSchedule extends BaseClass {
             formData.append("pickupDateRange", pickupDateRange);
             formData.append("format", format);
             formData.append("driverId", driverId);
+            formData.append("driverType", driverType);
             formData.append("hotelId", hotelId);
             formData.append("eventId", eventId);
             formData.append("userId", userId);

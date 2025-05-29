@@ -86,7 +86,9 @@ class HotelService
             $hotelData = [
                 'name' => $requestData['name'],
                 'status' => $requestData['status'],
-                'term_conditions' => $requestData['term_conditions'],
+                'is_head_office' => $requestData['is_head_office'],
+                'linked_head_office' => ($requestData['is_head_office'] == '0' ? $requestData['linked_head_office'] : NULL),
+                'term_conditions' => !empty($requestData['term_conditions']) ? $requestData['term_conditions'] : '',
                 'created_by_id' => $loggedUserId,
             ];
             // Add the hotel using the hotel repository
@@ -192,10 +194,22 @@ class HotelService
             // Prepare the updated hotel data
             $hotelData = [
                 'name' => $requestData['name'],
-                'term_conditions' => $requestData['term_conditions'],
+                'is_head_office' => $requestData['is_head_office'],
+                'linked_head_office' => ($requestData['is_head_office'] == '0' && $requestData['linked_head_office'] !== $hotel->id ? $requestData['linked_head_office'] : NULL),
+                'term_conditions' => !empty($requestData['term_conditions']) ? $requestData['term_conditions'] : '',
                 'status' => $requestData['status'],
                 'updated_by_id' => $loggedUserId,
             ];
+
+            // point of contact
+            $point_of_contact = !empty($requestData['point_of_contact']) ? $requestData['point_of_contact'] : [];
+            
+            // create hotel logs
+            $this->hotelRepository->createHotelLinkageLogs($hotel, $hotelData, $point_of_contact, $loggedUserId);
+            
+            $this->hotelRepository->updateHotelPOC($hotel->id, $loggedUserId, $point_of_contact);
+
+
             $oldData = json_encode($hotel);
             // Update the hotel using the hotel repository
             $this->hotelRepository->updateHotel($hotel, $hotelData);
@@ -379,6 +393,28 @@ class HotelService
         try {
             // Retrieve all hotels from the repository
             return $this->hotelRepository->getActiveHotelsData();
+        } catch (\Exception $e) {
+            // Throw an exception with the error message if an error occurs
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    public function getHeadOfficeHotels()
+    {
+        try {
+            // Retrieve all hotels from the repository
+            return $this->hotelRepository->getHeadOfficeHotelsData();
+        } catch (\Exception $e) {
+            // Throw an exception with the error message if an error occurs
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    public function getHotelLinkageLogs($hotelId)
+    {
+        try {
+            // Retrieve all hotels from the repository
+            return $this->hotelRepository->getHotelLinkageLogs($hotelId);
         } catch (\Exception $e) {
             // Throw an exception with the error message if an error occurs
             throw new \Exception($e->getMessage());

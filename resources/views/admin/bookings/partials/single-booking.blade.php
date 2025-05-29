@@ -482,7 +482,8 @@
         </div>
         <div class="col-md-4">
             <div class="form-group">
-                <label for="clientInstructions">Client Instructions</label>
+                <label for="clientInstructions">Client Instructions<span class="text-danger" id="clientInstructionsSpan"
+                        style="display:none">*</span></label>
                 <input type="text" id="clientInstructions" name="client_instructions"
                     value="{{ old('client_instructions') }}"
                     class="form-control @error('client_instructions') is-invalid @enderror"
@@ -572,6 +573,27 @@
             </div>
 
             <p class="text-muted small">1st Child seat is free. Additional child seat is $10.</p>
+        </div>
+    </div>
+    <div class="row" id="meetAndGreetContainer">
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <label class="form-label fw-bold" style="padding-bottom:0">Meet and Greet? <span class="text-danger">*</span></label>
+                <p class="small mb-3">*Seating capacity > 13seater</p>
+                <div class="form-check">
+                    <input class="form-check-input @error('meet_and_greet') is-invalid @enderror" type="radio" name="meet_and_greet" id="meetAndGreetYes" value="yes" autocomplete="off" autofocus disabled>
+                    <label class="form-check-label" for="meetAndGreetYes">Yes</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input @error('meet_and_greet') is-invalid @enderror" type="radio" name="meet_and_greet" id="meetAndGreetNo" value="no" autocomplete="off" autofocus checked>
+                    <label class="form-check-label" for="meetAndGreetNo">No</label>
+                </div>
+            </div>
+            @error('meet_and_greet')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+            @enderror
         </div>
     </div>
     <div class="row" id="guestContainer">

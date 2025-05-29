@@ -10,6 +10,14 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <link rel="shortcut icon" type="image/x-icon" href="{{asset('images/favicon.ico')}}">
+    <script src="{{ asset('js/jquery-3.6.0.min.js') }}"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+
+<!-- Choices JS -->
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script src="{{ asset('js/jquery-ui.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('css/jquery-ui.css') }}">
+    
     @vite(['resources/sass/app.scss','resources/js/app.js','resources/js/bootstrap.bundle.min.js'])
 </head>
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">

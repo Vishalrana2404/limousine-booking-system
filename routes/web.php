@@ -121,17 +121,20 @@ Route::middleware(['Auth','SanitizeInput', AuthenticateSession::class])->group(f
         Route::any('vehicle-class/create', [VehicleClassController::class, 'create'])->name('add-vehicle-class');
         Route::post('vehicle-class/save', [VehicleClassController::class, 'save'])->name('save-vehicle-class');
 
+        Route::get('vehicle-class/filterVehicleClass', [VehicleClassController::class, 'filterVehicleClass'])->name('filter-vehicle-class');
+        
+        Route::post('vehicle-class/update-sequence', [VehicleClassController::class, 'updateSequence'])->name('vehicle-class.update-sequence');
+                
+        Route::post('deleteVehicleClass', [VehicleClassController::class, 'delete'])->name('delete-vehicle-class');
+        
+        Route::post('updateBulkVehicleStatus', [VehicleClassController::class, 'updateBulkStatus'])->name('update-bulk-vehicle-class-status');
+        
         Route::any('vehicle-class/{vehicleClass}/edit', [VehicleClassController::class, 'edit'])->name('edit-vehicle-class');
+        
         Route::post('vehicle-class/{vehicleClass}', [VehicleClassController::class, 'update'])->name('update-vehicle-class');
 
-        Route::post('deleteVehicleClass', [VehicleClassController::class, 'delete'])->name('delete-vehicle-class');
-
         Route::any('vehicle-class/{vehicleClass}/view', [VehicleClassController::class, 'view'])->name('view-vehicle-class');
-
-        Route::post('updateBulkVehicleStatus', [VehicleClassController::class, 'updateBulkStatus'])->name('update-bulk-vehicle-class-status');
-
-        Route::get('vehicle-class/filterVehicleClass', [VehicleClassController::class, 'filterVehicleClass'])->name('filter-vehicle-class');
-
+        
         // Vehicle Routes
         Route::get('vehicles', [VehicleController::class, 'index'])->name('vehicles');
 
@@ -243,16 +246,19 @@ Route::middleware(['Auth','SanitizeInput', AuthenticateSession::class])->group(f
         Route::any('vehicle-class/create', [VehicleClassController::class, 'create'])->name('add-vehicle-class');
         Route::post('vehicle-class/save', [VehicleClassController::class, 'save'])->name('save-vehicle-class');
 
-        Route::any('vehicle-class/{vehicleClass}/edit', [VehicleClassController::class, 'edit'])->name('edit-vehicle-class');
-        Route::post('vehicle-class/{vehicleClass}', [VehicleClassController::class, 'update'])->name('update-vehicle-class');
-
-        Route::post('deleteVehicleClass', [VehicleClassController::class, 'delete'])->name('delete-vehicle-class');
-
-        Route::any('vehicle-class/{vehicleClass}/view', [VehicleClassController::class, 'view'])->name('view-vehicle-class');
-
-        Route::post('updateBulkVehicleStatus', [VehicleClassController::class, 'updateBulkStatus'])->name('update-bulk-vehicle-class-status');
-
         Route::get('vehicle-class/filterVehicleClass', [VehicleClassController::class, 'filterVehicleClass'])->name('filter-vehicle-class');
+        
+        Route::post('vehicle-class/update-sequence', [VehicleClassController::class, 'updateSequence'])->name('vehicle-class.update-sequence');
+        
+        Route::post('deleteVehicleClass', [VehicleClassController::class, 'delete'])->name('delete-vehicle-class');
+        
+        Route::post('updateBulkVehicleStatus', [VehicleClassController::class, 'updateBulkStatus'])->name('update-bulk-vehicle-class-status');
+        
+        Route::any('vehicle-class/{vehicleClass}/view', [VehicleClassController::class, 'view'])->name('view-vehicle-class');
+        
+        Route::any('vehicle-class/{vehicleClass}/edit', [VehicleClassController::class, 'edit'])->name('edit-vehicle-class');
+        
+        Route::post('vehicle-class/{vehicleClass}', [VehicleClassController::class, 'update'])->name('update-vehicle-class');
 
         // Vehicle Routes
         Route::get('vehicles', [VehicleController::class, 'index'])->name('vehicles');

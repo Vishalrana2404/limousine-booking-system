@@ -76,4 +76,59 @@
             },
         };
     </script>
+
+    <script>
+        // Enable drag-and-drop sorting on the table body
+        $("#sortableVehicleClass").sortable({
+            helper: fixWidthHelper,
+            update: function (event, ui) {
+                const sortedIds = [];
+
+                $("#vehicleClassTable tbody tr").each(function (index) {
+                    const id = $(this).data("vehicle-class-id");
+                    const newSequenceNo = index + 1;
+
+                    // Update hidden input field with new sequence_no
+                    $(this).find('input[name="sequence_no"]').val(newSequenceNo);
+
+                    if (id) {
+                        sortedIds.push({
+                            id: id,
+                            sequence_no: newSequenceNo
+                        });
+                    }
+                });
+
+                // Send AJAX POST request to update the sequence in the backend
+                $.ajax({
+                    url: "{{ route('vehicle-class.update-sequence') }}",
+                    method: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}", // Required for Laravel CSRF protection
+                        sortedData: sortedIds
+                    },
+                    success: function (response) {
+                        toastr.success("Vehicle class order updated successfully.", "Success");
+                    },
+                    error: function (xhr) {
+                        let errorMessage = "Something went wrong while updating the order.";
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        toastr.error(errorMessage, "Error");
+                    }
+                });
+            }
+        }).disableSelection();
+
+        // Optional helper to maintain column width during drag
+        function fixWidthHelper(e, ui) {
+            ui.children().each(function () {
+                $(this).width($(this).width());
+            });
+            return ui;
+        }
+    </script>
+
+
 @endsection

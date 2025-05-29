@@ -15,6 +15,7 @@ export default class EditBookings extends BaseClass {
     constructor(props = null) {
         super(props);
         this.handleOnLoad();
+        $(document).on("change", "#vehicle-type", this.handleMeetAndGreet);
         $(document).on(
             "change",
             "#service-types, #pick-up-location-id, #drop-off-location-id",
@@ -94,6 +95,33 @@ export default class EditBookings extends BaseClass {
             this.handleException(error);
         }
     };
+
+    handleMeetAndGreet = () => {
+        const selectedOption = $('#vehicle-type option:selected');
+
+        if(selectedOption)
+        {
+            const seatingCapacity = parseInt(selectedOption.data('seating-capacity'), 10);
+            
+            if (seatingCapacity > 13) {
+                $('#meetAndGreetYes').prop('disabled', false);
+            } else {
+                $('#meetAndGreetYes').prop('disabled', true);
+    
+                if ($('#meetAndGreetYes').is(':checked')) {
+                    $('#meetAndGreetYes').prop('checked', false);
+                    $('#meetAndGreetNo').prop('checked', true);
+                }
+            }
+        } else {
+            $('#meetAndGreetYes').prop('disabled', true);
+
+            if ($('#meetAndGreetYes').is(':checked')) {
+                $('#meetAndGreetYes').prop('checked', false);
+                $('#meetAndGreetNo').prop('checked', true);
+            }
+        }
+    }
 
     handleAddGuest = () => {
         const lastGuestInputContainer = $(".phone")
