@@ -972,19 +972,33 @@
                                             </div>
                                         </div>
                                     </li>
-                                    @if ($loggedUserType === null || $loggedUserType === 'admin')
                                         <li class="list-group-item">
                                             <div class="form-group row row-gap-2 mb-0">
                                                 <label class="col-sm-6 col-form-label">Corporate</label>
                                                 <div class="col-sm-6">
-                                                    @php
+                                                    <!-- @php
                                                         $hotelName = $booking->client->hotel->name ?? null;
-                                                    @endphp
-                                                    <span>{{ $hotelName ?? null }}</span>
+                                                    @endphp -->
+                                                    <!-- <span>{{ $hotelName ?? null }}</span> -->
+
+                                                    <select name="client_id" id="clientId"
+                                                        class="form-control form-select custom-select @error('client_id') is-invalid @enderror"
+                                                        autocomplete="off">
+                                                        <option value="">Select One</option>
+                                                        @foreach ($hotelClients as $hotelClient)
+                                                            @php
+                                                                $client = $hotelClient->client ?? null;
+                                                            @endphp
+                                                            @if ($client)
+                                                                <option value="{{ $client->id }}" {{ $booking->client->id == $client->id ? 'selected' : ''}}>{{$hotelClient->name  }}</option>
+                                                            @endif
+                                                        @endforeach
+                                                    </select>
                                                     <input type="hidden" name="client_hotel_id" id="client_hotel_id" value="{{!empty($booking->client->hotel_id) ? $booking->client->hotel_id : '';}}">
                                                 </div>
                                             </div>
                                         </li>
+                                    @if ($loggedUserType === null || $loggedUserType === 'admin')
                                         <li class="list-group-item">
                                             <div class="form-group row row-gap-2 mb-0">
                                                 <label class="col-sm-6 col-form-label">Invoice</label>
@@ -1009,7 +1023,7 @@
                                         </li>
                                     @else
                                         @if(!empty($hotelIdsFromLinkedCorporates) && count($hotelIdsFromLinkedCorporates) > 0)
-                                            <li class="list-group-item">
+                                            <!-- <li class="list-group-item">
                                                 <div class="form-group row row-gap-2 mb-0">
                                                     <label class="col-sm-6 col-form-label">Corporate</label>
                                                     <div class="col-sm-6">
@@ -1020,7 +1034,7 @@
                                                         <input type="hidden" name="client_hotel_id" id="client_hotel_id" value="{{!empty($booking->client->hotel_id) ? $booking->client->hotel_id : '';}}">
                                                     </div>
                                                 </div>
-                                            </li>
+                                            </li> -->
                                         @endif
                                     @endif
 

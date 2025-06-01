@@ -146,6 +146,8 @@
                                 <tr>
                                     <th>Booking <i class="fa fa-sort ml-1 theme-color" id="sortBooking"
                                             aria-hidden="true"></i></th>
+                                    <th>Pickup Date<i class="fa fa-sort ml-1 theme-color" id="sortPickupDate" aria-hidden="true"></i>
+                                    </th>
                                     <th>Time<i class="fa fa-sort ml-1 theme-color" id="sortTime" aria-hidden="true"></i>
                                     </th>
                                     <th>Type<i class="fa fa-sort ml-1 theme-color" id="sortType" aria-hidden="true"></i>

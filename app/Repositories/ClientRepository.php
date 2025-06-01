@@ -371,25 +371,28 @@ class ClientRepository implements ClientInterface
 
         // Link new hotels and log
         foreach ($toLink as $hotelId) {
-            $data = [
-                'client_id'      => $clientId,
-                'hotel_id'       => $hotelId,
-                'status'         => $status,
-                'created_by_id'  => $loggedUserId,
-            ];
-
-            $this->clientMultiCorporateModel->create($data);
-
-            $log = [
-                'user_id'        => $loggedUserId,
-                'client_id'      => $clientId,
-                'hotel_id'       => $hotelId,
-                'message'        => 'linked',
-                'log_type'       => 'to',
-                'created_by_id'  => $loggedUserId,
-                'updated_by_id'  => null,
-            ];
-            $this->clientLinkageLogsModel->create($log);
+            if(!empty($hotelId))
+            {
+                $data = [
+                    'client_id'      => $clientId,
+                    'hotel_id'       => $hotelId,
+                    'status'         => $status,
+                    'created_by_id'  => $loggedUserId,
+                ];
+    
+                $this->clientMultiCorporateModel->create($data);
+    
+                $log = [
+                    'user_id'        => $loggedUserId,
+                    'client_id'      => $clientId,
+                    'hotel_id'       => $hotelId,
+                    'message'        => 'linked',
+                    'log_type'       => 'to',
+                    'created_by_id'  => $loggedUserId,
+                    'updated_by_id'  => null,
+                ];
+                $this->clientLinkageLogsModel->create($log);
+            }
         }
     }
 

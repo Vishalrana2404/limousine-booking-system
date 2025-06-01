@@ -81,7 +81,20 @@ export default class EditBookings extends BaseClass {
             "#vehicle-type",
             this.handleCorporateFairCharges
         );
+        $(document).on(
+            "change",
+            "#clientId",
+            this.handleCorporateIdChange
+        );
     };
+
+    handleCorporateIdChange = () => {
+        const newCorporateId = $('#clientId').val();
+
+        $('#client_hotel_id').val(newCorporateId);
+
+        this.handleCorporateFairCharges();
+    }
 
     handleDeleteModal = ({ target }) => {
         try {
@@ -268,32 +281,56 @@ export default class EditBookings extends BaseClass {
                                     $('#transfer-charge').val(0.00);
                                     $('#departure-charge').val(0.00);
                                     $('#disposal-charge').val(0.00);
-                                    $('#arrival-charge').val(response.data.data.amount.toString());
-                                    $('#arrival-charge').attr('value', response.data.data.amount.toString());
+                                    if(response.data.data.amount)
+                                    {
+                                        $('#arrival-charge').val(response.data.data.amount.toString());
+                                        $('#arrival-charge').attr('value', response.data.data.amount.toString());
+                                    }else{
+                                        $('#arrival-charge').val('0.00');
+                                        $('#arrival-charge').attr('0.00');
+                                    }
                                 }
                                 if(serviceTypeId == 2)
                                 {
                                     $('#arrival-charge').val(0.00);
                                     $('#departure-charge').val(0.00);
                                     $('#disposal-charge').val(0.00);
-                                    $('#transfer-charge').val(response.data.data.amount.toString());
-                                    $('#transfer-charge').attr('value', response.data.data.amount.toString());
+                                    if(response.data.data.amount)
+                                    {
+                                        $('#transfer-charge').val(response.data.data.amount.toString());
+                                        $('#transfer-charge').attr('value', response.data.data.amount.toString());
+                                    }else{
+                                        $('#transfer-charge').val('0.00');
+                                        $('#transfer-charge').attr('0.00');
+                                    }
                                 }
                                 if(serviceTypeId == 3)
                                 {
                                     $('#arrival-charge').val(0.00);
                                     $('#transfer-charge').val(0.00);
                                     $('#disposal-charge').val(0.00);
-                                    $('#departure-charge').val(response.data.data.amount.toString());
-                                    $('#departure-charge').attr('value', response.data.data.amount.toString());                                         
+                                    if(response.data.data.amount)
+                                    {
+                                        $('#departure-charge').val(response.data.data.amount.toString());
+                                        $('#departure-charge').attr('value', response.data.data.amount.toString());                                         
+                                    }else{
+                                        $('#departure-charge').val('0.00');
+                                        $('#departure-charge').attr('0.00');                                         
+                                    }
                                 }
                                 if(serviceTypeId == 4)
                                 {
                                     $('#arrival-charge').val(0.00);
                                     $('#transfer-charge').val(0.00);
                                     $('#departure-charge').val(0.00);
-                                    $('#disposal-charge').val(($('#no-of-hours').val() * response.data.data.amount).toString());
-                                    $('#disposal-charge').attr('value', ($('#no-of-hours').val() * response.data.data.amount).toString());                                         
+                                    if(response.data.data.amount)
+                                    {
+                                        $('#disposal-charge').val(($('#no-of-hours').val() * response.data.data.amount).toString());
+                                        $('#disposal-charge').attr('value', ($('#no-of-hours').val() * response.data.data.amount).toString());                                         
+                                    }else{
+                                        $('#disposal-charge').val('0.00');
+                                        $('#disposal-charge').attr('0.00');                                        
+                                    }
                                 }
                                 this.calculatedBilling();
                             } else {
@@ -301,6 +338,7 @@ export default class EditBookings extends BaseClass {
                             }
                         })
                         .catch((error) => {
+                                console.log(error);
                             this.handleException(error);
                         });
                 } catch (error) {
@@ -1090,13 +1128,14 @@ export default class EditBookings extends BaseClass {
                 flight_detail: {
                     required: {
                         depends: function (element) {
+                            const serviceTypeId = $("#service-types").val();
+                            const pickupLocationId = $("#pick-up-location-id").val();
+
                             return (
-                                $.inArray($("#service-types").val(), [
-                                    "1",
-                                    "3",
-                                ]) != -1
+                                serviceTypeId === "3" ||
+                                (serviceTypeId === "1" && ["1", "2", "3", "4", "5"].includes(pickupLocationId))
                             );
-                        },
+                        }
                     },
                     minlength: 3,
                     maxlength: 50,
@@ -1223,6 +1262,16 @@ export default class EditBookings extends BaseClass {
                 misc_surcharge: {
                     pattern: /^\d{1,8}(?:\.\d{1,2})?$/,
                 },
+                client_instructions: {
+                    required: {
+                        depends: function (element) {
+                            return (
+                                $("#service-types").val() === "1" &&
+                                $("#pick-up-location-id").val() === "12"
+                            );
+                        }
+                    },
+                }
             },
             messages: {
                 departure_time: {
@@ -1342,6 +1391,9 @@ export default class EditBookings extends BaseClass {
                     minlength: this.languageMessage.guest_name.min,
                     maxlength: this.languageMessage.guest_name.max,
                 },
+                client_instructions: {
+                    required: this.languageMessage.client_instructions.required,
+                }
                 // Add custom error messages for other fields here
             },
             errorElement: "span",

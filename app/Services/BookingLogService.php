@@ -10,6 +10,7 @@ use App\Models\ServiceType;
 use App\Models\User;
 use App\Models\Client;
 use App\Models\UserType;
+use App\Models\Hotel;
 use App\Models\Vehicle;
 use App\Models\Events;
 use App\Models\VehicleClass;
@@ -48,6 +49,16 @@ class BookingLogService
                     $oldValue = $booking->{$field};
                     if ($oldValue != $newValue) {
                         switch ($field) {
+                            case "client_id":
+                                if ($oldValue === null) {
+                                    $name = Client::find($newValue)->hotel->name;
+                                    $logMessages[] = "Added Corporate: {$name}";
+                                } else {
+                                    $oldName = Client::find($oldValue)->hotel->name;
+                                    $newName = Client::find($newValue)->hotel->name;
+                                    $logMessages[] = "Changed Corporate from {$oldName} to {$newName}";
+                                }
+                                break;
                             case "service_type_id":
                                 if ($oldValue === null) {
                                     $name = ServiceType::find($newValue)->name;
@@ -84,8 +95,13 @@ class BookingLogService
                                     $logMessages[] = "Added driver: {$name}";
                                 } else {
                                     $oldName = Driver::find($oldValue)->name;
-                                    $newName = Driver::find($newValue)->name;
-                                    $logMessages[] = "Changed driver from {$oldName} to {$newName}";
+                                    if(!empty($newValue))
+                                    {
+                                        $newName = Driver::find($newValue)->name;
+                                        $logMessages[] = "Changed driver from {$oldName} to {$newName}";
+                                    }else{
+                                        $logMessages[] = "Removed driver {$oldName}";
+                                    }
                                 }
                                 break;
                             case "vehicle_id":
@@ -325,6 +341,19 @@ class BookingLogService
                                     }
                                 }
                                 break;
+                            case "meet_and_greet":
+                                if (strtoupper($oldValue) === 'NO') {
+                                    if(strtoupper($newValue) !== 'NO')
+                                    {
+                                        $logMessages[] = "Added Meet and Greet";
+                                    }
+                                } else {
+                                    if(strtoupper($newValue) !== 'YES')
+                                    {
+                                        $logMessages[] = "Removed Meet and Greet";
+                                    }
+                                }
+                                break;
                             default:
                                 break;
                         }
@@ -345,6 +374,7 @@ class BookingLogService
             // if ($userType === null || $userType === UserType::ADMIN) {
             // }
             $this->sendEmailToCreator($loggedUserFullName, $logMessages, $booking);
+            $this->sendEmailToPOCandHeadOffice($loggedUserFullName, $logMessages, $booking);
     
             if(!empty($linkedClients))
             {
@@ -504,6 +534,193 @@ class BookingLogService
                 ];
          
                 $this->helper->sendEmail($creatorDetails->email, $mailData);
+            }
+        } catch (\Exception $e) {
+            return;
+        }
+    }
+
+    private function sendEmailToPOCandHeadOffice($loggedUserFullName, $logs, $booking)
+    {
+        try {
+            // first check if creator is not super admin
+
+            $filterStr = ['added driver acknowledge', 'changed driver acknowledge', 'changed driver notified', 'added driver notified'];
+            $filteredLogs = array_filter($logs, function($log) use ($filterStr) {
+                foreach ($filterStr as $filter) {
+                    if (strpos(strtolower($log), $filter) !== false) {
+                        return false; // Exclude log if any filter string is found
+                    }
+                }
+                return true; // Include log if none of the filter strings are found
+            });
+
+            $bookingId = $booking->id;
+            $subject = "Updated Booking #" . $bookingId;
+
+            // to poc of logged in user's hotel
+            $hotelId = $loggedUser->client->hotel_id;
+
+            // Step 1: Get all client IDs from hotel_poc table
+            $allPocClientIds = DB::table('hotels_poc')
+                ->where('hotel_id', $hotelId)
+                ->pluck('client_id')
+                ->toArray();
+
+            // Step 2: Get all user IDs from clients table using those client IDs
+            $clientUserIds = DB::table('clients')
+                ->whereIn('id', $allPocClientIds)
+                ->pluck('user_id')
+                ->toArray();
+
+            // Step 3: Get user details from users table
+            $users = DB::table('users')
+                ->whereIn('id', $clientUserIds)
+                ->select('first_name', 'last_name', 'email')
+                ->get();
+
+            if(!empty($users))
+            {
+                foreach($users as $user)
+                {
+
+                    $mailData   = [
+                        'subject' =>  $subject,
+                        'template' =>  'send-email',
+                        'name'    => $this->helper->getFullName($user->first_name, $user->last_name),
+                        'logs' => $filteredLogs,
+                        'changedBy' => $loggedUserFullName,
+                        'bookingId' => $bookingId,
+                    ];
+                    $this->helper->sendEmail($user->email, $mailData);
+                }
+            }
+
+
+            // check if logged in user belongs to the same corporate, for whom the booking is created
+            if($booking->client->hotel_id == $loggedUser->client->hotel_id)
+            {
+                // check if logged in user's hotel is head office
+                if($loggedUser->client->hotel->is_head_office == 1 || ($loggedUser->client->hotel->is_head_office == 0 && $loggedUser->client->hotel->linked_head_office == NULL))
+                {
+                    
+                }else
+                {   
+                    // to head office
+                    $hotelId = $loggedUser->client->hotel->linked_head_office;
+
+                    // Step 1: Get all client IDs from hotel_poc table
+                    $allPocClientIds = DB::table('hotels_poc')
+                        ->where('hotel_id', $hotelId)
+                        ->pluck('client_id')
+                        ->toArray();
+
+                    // Step 2: Get all user IDs from clients table using those client IDs
+                    $clientUserIds = DB::table('clients')
+                        ->whereIn('id', $allPocClientIds)
+                        ->pluck('user_id')
+                        ->toArray();
+
+                    // Step 3: Get user details from users table
+                    $users = DB::table('users')
+                        ->whereIn('id', $clientUserIds)
+                        ->select('first_name', 'last_name', 'email')
+                        ->get();
+
+                    if(!empty($users))
+                    {
+                        foreach($users as $user)
+                        {                        
+                            $mailData   = [
+                                'subject' =>  $subject,
+                                'template' =>  'send-email',
+                                'name'    => $this->helper->getFullName($user->first_name, $user->last_name),
+                                'logs' => $filteredLogs,
+                                'changedBy' => $loggedUserFullName,
+                                'bookingId' => $bookingId,
+                            ];
+                        }
+                    }
+                }
+            }else{
+                // to poc of booking's hotel
+                $hotelId = $booking->client->hotel_id;
+
+                // Step 1: Get all client IDs from hotel_poc table
+                $allPocClientIds = DB::table('hotels_poc')
+                    ->where('hotel_id', $hotelId)
+                    ->pluck('client_id')
+                    ->toArray();
+
+                // Step 2: Get all user IDs from clients table using those client IDs
+                $clientUserIds = DB::table('clients')
+                    ->whereIn('id', $allPocClientIds)
+                    ->pluck('user_id')
+                    ->toArray();
+
+                // Step 3: Get user details from users table
+                $users = DB::table('users')
+                    ->whereIn('id', $clientUserIds)
+                    ->select('first_name', 'last_name', 'email')
+                    ->get();
+
+                if(!empty($users))
+                {
+                    foreach($users as $user)
+                    {
+                        $mailData   = [
+                            'subject' =>  $subject,
+                            'template' =>  'send-email',
+                            'name'    => $this->helper->getFullName($user->first_name, $user->last_name),
+                            'logs' => $filteredLogs,
+                            'changedBy' => $loggedUserFullName,
+                            'bookingId' => $bookingId,
+                        ];
+                    }
+                }
+
+                // check if booking's hotel is head office
+                if($booking->client->hotel->is_head_office == 1 || ($loggedUser->client->hotel->is_head_office == 0 && $loggedUser->client->hotel->linked_head_office == NULL))
+                {
+                    
+                }else
+                {   
+                    // to head office
+                    $hotelId = $booking->client->hotel->linked_head_office;
+
+                    // Step 1: Get all client IDs from hotel_poc table
+                    $allPocClientIds = DB::table('hotels_poc')
+                        ->where('hotel_id', $hotelId)
+                        ->pluck('client_id')
+                        ->toArray();
+
+                    // Step 2: Get all user IDs from clients table using those client IDs
+                    $clientUserIds = DB::table('clients')
+                        ->whereIn('id', $allPocClientIds)
+                        ->pluck('user_id')
+                        ->toArray();
+
+                    // Step 3: Get user details from users table
+                    $users = DB::table('users')
+                        ->whereIn('id', $clientUserIds)
+                        ->select('first_name', 'last_name', 'email')
+                        ->get();
+
+                    if(!empty($users))
+                    {
+                        foreach($users as $user)
+                        {
+                            $mailData   = [
+                                'subject' =>  $subject,
+                                'template' =>  'send-email',
+                                'name'    => $this->helper->getFullName($user->first_name, $user->last_name),
+                                'logs' => $filteredLogs,
+                                'changedBy' => $loggedUserFullName,
+                                'bookingId' => $bookingId,
+                            ];
+                        }
+                    }
+                }
             }
         } catch (\Exception $e) {
             return;

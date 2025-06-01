@@ -156,6 +156,8 @@ class BookingRepository implements BookingInterface
     {
         // Filter Booking based on the provided parameters
         $bookings = $this->filterBookingResult($loggedUser, $startDate, $endDate, $search, $searchByBookingId, $driverId, $isDriverSchedule)->get();
+        // $bookings = $this->filterBookingResult($loggedUser, $startDate, $endDate, $search, $searchByBookingId, $driverId, $isDriverSchedule);
+        // return $bookings;
         if ($noPagination) {
             return  $bookings;
         }
@@ -203,20 +205,77 @@ class BookingRepository implements BookingInterface
         $loggedUserId = $loggedUser->id;
         $loggedUserHotel = $loggedUser->client->hotel_id ?? null;
         $loggedUserType = $loggedUser->userType->type ?? null;
+        $loggedClientId = $loggedUser->client->id ?? null;
 
-        // Start building the query with eager loading relationships
+        // Now build the main query
         $query = $this->model
-            ->with(['serviceType', 'event', 'pickUpLocation', 'dropOffLocation', 'vehicleType', 'client.user', 'client.hotel', 'vehicle', 'driver', 'createdBy', 'updatedBy']);
+            ->with([
+                'serviceType',
+                'event',
+                'pickUpLocation',
+                'dropOffLocation',
+                'vehicleType',
+                'client.user',
+                'client.hotel',
+                'vehicle',
+                'driver',
+                'createdBy.client.hotel',
+                'updatedBy'
+            ]);
 
         if ($loggedUserType === UserType::CLIENT) {
-            $query->where(function ($query) use ($loggedUserId, $loggedUserHotel) {
+            
+            $hotelIdsToQuery = [];
+            $hotel = $loggedUser->client->hotel;
+
+
+            if($hotel->is_head_office == 1)
+            {
+                $hotelIdsOfThisHeadOffice = DB::table('hotels')
+                    ->where('linked_head_office', $hotel->id)
+                    ->pluck('id')
+                    ->unique()
+                    ->toArray();
+ 
+                    $hotelIdsToQuery[] = $hotel->id;
+                    $hotelIdsToQuery = array_merge($hotelIdsToQuery, $hotelIdsOfThisHeadOffice);
+            }else{
+                $hotelIdsToQuery[] = $loggedUserHotel;
+            }
+
+            // check if poc
+            $isPOC = false;
+            $pocCheck = DB::table('hotels_poc')
+                    ->where('hotel_id', $loggedUserHotel)
+                    ->where('client_id', $loggedClientId)
+                    ->first();
+
+            if (!empty($pocCheck)) {
+                $isPOC = true;
+            }
+
+            $query->where(function ($query) use ($loggedUserId, $loggedClientId, $hotelIdsToQuery, $loggedUserHotel, $isPOC) {
                 $query->where('created_by_id', $loggedUserId)
-                      ->orWhereHas('client', function ($query) use ($loggedUserHotel) {
-                          $query->where('hotel_id', $loggedUserHotel);
-                      })
-                      ->orWhere(function ($query) use ($loggedUserId) {  // Fixed `->orWhere`
-                          $query->whereRaw("linked_clients REGEXP ?", ["(^|,)$loggedUserId(,|$)"]);
-                      });
+                    ->orWhere(function ($query) use ($loggedUserId) {
+                        $query->whereRaw("linked_clients REGEXP ?", ["(^|,)$loggedUserId(,|$)"]);
+                    });
+                    if($isPOC)
+                    {
+                        $query = $query->orWhereHas('client', function ($q) use ($hotelIdsToQuery, $isPOC) {
+                            if($isPOC)
+                            {
+                                $q->whereIn('hotel_id', $hotelIdsToQuery);
+                            }
+                        });
+                    }                    
+                    $query = $query->orWhere('client_id', $loggedClientId);
+
+                    if($isPOC)
+                    {
+                        $query = $query->orWhereHas('createdBy.client', function ($q) use ($loggedUserHotel, $isPOC) {
+                            $q->where('hotel_id', $loggedUserHotel);
+                        });
+                    }    
             });
         }
         
@@ -234,18 +293,11 @@ class BookingRepository implements BookingInterface
 
         if (!empty($driverId)) {
             $query->where('driver_id', $driverId);
-        }
-
-        if ($loggedUserType === UserType::CLIENT) {
-            $query->where(function ($query) use ($loggedUserId) {
-                $query->whereRaw("linked_clients REGEXP ?", ["(^|,)$loggedUserId(,|$)"])
-                      ->orWhere('created_by_id', $loggedUserId);
-            });
-        }        
+        } 
         
-        // if (!empty($clientId)) {
-        //     $query->where('created_by_id', $clientId);
-        // }
+        if (!empty($clientId)) {
+            $query->where('created_by_id', $clientId);
+        }
 
         if (!empty($search)) {
             $search = strtolower($search);
@@ -839,6 +891,9 @@ class BookingRepository implements BookingInterface
                     break;
                 case 'sortType':
                     $value = strtolower($innerQuery->serviceType->name ?? 'zzzz');
+                    break;
+                case 'sortPickupDate':
+                    $value = $innerQuery->pickup_date;
                     break;
                 case 'sortTime':
                     $value = $innerQuery->pickup_time;

@@ -74,16 +74,17 @@ class BookingController extends Controller
      */
     public function index(Request $request)
     {
+        $serviceTypes = $this->serviceTypeService->getServiceTypes();
+        $drivers = $this->driverService->getDrivers()->sortBy('name')->values();
+        $locations = $this->locationService->getLocations();
+        $hotels = $this->hotelService->getHotels();
+        $vehicleTypes = $this->vehicleClassService->getVehicleClass()->sortBy('name')->values();
+        $vehicles = $this->vehicleService->getvehicles()->sortBy('vehicle_number')->values();
+        $driverOffDays = $this->driverOffDayService->getSavedDates();
+        $hotelClients = $this->hotelService->getClientAdmins();
+        $bookingData = $this->bookingService->getBookingData($request->query());
+        // return $bookingData;
         try {
-            $serviceTypes = $this->serviceTypeService->getServiceTypes();
-            $drivers = $this->driverService->getDrivers()->sortBy('name')->values();
-            $locations = $this->locationService->getLocations();
-            $hotels = $this->hotelService->getHotels();
-            $vehicleTypes = $this->vehicleClassService->getVehicleClass()->sortBy('name')->values();
-            $vehicles = $this->vehicleService->getvehicles()->sortBy('vehicle_number')->values();
-            $driverOffDays = $this->driverOffDayService->getSavedDates();
-            $hotelClients = $this->hotelService->getClientAdmins();
-            $bookingData = $this->bookingService->getBookingData($request->query());
             return view('admin.bookings.index', compact('serviceTypes', 'locations', 'driverOffDays', 'bookingData', 'hotels', 'vehicleTypes', 'drivers', 'vehicles', 'hotelClients'));
         } catch (\Exception $e) {
             $this->helper->alertResponse(__('messages.something_went_wrong'), 'error');
@@ -248,20 +249,29 @@ class BookingController extends Controller
         $hoursDifference = ($pickupDateTimeStamp - $currentTimeStamp) / 3600;
         
         $hotelIdsFromLinkedCorporates = NULL;
-
         if (in_array($userTypeSlug, ['client-admin', 'client-staff']) && $loggedUserHotelId !== null && $bookedByHotelId !== $loggedUserHotelId) {
-
-            $client = $user->load('client');
-
-            $multiCorporatesData = $user->client->load('multiCorporates');
-            $hotelIdsFromLinkedCorporates = $multiCorporatesData->multiCorporates->pluck('hotel_id');
             
-
+            $client = $user->load('client');
+            $hotel = $user->client->load('hotel');
+            
+            $multiCorporatesData = $user->client->load('multiCorporates');
+            $hotelIdsFromLinkedCorporates = $multiCorporatesData->multiCorporates->pluck('hotel_id');            
+            
             if(!empty($hotelIdsFromLinkedCorporates))
             {
-                if (!in_array($bookedByHotelId, $hotelIdsFromLinkedCorporates->toArray())) {
-                    $this->helper->alertResponse(__('message.permission_denied'), 'error');
-                    return redirect()->route('dashboard');
+                if($booking->createdBy->client->hotel_id == $loggedUserHotelId)
+                {
+                    
+                }else{
+                    if($hotel->hotel->is_head_office == 1 && ($booking->createdBy->client->hotel->linked_head_office == $loggedUserHotelId || $booking->client->hotel->id == $loggedUserHotelId || $booking->client->hotel->linked_head_office == $loggedUserHotelId))
+                    {
+
+                    }else{
+                        if (!in_array($bookedByHotelId, $hotelIdsFromLinkedCorporates->toArray())) {
+                            $this->helper->alertResponse(__('message.permission_denied'), 'error');
+                            return redirect()->route('dashboard');
+                        }
+                    }
                 }
             }else{
                 if($loggedUserHotelId !== null && $bookedByHotelId !== $loggedUserHotelId){
@@ -361,8 +371,9 @@ class BookingController extends Controller
             $corporateFairBillingDetailsService = $this->corporateFairBillingRepository->getCorporateFairBillingByHotelIdVehicleClassTripType($booking->client->hotel_id, $vehicleClassId, $service);
             $corporateFairBillingDetailsPerHour = $this->corporateFairBillingRepository->getCorporateFairBillingByHotelIdVehicleClassTripType($booking->client->hotel_id, $vehicleClassId, 'Hour');
         }
+        $hotelClients = $this->hotelService->getClientAdmins();
         // return explode(',', $booking->linked_clients);
-        return view('admin.bookings.edit-booking', compact('serviceTypes', 'driverOffDays', 'logs', 'vehicles', 'drivers', 'booking', 'locations', 'peakPeriods', 'vehicleTypes', 'events', 'corporateFairBillingDetailsService', 'corporateFairBillingDetailsPerHour', 'clients', 'hotelIdsFromLinkedCorporates'));
+        return view('admin.bookings.edit-booking', compact('serviceTypes', 'driverOffDays', 'logs', 'vehicles', 'drivers', 'booking', 'locations', 'peakPeriods', 'vehicleTypes', 'events', 'corporateFairBillingDetailsService', 'corporateFairBillingDetailsPerHour', 'clients', 'hotelIdsFromLinkedCorporates', 'hotelClients'));
     }
 
     public function update(EditBookingRequest $request, Booking $booking)
@@ -395,17 +406,27 @@ class BookingController extends Controller
     
             if (in_array($userTypeSlug, ['client-admin', 'client-staff']) && $loggedUserHotelId !== null && $bookedByHotelId !== $loggedUserHotelId) {
     
-                $client = $user->load('client');
-    
-                $multiCorporatesData = $user->client->load('multiCorporates');
-                $hotelIdsFromLinkedCorporates = $multiCorporatesData->multiCorporates->pluck('hotel_id');
+                 $client = $user->load('client');
+                $hotel = $user->client->load('hotel');
                 
-    
+                $multiCorporatesData = $user->client->load('multiCorporates');
+                $hotelIdsFromLinkedCorporates = $multiCorporatesData->multiCorporates->pluck('hotel_id');            
+                
                 if(!empty($hotelIdsFromLinkedCorporates))
                 {
-                    if (!in_array($bookedByHotelId, $hotelIdsFromLinkedCorporates->toArray())) {
-                        $this->helper->alertResponse(__('message.permission_denied'), 'error');
-                        return redirect()->route('dashboard');
+                    if($booking->createdBy->client->hotel_id == $loggedUserHotelId)
+                    {
+                        
+                    }else{
+                        if($hotel->hotel->is_head_office == 1 && ($booking->createdBy->client->hotel->linked_head_office == $loggedUserHotelId || $booking->client->hotel->id == $loggedUserHotelId || $booking->client->hotel->linked_head_office == $loggedUserHotelId))
+                        {
+
+                        }else{
+                            if (!in_array($bookedByHotelId, $hotelIdsFromLinkedCorporates->toArray())) {
+                                $this->helper->alertResponse(__('message.permission_denied'), 'error');
+                                return redirect()->route('dashboard');
+                            }
+                        }
                     }
                 }else{
                     if($loggedUserHotelId !== null && $bookedByHotelId !== $loggedUserHotelId){

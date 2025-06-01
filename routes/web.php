@@ -456,3 +456,29 @@ Route::middleware(['Auth','SanitizeInput', AuthenticateSession::class])->group(f
         Route::post('createEventFromBooking',  [EventsController::class, 'createEventFromBooking'])->name('create-event-by-ajax');
     });
 });
+
+// Route::get('/run-migrate', function () {
+//     try {
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_05_29_001257_add_meet_greet_column_in_vehicle_classes_table.php',
+//             '--force' => true
+//         ]);
+//         return 'Selected migrations ran successfully.';
+//     } catch (\Exception $e) {
+//         return 'Migration error: ' . $e->getMessage();
+//     }
+// });
+
+// Route::get('/run-seeder', function () {
+//     try {
+//         // Run specific seeder by class name
+//         Artisan::call('db:seed', [
+//             '--class' => 'LocationTestSeeder',
+//             '--force' => true
+//         ]);
+//         return 'Selected seeder ran successfully.';
+//     } catch (\Exception $e) {
+//         return 'Seeder error: ' . $e->getMessage();
+//     }
+// });

@@ -284,6 +284,7 @@ class BookingService
             if ($userTypeSlug === 'client-staff' ||  $userTypeSlug === 'client-admin') {
                 $this->sendMessageToOpsTeam($booking, $loggedUser);
                 $this->createBookingNotification($loggedUser, $booking, $userTypeSlug);
+                $this->createBookingNotificationToPOCandHeadOffice($booking, $loggedUser);
             }
             return $booking;
         } catch (\Exception $e) {
@@ -417,6 +418,7 @@ class BookingService
                 if ($userTypeSlug === 'client-staff' ||  $userTypeSlug === 'client-admin') {
                     $this->sendMessageToOpsTeam($booking, $loggedUser);
                     $this->createBookingNotification($loggedUser, $booking, $userTypeSlug);
+                    $this->createBookingNotificationToPOCandHeadOffice($booking, $loggedUser);
                 }
             }
             DB::commit();
@@ -435,6 +437,14 @@ class BookingService
             $loggedUserId = Auth::user()->id;
             $loggedUserType = Auth::user()->userType->name ?? null;
             $userTypeSlug = Auth::user()->userType->slug ?? null;
+
+            $clientId = null;
+            if (isset($requestData['client_id']) && !empty($requestData['client_id'])) {
+                $clientId = $requestData['client_id'];
+            } elseif ($userTypeSlug === 'client-staff' || $userTypeSlug === 'client-admin') {
+                $clientId = $loggedUserForNotification->client->id;
+            }
+
             $serviceTypeId = $requestData['service_type_id'] ?? null;
             $additional_stops = !empty($requestData['additional_stops']) 
                                 ? join('||', array_filter($requestData['additional_stops'])) 
@@ -469,6 +479,8 @@ class BookingService
     
             if (isset($requestData['event_id']))
                 $bookingData['event_id'] = $eventId;
+            if (isset($requestData['client_id']))
+                $bookingData['client_id'] = $clientId;
             if (isset($requestData['service_type_id']))
                 $bookingData['service_type_id'] = $serviceTypeId;
             if (isset($requestData['flight_detail']))
@@ -1036,6 +1048,195 @@ class BookingService
                 'from_user_name' => $loggedUserFullName,
             ];
             $this->notificationService->sendNotification($notificationData, $loggedUser, $notificationType, $subject, $notifyUsers, $message, $template);
+        } catch (\Exception $e) {
+            // Rollback the transaction if an error occurs
+            DB::rollback();
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    private function createBookingNotificationToPOCandHeadOffice($loggedUser, $booking)
+    {
+        
+        try {
+            $message = "added a new booking";
+            $subject = "New Booking Created";
+
+
+            // to poc of logged in user's hotel
+            $hotelId = $loggedUser->client->hotel_id;
+
+            // Step 1: Get all client IDs from hotel_poc table
+            $allPocClientIds = DB::table('hotels_poc')
+                ->where('hotel_id', $hotelId)
+                ->pluck('client_id')
+                ->toArray();
+
+            // Step 2: Get all user IDs from clients table using those client IDs
+            $clientUserIds = DB::table('clients')
+                ->whereIn('id', $allPocClientIds)
+                ->pluck('user_id')
+                ->toArray();
+
+            // Step 3: Get user details from users table
+            $users = DB::table('users')
+                ->whereIn('id', $clientUserIds)
+                ->select('first_name', 'last_name', 'email')
+                ->get();
+
+            if(!empty($users))
+            {
+                foreach($users as $user)
+                {
+                    $loggedUserFullName = $this->helper->getFullName($loggedUser->first_name, $loggedUser->last_name);
+
+                    $mailDataForAdmin = [
+                        'subject' => $subject,
+                        'template' => 'booking-created-email',
+                        'name' => 'Limousine Team',
+                        'logs' => $message,
+                        'changedBy' => $loggedUserFullName . ' from ' . Auth::user()->client->hotel->name,
+                        'bookingId' => $booking->id,
+                    ];
+                    $this->helper->sendEmail($user->email, $mailDataForAdmin);
+                }
+            }
+
+
+            // check if logged in user belongs to the same corporate, for whom the booking is created
+            if($booking->client->hotel_id == $loggedUser->client->hotel_id)
+            {
+                // check if logged in user's hotel is head office
+                if($loggedUser->client->hotel->is_head_office == 1 || ($loggedUser->client->hotel->is_head_office == 0 && $loggedUser->client->hotel->linked_head_office == NULL))
+                {
+                    
+                }else
+                {   
+                    // to head office
+                    $hotelId = $loggedUser->client->hotel->linked_head_office;
+
+                    // Step 1: Get all client IDs from hotel_poc table
+                    $allPocClientIds = DB::table('hotels_poc')
+                        ->where('hotel_id', $hotelId)
+                        ->pluck('client_id')
+                        ->toArray();
+
+                    // Step 2: Get all user IDs from clients table using those client IDs
+                    $clientUserIds = DB::table('clients')
+                        ->whereIn('id', $allPocClientIds)
+                        ->pluck('user_id')
+                        ->toArray();
+
+                    // Step 3: Get user details from users table
+                    $users = DB::table('users')
+                        ->whereIn('id', $clientUserIds)
+                        ->select('first_name', 'last_name', 'email')
+                        ->get();
+
+                    if(!empty($users))
+                    {
+                        foreach($users as $user)
+                        {
+                            $loggedUserFullName = $this->helper->getFullName($loggedUser->first_name, $loggedUser->last_name);
+
+                            $mailDataForAdmin = [
+                                'subject' => $subject,
+                                'template' => 'booking-created-email',
+                                'name' => 'Limousine Team',
+                                'logs' => $message,
+                                'changedBy' => $loggedUserFullName . ' from ' . Auth::user()->client->hotel->name,
+                                'bookingId' => $booking->id,
+                            ];
+                            $this->helper->sendEmail($user->email, $mailDataForAdmin);
+                        }
+                    }
+                }
+            }else{
+                // to poc of booking's hotel
+                $hotelId = $booking->client->hotel_id;
+
+                // Step 1: Get all client IDs from hotel_poc table
+                $allPocClientIds = DB::table('hotels_poc')
+                    ->where('hotel_id', $hotelId)
+                    ->pluck('client_id')
+                    ->toArray();
+
+                // Step 2: Get all user IDs from clients table using those client IDs
+                $clientUserIds = DB::table('clients')
+                    ->whereIn('id', $allPocClientIds)
+                    ->pluck('user_id')
+                    ->toArray();
+
+                // Step 3: Get user details from users table
+                $users = DB::table('users')
+                    ->whereIn('id', $clientUserIds)
+                    ->select('first_name', 'last_name', 'email')
+                    ->get();
+
+                if(!empty($users))
+                {
+                    foreach($users as $user)
+                    {
+                        $loggedUserFullName = $this->helper->getFullName($loggedUser->first_name, $loggedUser->last_name);
+
+                        $mailDataForAdmin = [
+                            'subject' => $subject,
+                            'template' => 'booking-created-email',
+                            'name' => 'Limousine Team',
+                            'logs' => $message,
+                            'changedBy' => $loggedUserFullName . ' from ' . Auth::user()->client->hotel->name,
+                            'bookingId' => $booking->id,
+                        ];
+                        $this->helper->sendEmail($user->email, $mailDataForAdmin);
+                    }
+                }
+
+                // check if booking's hotel is head office
+                if($booking->client->hotel->is_head_office == 1 || ($loggedUser->client->hotel->is_head_office == 0 && $loggedUser->client->hotel->linked_head_office == NULL))
+                {
+                    
+                }else
+                {   
+                    // to head office
+                    $hotelId = $booking->client->hotel->linked_head_office;
+
+                    // Step 1: Get all client IDs from hotel_poc table
+                    $allPocClientIds = DB::table('hotels_poc')
+                        ->where('hotel_id', $hotelId)
+                        ->pluck('client_id')
+                        ->toArray();
+
+                    // Step 2: Get all user IDs from clients table using those client IDs
+                    $clientUserIds = DB::table('clients')
+                        ->whereIn('id', $allPocClientIds)
+                        ->pluck('user_id')
+                        ->toArray();
+
+                    // Step 3: Get user details from users table
+                    $users = DB::table('users')
+                        ->whereIn('id', $clientUserIds)
+                        ->select('first_name', 'last_name', 'email')
+                        ->get();
+
+                    if(!empty($users))
+                    {
+                        foreach($users as $user)
+                        {
+                            $loggedUserFullName = $this->helper->getFullName($loggedUser->first_name, $loggedUser->last_name);
+
+                            $mailDataForAdmin = [
+                                'subject' => $subject,
+                                'template' => 'booking-created-email',
+                                'name' => 'Limousine Team',
+                                'logs' => $message,
+                                'changedBy' => $loggedUserFullName . ' from ' . Auth::user()->client->hotel->name,
+                                'bookingId' => $booking->id,
+                            ];
+                            $this->helper->sendEmail($user->email, $mailDataForAdmin);
+                        }
+                    }
+                }
+            }
         } catch (\Exception $e) {
             // Rollback the transaction if an error occurs
             DB::rollback();

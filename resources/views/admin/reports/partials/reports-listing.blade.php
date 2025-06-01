@@ -96,6 +96,7 @@
             @endif
             #{{ $drivers->id }}
         </td>
+        <td>{{ date('d-m-Y', strtotime($drivers->pickup_date)) ?? 'N/A'}}</td>
         <td>{!! $pickUpTime ?? 'N/A' !!}</td>
         <td class="text-truncate">{{ $drivers->serviceType->name ?? 'N/A' }}</td>
         <td class="text-truncate toggalPickup">{{ $pickUpLocation ?? 'N/A' }}</td>

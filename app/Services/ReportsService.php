@@ -120,9 +120,9 @@ class ReportsService
                     $fileName = time() . "_reports.xlsx";
                     $filePath = 'exports/excel/';
                     $this->exportService->setPath($filePath);
-                    $columns = ['Booking', 'Time', 'Type', 'Driver', 'Vehicle', 'Status', 'Booked By', 'Access Given Clients', 'Booking Date'];
+                    $columns = ['Booking', 'Pickup Date', 'Time', 'Type', 'Driver', 'Vehicle', 'Status', 'Booked By', 'Access Given Clients', 'Booking Date'];
 
-                    $position = 3;
+                    $position = 4;
 
                     $dynamicFields = [];
 
@@ -187,6 +187,7 @@ class ReportsService
             } else {
                 $hotelValue = null;
             }
+            $pickupDate = $schedule->pickup_date ? date('d-m-y', strtotime($schedule->pickup_date)) : null;
             $pickUpTime = null;
             $pickup = $schedule->pickup_time ? $this->helper->formatTime($schedule->pickup_time) : null;
             if ($schedule->service_type_id === 4) {
@@ -235,6 +236,7 @@ class ReportsService
             $driverName = !empty($schedule->driver) && !empty($schedule->driver->name) ? $schedule->driver->name : '';
             $booking = [
                 $schedule->id,
+                $pickupDate ?? null,
                 $pickUpTime ?? null,
                 $schedule->serviceType->name ?? null,
                 $driverName,
@@ -245,7 +247,7 @@ class ReportsService
                 date('d-m-Y H:i', strtotime($schedule->created_at)) ?? null,
             ];
 
-            $position = 3;
+            $position = 4;
 
             $dynamicData = [];
 

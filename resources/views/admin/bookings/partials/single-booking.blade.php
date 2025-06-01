@@ -575,7 +575,7 @@
             <p class="text-muted small">1st Child seat is free. Additional child seat is $10.</p>
         </div>
     </div>
-    <div class="row" id="meetAndGreetContainer">
+    <div class="row" id="meetAndGreetContainer" style="display:none;">
         <div class="row mb-3">
             <div class="col-md-12">
                 <label class="form-label fw-bold" style="padding-bottom:0">Meet and Greet? <span class="text-danger">*</span></label>

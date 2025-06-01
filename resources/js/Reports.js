@@ -69,7 +69,7 @@ export default class DriverSchedule extends BaseClass {
 
         $(document).on(
             "click",
-            "#sortBooking, #sortTime, #sortType,#sortPickUp,#sortDropOff, #sortAdditionalStops, #sortGuestName, #sortCorporate, #sortEvent, #sortContact, #sortRemarks, #sortDriver, #sortVehicle, #sortStatus, #sortBookedBy, #sortAccessGivenClients, #sortBookingDate",
+            "#sortBooking, #sortPickupDate, #sortTime, #sortType,#sortPickUp,#sortDropOff, #sortAdditionalStops, #sortGuestName, #sortCorporate, #sortEvent, #sortContact, #sortRemarks, #sortDriver, #sortVehicle, #sortStatus, #sortBookedBy, #sortAccessGivenClients, #sortBookingDate",
             this.handleSorting
         );
     }

@@ -33,7 +33,7 @@ class AddMultipleBookingRequest extends FormRequest
                 $serviceTypeId = $request->input('multiple_service_type_id.' . $index);
                 $pickupLocationId = $request->input('multiple_pick_up_location_id.' . $index);
             
-                if (in_array($serviceTypeId, ["2", "3", "4", "5"]) || $pickupLocationId == 8) {
+                if (in_array($serviceTypeId, ["2", "3", "4", "5"]) || $pickupLocationId == 12) {
                     if ($value === null || strlen($value) < 3) {
                         $fail(__('validation.custom.pick_up_location.required'));
                     }
@@ -44,7 +44,7 @@ class AddMultipleBookingRequest extends FormRequest
                 $serviceTypeId = $request->input('multiple_service_type_id.' . $index);
                 $dropLocationId = $request->input('multiple_drop_off_location_id.' . $index);
             
-                if (in_array($serviceTypeId, ["1", "2", "5"]) || $dropLocationId == 8) {
+                if (in_array($serviceTypeId, ["1", "2", "5"]) || $dropLocationId == 12) {
                     if ($value === null || strlen($value) < 3) {
                         $fail(__('validation.custom.drop_of_location.required'));
                     }

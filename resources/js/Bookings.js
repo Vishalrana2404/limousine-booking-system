@@ -143,6 +143,7 @@ export default class Bookings extends BaseClass {
             const seatingCapacity = parseInt(selectedOption.data('seating-capacity'), 10);
     
             if (seatingCapacity > 13) {
+                $('#meetAndGreetContainer').show();
                 $('#meetAndGreetYes').prop('disabled', false);
             } else {
                 $('#meetAndGreetYes').prop('disabled', true);
@@ -151,6 +152,7 @@ export default class Bookings extends BaseClass {
                     $('#meetAndGreetYes').prop('checked', false);
                     $('#meetAndGreetNo').prop('checked', true);
                 }
+                $('#meetAndGreetContainer').hide();
             }
         } else {
             $('#meetAndGreetYes').prop('disabled', true);
@@ -159,6 +161,7 @@ export default class Bookings extends BaseClass {
                 $('#meetAndGreetYes').prop('checked', false);
                 $('#meetAndGreetNo').prop('checked', true);
             }
+            $('#meetAndGreetContainer').hide();
         }
     }
     
@@ -174,12 +177,14 @@ export default class Bookings extends BaseClass {
         const noOption = meetAndGreetSelect.find('option[value="NO"]');
 
         if (!isNaN(seatingCapacity) && seatingCapacity > 13) {
+            $(meetAndGreetSelect).show();
             yesOption.prop('disabled', false);
         } else {            
             if (meetAndGreetSelect.val() === 'YES') {
                 meetAndGreetSelect.val('NO');
             }
             yesOption.prop('disabled', true);
+            $(meetAndGreetSelect).hide();
         }
     }
 
@@ -999,7 +1004,6 @@ export default class Bookings extends BaseClass {
         }
     };
     sendPostRequest = (url, formData, bookingId) => {
-        console.log('adfadf')
         $("#loader").show();
         axios
             .post(url, formData)
@@ -2046,7 +2050,7 @@ export default class Bookings extends BaseClass {
                     </td>                    
                     <td>
                         <div class="d-flex gap-2">
-                            <select name="multiple_meet_and_greet[]" id="meet_and_greet_${index}" class="form-control form-select custom-select multiple_meet_and_greet" autocomplete="off">
+                            <select name="multiple_meet_and_greet[]" id="meet_and_greet_${index}" class="form-control form-select custom-select multiple_meet_and_greet" autocomplete="off" style="">
                                 <option value="YES" disabled>Yes</option>
                                 <option value="NO" selected>No</option>
                             </select>

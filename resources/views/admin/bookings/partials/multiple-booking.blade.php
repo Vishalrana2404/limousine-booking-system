@@ -692,7 +692,7 @@
                                         <select name="multiple_meet_and_greet[]"
                                             id="meet_and_greet_{{ $index }}"
                                             class="form-control form-select custom-select multiple_meet_and_greet @error('multiple_meet_and_greet.' . $index) is-invalid @enderror"
-                                            autocomplete="off">
+                                            autocomplete="off" style="display:none;">
                                             <option value="YES" disabled>Yes</option>
                                             <option value="NO" selected>No</option>
                                         </select>
