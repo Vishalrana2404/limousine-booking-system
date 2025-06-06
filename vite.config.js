@@ -33,6 +33,7 @@ export default defineConfig({
                 "resources/js/Notification.js",
                 "resources/js/NotificationList.js",
                 "resources/js/Reports.js",
+                "resources/js/EmailTemplates.js",
             ],
             refresh: true,
         }),

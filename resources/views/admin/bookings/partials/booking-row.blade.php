@@ -22,7 +22,7 @@
             $pickUpTime = $pickup ? $pickup : 'N/A';
         }
         $pickupDate = $booking->pickup_date;
-        $pickupDateTime = $pickupDate . ' ' . $pickUpTime;
+        $pickupDateTime = $pickupDate . ' ' . $pickup;
         $pickupDateTimeStamp = strtotime($pickupDateTime);
         $currentTimeStamp = strtotime(date('Y-m-d H:i'));
         $hoursDifference = ($pickupDateTimeStamp - $currentTimeStamp) / 3600;
@@ -44,10 +44,15 @@
         $pickUpLocation = null;
 
         if ($booking->service_type_id === 1) {
-            $pickUpLocation = $booking->flight_detail ?? null;
+            if($booking->pick_up_location_id == 8 || $booking->pick_up_location_id == 9 || $booking->pick_up_location_id == 10 || $booking->pick_up_location_id == 11 || $booking->pick_up_location_id == 12)
+            {
+                $pickUpLocation = $booking->pickUpLocation->name;
+            }else{
+                $pickUpLocation = $booking->flight_detail ?? null;
+            }
         } else {
             $pickupLocationId = $booking->pick_up_location_id ?? null;
-            if ($pickupLocationId && $pickupLocationId !== 8) {
+            if ($pickupLocationId && $pickupLocationId !== 12) {
                 $pickUpLocation = $booking->pickUpLocation->name ?? null;
             } else {
                 $pickUpLocation = $booking->pick_up_location;
@@ -56,7 +61,10 @@
         $dropOffLocation = null;
         $dropOffLocationEditVal = null;
         if ($booking->service_type_id === 3) {
-            if (!empty($booking->flight_detail)) {
+             if($booking->pick_up_location_id == 8 || $booking->pick_up_location_id == 9 || $booking->pick_up_location_id == 10 || $booking->pick_up_location_id == 11 || $booking->pick_up_location_id == 12)
+            {
+                $dropOffLocation = $booking->dropOffLocation->name;
+            }else{
                 $dropOffLocation = $booking->departure_time
                     ? $booking->flight_detail .
                         ' / ' .
@@ -66,7 +74,7 @@
             }
         } else {
             $dropOffLocationId = $booking->drop_off_location_id ?? null;
-            if ($dropOffLocationId && $dropOffLocationId !== 8) {
+            if ($dropOffLocationId && $dropOffLocationId !== 12) {
                 $dropOffLocation = $booking->dropOffLocation->name ?? null;
                 $dropOffLocationEditVal = $booking->dropOffLocation->name ?? null;
             } else {
@@ -162,10 +170,9 @@
             
         @else
             @if($booking->status === 'PENDING' && $booking->client_asked_to_cancel != 'yes')
-                @if($hoursDifference > 24)
-                <a class="text-dark mx-1" href="{{ route('edit-booking', ['booking' => $booking->id]) }}" title="Edit">
-                    <i class="fas fa-pencil-alt mr-1"></i>
-                </a>
+            @if($hoursDifference > 24)
+            <a class="text-dark mx-1" href="{{ route('edit-booking', ['booking' => $booking->id]) }}" title="Edit">
+                <i class="fas fa-pencil-alt mr-1"></i></a>
                 @endif
             @endif
             @if($booking->status === 'ACCEPTED' && $booking->client_asked_to_cancel != 'yes')
@@ -214,7 +221,7 @@
       <td @if ($isEditable) data-name="guest_name" data-old="{{ $guestNames }}" @endif
           class="text-truncate" style="max-width: 200px" title="{{ $resultGuestName ?? 'N/A' }}">{!! $resultGuestName ?? 'N/A' !!}</td>
       @if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']))
-          <td class="text-truncate">{!! $hotelValue !!}</td>
+          <td class="text-truncate" title="{{ strip_tags($hotelValue) }}">{{ \Illuminate\Support\Str::limit(strip_tags($hotelValue), 22) }}</td>
       @endif
         <td @if ($isEditable) data-name="phone" data-old="{{ $booking->phone }}" data-country-code="{{ $booking->country_code }}" @endif
           class="text-truncate" style="max-width: 200px" title="{{ $booking->country_code ? '+(' . $booking->country_code . ')' : '' }}{{ $booking->phone ?? 'N/A' }}">            
@@ -247,6 +254,9 @@
       <td @if ($isEditable) data-name="client_instructions" data-old="{{ $booking->client_instructions }}" @endif
           class="text-truncate" style="max-width: 200px" title="{{ $booking->client_instructions ?? 'N/A' }}">
           {{ $booking->client_instructions ?? 'N/A' }}</td>
+      <td @if ($isEditable) data-name="latest_comment" data-old="{{ $booking->latest_comment }}" @endif
+          class="text-truncate" style="max-width: 200px" title="{{ $booking->latest_comment ?? 'N/A' }}">
+          {{ $booking->latest_comment ?? 'N/A' }}</td>
 
       <!-- <td class="text-truncate">{{ CustomHelper::formatSingaporeDate($booking->created_at) ?? 'N/A' }}</td> -->
       <!-- @if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']))

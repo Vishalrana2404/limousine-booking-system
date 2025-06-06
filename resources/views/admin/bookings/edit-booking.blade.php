@@ -734,79 +734,79 @@
                                         <div class="form-group row row-gap-2 mb-0">
                                             <label for="pick-up-location-id"
                                                 class="col-sm-6 col-form-label">Pick-up</label>
-                                            <div class="col-sm-6" id="pickUpLocationDropdown"
-                                                style="display:{{ $pickUpLocationDropdown }};">
-                                                <select name="pick_up_location_id" id="pick-up-location-id"
-                                                    class="form-control form-select custom-select @error('pick_up_location_id') is-invalid @enderror"
-                                                    autocomplete="off">
-                                                    <option value="">Select one</option>
-                                                    @foreach ($locations as $location)
-                                                        @if ($booking->pick_up_location_id === $location->id)
-                                                            <option value="{{ $location->id }}" selected>
-                                                                {{ $location->name }}</option>
-                                                        @else
-                                                            <option value="{{ $location->id }}">{{ $location->name }}
-                                                            </option>
-                                                        @endif
-                                                    @endforeach
-                                                </select>
-                                                @error('pick_up_location_id')
-                                                    <span class="invalid-feedback" role="alert">
-                                                        <strong>{{ $message }}</strong>
-                                                    </span>
-                                                @enderror
-                                            </div>
-                                            <div class="col-sm-6" id="pickUpLocationTextBox"
-                                                style="display:{{ $pickUpLocationTextBox }};">
-                                                <input type="text" id="pick-up-location" name="pick_up_location"
-                                                    value="{{ $booking->pick_up_location }}"
-                                                    class="form-control @error('pick_up_location') is-invalid @enderror"
-                                                    placeholder="Pick Up Location" autocomplete="off">
-                                                @error('pick_up_location')
-                                                    <span class="invalid-feedback" role="alert">
-                                                        <strong>{{ $message }}</strong>
-                                                    </span>
-                                                @enderror
-                                            </div>
+                                                <div class="col-sm-6 d-flex align-items-center justify-content-center flex-column">
+                                                    <div class="w-100 mb-2" id="pickUpLocationDropdown"
+                                                        style="display:{{ $pickUpLocationDropdown }};">
+                                                        <select name="pick_up_location_id" id="pick-up-location-id"
+                                                            class="form-control form-select custom-select @error('pick_up_location_id') is-invalid @enderror"
+                                                            autocomplete="off">
+                                                            <option value="">Select one</option>
+                                                            @foreach ($locations as $location)
+                                                                @if ($booking->pick_up_location_id === $location->id)
+                                                                    <option value="{{ $location->id }}" selected>
+                                                                        {{ $location->name }}</option>
+                                                                @else
+                                                                    <option value="{{ $location->id }}">{{ $location->name }}
+                                                                    </option>
+                                                                @endif
+                                                            @endforeach
+                                                        </select>
+                                                        @error('pick_up_location_id')
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong>{{ $message }}</strong>
+                                                            </span>
+                                                        @enderror
+                                                    </div>
+                                                    <div class="w-100" id="pickUpLocationTextBox"
+                                                        style="display:{{ $pickUpLocationTextBox }};">
+                                                        <input type="text" id="pick-up-location" name="pick_up_location"
+                                                            value="{{ $booking->pick_up_location }}"
+                                                            class="form-control @error('pick_up_location') is-invalid @enderror"
+                                                            placeholder="Pick Up Location" autocomplete="off">
+                                                        @error('pick_up_location')
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong>{{ $message }}</strong>
+                                                            </span>
+                                                        @enderror
+                                                    </div>
+                                                </div>
                                         </div>
                                     </li>
                                     <li class="list-group-item">
                                         <div class="form-group row row-gap-2 mb-0">
                                             <label for="drop-of-location-id"
                                                 class="col-sm-6 col-form-label">Drop-off</label>
-                                            <div class="col-sm-6" id="dropOffLocationDropdown"
-                                                style="display:{{ $dropOffLocationDropdown }};">
-                                                <select name="drop_off_location_id" id="drop-off-location-id"
-                                                    class="form-control form-select custom-select @error('drop_off_location_id') is-invalid @enderror"
-                                                    autocomplete="off">
-                                                    <option value="">Select one</option>
-                                                    @foreach ($locations as $location)
-                                                        @if ($booking->drop_off_location_id === $location->id)
-                                                            <option value="{{ $location->id }}" selected>
-                                                                {{ $location->name }}</option>
-                                                        @else
-                                                            <option value="{{ $location->id }}">{{ $location->name }}
+                                            <div class="col-sm-6 d-flex align-items-center justify-content-center flex-column">
+                                                <div id="dropOffLocationDropdown" class="w-100 mb-2" style="display:{{ $dropOffLocationDropdown }};">
+                                                    <select name="drop_off_location_id" id="drop-off-location-id"
+                                                        class="form-control form-select custom-select @error('drop_off_location_id') is-invalid @enderror"
+                                                        autocomplete="off">
+                                                        <option value="">Select one</option>
+                                                        @foreach ($locations as $location)
+                                                            <option value="{{ $location->id }}"
+                                                                {{ $booking->drop_off_location_id === $location->id ? 'selected' : '' }}>
+                                                                {{ $location->name }}
                                                             </option>
-                                                        @endif
-                                                    @endforeach
-                                                </select>
-                                                @error('drop_off_location_id')
-                                                    <span class="invalid-feedback" role="alert">
-                                                        <strong>{{ $message }}</strong>
-                                                    </span>
-                                                @enderror
-                                            </div>
-                                            <div class="col-sm-6" id="dropOffLocationtextBox"
-                                                style="display:{{ $dropOffLocationtextBox }};">
-                                                <input type="text" id="drop-off-location" name="drop_of_location"
-                                                    value="{{ $booking->drop_of_location }}"
-                                                    class="form-control @error('drop_of_location') is-invalid @enderror"
-                                                    placeholder="Drop Off Location" autocomplete="off">
-                                                @error('drop_of_location')
-                                                    <span class="invalid-feedback" role="alert">
-                                                        <strong>{{ $message }}</strong>
-                                                    </span>
-                                                @enderror
+                                                        @endforeach
+                                                    </select>
+                                                    @error('drop_off_location_id')
+                                                        <span class="invalid-feedback" role="alert">
+                                                            <strong>{{ $message }}</strong>
+                                                        </span>
+                                                    @enderror
+                                                </div>
+
+                                                <div id="dropOffLocationtextBox" class="w-100" style="display:{{ $dropOffLocationtextBox }};">
+                                                    <input type="text" id="drop-off-location" name="drop_of_location"
+                                                        value="{{ $booking->drop_of_location }}"
+                                                        class="form-control @error('drop_of_location') is-invalid @enderror"
+                                                        placeholder="Drop Off Location" autocomplete="off">
+                                                    @error('drop_of_location')
+                                                        <span class="invalid-feedback" role="alert">
+                                                            <strong>{{ $message }}</strong>
+                                                        </span>
+                                                    @enderror
+                                                </div>
                                             </div>
                                         </div>
                                     </li>
@@ -989,8 +989,16 @@
                                                             @php
                                                                 $client = $hotelClient->client ?? null;
                                                             @endphp
-                                                            @if ($client)
-                                                                <option value="{{ $client->id }}" {{ $booking->client->id == $client->id ? 'selected' : ''}}>{{$hotelClient->name  }}</option>
+                                                            @if ($loggedUserType === null || $loggedUserType === 'admin')
+                                                                @if ($client)
+                                                                    <option value="{{ $client->id }}" {{ $booking->client->hotel_id == $client->hotel_id ? 'selected' : ''}}>{{$hotelClient->name  }}</option>
+                                                                @endif
+                                                            @else
+                                                                @if ($client)
+                                                                    @if(in_array($client->hotel_id, $hotelIdsFromLinkedCorporates->toArray()) || $client->hotel_id == $booking->client->hotel_id)
+                                                                        <option value="{{ $client->id }}" {{ $booking->client->hotel_id == $client->hotel_id ? 'selected' : ''}}>{{$hotelClient->name  }}</option>
+                                                                    @endif
+                                                                @endif
                                                             @endif
                                                         @endforeach
                                                     </select>
@@ -1182,6 +1190,42 @@
                                                         @enderror
                                                     </div>
                                                 @endif
+                                            </div>
+                                        </div>
+                                    </li>
+                                    @if(!empty($booking->latest_comment))
+                                    <li class="list-group-item">
+                                        <div class="form-group row row-gap-2 mb-0">
+                                            <label class="col-sm-6 col-form-label">Latest Comment</label>
+                                            <div class="col-sm-6">
+                                                <div>
+                                                    <span>{{ $booking->latest_comment }}</span>
+                                                </div>
+                                                @if($booking->latestComment && $booking->latestComment->createdBy)
+                                                    <div class="d-flex justify-content-between mt-1 text-muted small">
+                                                        <span>
+                                                            {{ $booking->latestComment->createdBy->first_name }}
+                                                            {{ $booking->latestComment->createdBy->last_name ?? '' }}
+                                                        </span>
+                                                        <span>
+                                                            {{ \Carbon\Carbon::parse($booking->latestComment->created_at)->format('d-M-Y H:i') }}
+                                                        </span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </li>
+                                    @endif
+                                    <li class="list-group-item">
+                                        <div class="form-group row row-gap-2 mb-0">
+                                            <label class="col-sm-6 col-form-label">Add Comment</label>
+                                            <div class="col-sm-6">
+                                                <textarea id="latest_comment" rows="4" name="latest_comment" class="form-control @error('latest_comment') is-invalid @enderror" placeholder="Booking Comment"></textarea>
+                                                @error('latest_comment')
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $message }}</strong>
+                                                    </span>
+                                                @enderror
                                             </div>
                                         </div>
                                     </li>
@@ -2146,6 +2190,22 @@
                                 </div>
                             </div>
                         </div>
+                    @endif
+                    @if(!empty($booking->bookings_comment_log))
+                    <div class="col-md-6">
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h3 class="head-sm medium">Comment Logs</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        @include('admin.logs.partials.booking-comments-logs')
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     @endif
                 </div>
                 <div class="card mt-3">

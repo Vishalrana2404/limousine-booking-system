@@ -94,7 +94,7 @@
                                 </th>
                                 <th>Guest Name</th>
                                 @if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']))
-                                    <th>Client<i class="fa fa-sort ml-1 text-dark" id="sortClient" aria-hidden="true"></i>
+                                    <th>Corporate<i class="fa fa-sort ml-1 text-dark" id="sortClient" aria-hidden="true"></i>
                                     </th>
                                 @endif
                                 <th>Contact<i class="fa fa-sort ml-1 text-dark" id="sortContact" aria-hidden="true"></i>
@@ -108,6 +108,8 @@
                                 <th>Status<i class="fa fa-sort ml-1 text-dark" id="sortStatus" aria-hidden="true"></i>
                                 </th>
                                 <th>Client Instructions<i class="fa fa-sort ml-1 text-dark" id="sortInstructions"
+                                        aria-hidden="true"></i></th>
+                                <th>Comment<i class="fa fa-sort ml-1 text-dark" id="sortComments"
                                         aria-hidden="true"></i></th>
                                 <!-- <th>Booked On<i class="fa fa-sort ml-1 text-dark" id="sortBookingDate"
                                         aria-hidden="true"></i></th> -->

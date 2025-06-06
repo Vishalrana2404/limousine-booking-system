@@ -37,7 +37,6 @@ class EventsController extends Controller
     public function index(Request $request)
     {
         try {
-
             $user = Auth::user();
             $userTypeSlug = $user->userType->slug ?? null;
             
@@ -51,6 +50,7 @@ class EventsController extends Controller
             }
             // Retrieve events data from the eventService
             return view('admin.events.index', compact('eventData'));
+
         } catch (\Exception $e) {
             // Display an alert message for the user
             $this->helper->alertResponse(__('messages.something_went_wrong'), 'error');
@@ -70,7 +70,35 @@ class EventsController extends Controller
     {
         $hotels = $this->hotelService->getHotels();
 
-        return view('admin.events.create-event', compact('hotels'));
+        $loggedUser = Auth::user();
+        $multipleCorporatesHotelData = NULL;
+
+        if(!empty($loggedUser->userType))
+        {
+            if($loggedUser->userType->slug === 'client-staff' || $loggedUser->userType->slug === 'client-admin')
+            {
+                $loggedUser->load('client');
+                $loggedUser->client->load(['hotel', 'multiCorporates.hotel']);
+
+                $loggedInUserHotelDetails = $loggedUser->client->hotel;
+                $hotel_id = $loggedUser->client->id;
+                $multiCorporates = $loggedUser->client->multiCorporates;
+
+                $multipleCorporatesHotelData = $multiCorporates->pluck('hotel');
+
+                if (!$multipleCorporatesHotelData->isEmpty() && !$multipleCorporatesHotelData->contains('id', $loggedInUserHotelDetails->id)) {
+                    $multipleCorporatesHotelData->push($loggedInUserHotelDetails);
+                }
+
+                if(!empty($multipleCorporatesHotelData) && count($multipleCorporatesHotelData) > 1)
+                {
+                    $events = NULL;
+                }else{
+                    $events = $this->eventService->getEventDataByHotel($hotel_id);
+                }
+            }
+        }
+        return view('admin.events.create-event', compact('hotels', 'multipleCorporatesHotelData'));
     }
 
     /**
@@ -84,7 +112,7 @@ class EventsController extends Controller
         
             // Create a new event using eventService
             $this->eventService->createEvent($request->all(), $log_headers, 'not from booking');
-
+    
             // Display success message and redirect to events listing
             $this->helper->alertResponse(__('message.event_created'), 'success');
             return redirect('events');
@@ -102,8 +130,37 @@ class EventsController extends Controller
     public function edit(Events $event)
     {
         $hotels = $this->hotelService->getHotels();
+
+        $loggedUser = Auth::user();
+        $multipleCorporatesHotelData = NULL;
+
+        if(!empty($loggedUser->userType))
+        {
+            if($loggedUser->userType->slug === 'client-staff' || $loggedUser->userType->slug === 'client-admin')
+            {
+                $loggedUser->load('client');
+                $loggedUser->client->load(['hotel', 'multiCorporates.hotel']);
+
+                $loggedInUserHotelDetails = $loggedUser->client->hotel;
+                $hotel_id = $loggedUser->client->id;
+                $multiCorporates = $loggedUser->client->multiCorporates;
+
+                $multipleCorporatesHotelData = $multiCorporates->pluck('hotel');
+
+                if (!$multipleCorporatesHotelData->isEmpty() && !$multipleCorporatesHotelData->contains('id', $loggedInUserHotelDetails->id)) {
+                    $multipleCorporatesHotelData->push($loggedInUserHotelDetails);
+                }
+
+                if(!empty($multipleCorporatesHotelData) && count($multipleCorporatesHotelData) > 1)
+                {
+                    $events = NULL;
+                }else{
+                    $events = $this->eventService->getEventDataByHotel($hotel_id);
+                }
+            }
+        }
         
-        return view('admin.events.update-event', compact('event', 'hotels'));
+        return view('admin.events.update-event', compact('event', 'hotels', 'multipleCorporatesHotelData'));
     }
 
     /**

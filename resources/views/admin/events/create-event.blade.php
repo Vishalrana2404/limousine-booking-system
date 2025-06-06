@@ -69,6 +69,29 @@
                                                     @enderror
                                                 </div>
                                             </div>
+                                        @else
+                                            @if(!empty($multipleCorporatesHotelData) && count($multipleCorporatesHotelData) > 0)
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="hotelId">Corporate <span class="text-danger">*</span></label>
+                                                        <select name="hotel_id" id="hotelId" class="form-control form-select custom-select @error('hotel_id') is-invalid @enderror" autocomplete="off">
+                                                            <option value="">Select one</option>
+                                                            @foreach($multipleCorporatesHotelData as $hotel)
+                                                                @if (old('hotel_id') === $hotel->id)
+                                                                    <option value="{{  $hotel->id }}" selected>{{ $hotel->name }}</option>
+                                                                @else
+                                                                    <option value="{{ $hotel->id }}">{{ $hotel->name }}</option>
+                                                                @endif
+                                                            @endforeach
+                                                        </select>
+                                                        @error('hotel_id')
+                                                        <span class="invalid-feedback" role="alert">
+                                                            <strong>{{ $message }}</strong>
+                                                        </span>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            @endif
                                         @endif
                                         <div class="col-md-4">
                                             <div class="form-group">

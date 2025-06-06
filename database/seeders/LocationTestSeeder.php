@@ -30,7 +30,7 @@ class LocationTestSeeder extends Seeder
             ['id' => 4, 'name' => 'Changi Airport Terminal 4', 'is_instant_acceptable' => true],
             // ['id' => 5, 'name' => 'Changi Airport Jet Query', 'is_instant_acceptable' => false],
             // ['id' => 6, 'name' => 'Changi Airport VIP Complex', 'is_instant_acceptable' => false],
-            ['id' => 7, 'name' => 'Selater Airport', 'is_instant_acceptable' => true],
+            ['id' => 7, 'name' => 'Seletar Airport', 'is_instant_acceptable' => true],
             ['id' => 8, 'name' => 'Woodlands Checkpoint', 'is_instant_acceptable' => true],
             ['id' => 9, 'name' => 'Tanah Merah Ferry Terminal', 'is_instant_acceptable' => true],
             ['id' => 10, 'name' => 'Singapore Cruise Centre', 'is_instant_acceptable' => true],

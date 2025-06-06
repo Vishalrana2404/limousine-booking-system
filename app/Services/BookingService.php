@@ -570,6 +570,13 @@ class BookingService
             $bookingData['meet_and_greet'] = $requestData['meet_and_greet'];
     
             $bookingData['additional_stops'] = $additional_stops;
+
+            
+            if (isset($requestData['latest_comment']))
+            {
+                $bookingData['latest_comment'] = $requestData['latest_comment'];
+                $this->bookingRepository->addBookingComment($bookingData['latest_comment'], $booking->id, $loggedUserId);
+            }
     
             if ($file && $file->isValid()) {
                 $folderName = 'bookings';
@@ -853,6 +860,13 @@ class BookingService
                 }
                 if (isset($requestData['client_instructions']) && !empty($requestData['client_instructions']))
                     $bookingData['client_instructions'] = $requestData['client_instructions'];
+
+                    
+                if (isset($requestData['latest_comment']) && !empty($requestData['latest_comment']))
+                {
+                    $bookingData['latest_comment'] = $requestData['latest_comment'];
+                    $this->bookingRepository->addBookingComment($bookingData['latest_comment'], $booking->id, $loggedUserId);
+                }
             
                 $linkedClients = !empty($booking->linked_clients) ? explode(',', $booking->linked_clients) : [];
                 $this->bookingLogService->addLogMessages($bookingData, $booking, Auth::user(), $linkedClients);

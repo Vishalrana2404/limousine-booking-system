@@ -110,7 +110,11 @@ class EventRepository implements EventInterface
     }
     private function filterEventResultForClient(User $loggedUser, string $search = '', int $hotel_id)
     {
-        $query = $this->model->with('hotel');
+        
+        $query = $this->model->with(['hotel.multiClients']);
+
+        $hotel_ids = $loggedUser->client->multiCorporates->pluck('hotel')->pluck('id');
+
         if (!empty($search)) {
             $search = strtolower($search);
             $query->where(function ($query) use ($search) {
@@ -118,6 +122,11 @@ class EventRepository implements EventInterface
                       ->orWhereRaw('LOWER(`status`) like ?', ['%' . $search . '%'])
                       ->orWhereHas('hotel', function ($query) use ($search) {
                         $query->whereRaw('LOWER(`name`) like ?', ['%' . $search . '%']);
+                    })
+                    ->orWhereHas('hotel.multiClients', function ($query) use ($search) {
+                        $query->whereHas('hotel', function ($subQuery) use ($search) {
+                            $subQuery->whereRaw('LOWER(`name`) like ?', ["%{$search}%"]);
+                        });
                     });
             });
         }
@@ -125,6 +134,10 @@ class EventRepository implements EventInterface
         if (!empty($hotel_id)) {
             $query->where('hotel_id', $hotel_id);
         }
+
+        if (!empty($hotel_ids)) {
+            $query->orWhereIn('hotel_id', $hotel_ids);
+        }        
         return $query;
     }
 

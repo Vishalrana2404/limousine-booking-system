@@ -687,7 +687,7 @@
                                         $client = $hotelClient->client ?? null;
                                     @endphp
                                     @if ($client)
-                                        @if (old('client_id_for_event') == $client->id)
+                                        @if (old('client_id_for_event') == $client->hotel_id)
                                             <option value="{{ $client->id }}" selected>{{ $hotelClient->name }}</option>
                                         @else
                                             <option value="{{ $client->id }}">{{$hotelClient->name  }}</option>
@@ -713,10 +713,10 @@
                                             $client = $hotelClient->client ?? null;
                                         @endphp
                                         @if ($client)
-                                            @if (old('client_id') == $client->id)
-                                                <option value="{{ $client->id }}" selected>{{ $hotelClient->name }}</option>
+                                            @if (old('client_id_for_event') == $client->id)
+                                                <option value="{{ $client->hotel_id }}" selected>{{ $hotelClient->name }}</option>
                                             @else
-                                                <option value="{{ $client->id }}">{{$hotelClient->name  }}</option>
+                                                <option value="{{ $client->hotel_id }}">{{$hotelClient->name  }}</option>
                                             @endif
                                         @endif
                                     @endforeach

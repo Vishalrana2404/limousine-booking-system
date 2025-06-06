@@ -249,19 +249,18 @@ class BookingController extends Controller
         $hoursDifference = ($pickupDateTimeStamp - $currentTimeStamp) / 3600;
         
         $hotelIdsFromLinkedCorporates = NULL;
-        if (in_array($userTypeSlug, ['client-admin', 'client-staff']) && $loggedUserHotelId !== null && $bookedByHotelId !== $loggedUserHotelId) {
-            
+
+        if (in_array($userTypeSlug, ['client-admin', 'client-staff']) && $loggedUserHotelId !== null) {
             $client = $user->load('client');
             $hotel = $user->client->load('hotel');
             
             $multiCorporatesData = $user->client->load('multiCorporates');
-            $hotelIdsFromLinkedCorporates = $multiCorporatesData->multiCorporates->pluck('hotel_id');            
+            $hotelIdsFromLinkedCorporates = $multiCorporatesData->multiCorporates->pluck('hotel_id'); 
             
             if(!empty($hotelIdsFromLinkedCorporates))
             {
-                if($booking->createdBy->client->hotel_id == $loggedUserHotelId)
+                if($booking->createdBy->client->hotel_id == $loggedUserHotelId || $booking->client->hotel_id == $loggedUserHotelId)
                 {
-                    
                 }else{
                     if($hotel->hotel->is_head_office == 1 && ($booking->createdBy->client->hotel->linked_head_office == $loggedUserHotelId || $booking->client->hotel->id == $loggedUserHotelId || $booking->client->hotel->linked_head_office == $loggedUserHotelId))
                     {
@@ -297,52 +296,52 @@ class BookingController extends Controller
         $driverOffDays = $this->driverOffDayService->getSavedDates();
         $events = $this->eventService->getEventDataByHotel($booking->client_id);
         
-        if(in_array($userTypeSlug, ['client-admin', 'client-staff']) && $loggedUserClientId !== null)
-        {
-            $clients = $this->clientService->getClientsByHotel($loggedUserClientId);
-        }else{
-            $clientsFromBookingCorporate = $this->clientService->getClientsByHotel($booking->client_id);        
-            $clientsFromLinkedCorporates = $this->clientService->getClientsByLinkedHotel($booking->client_id)->map(function ($client) {
-                return [
-                    'id' => $client->client->id,
-                    'user_id' => $client->client->user_id,
-                    'hotel_id' => $client->client->hotel_id,
-                    'invoice' => $client->client->invoice,
-                    'status' => $client->client->status,
-                    'created_by_id' => $client->client->created_by_id,
-                    'updated_by_id' => $client->client->updated_by_id,
-                    'created_at' => $client->client->created_at,
-                    'updated_at' => $client->client->updated_at,
-                    'deleted_at' => $client->client->deleted_at,
-                    'entity' => $client->client->entity,
-                    'user' => [
-                        'id' => $client->client->user->id,
-                        'email' => $client->client->user->email,
-                        'email_verified_at' => $client->client->user->email_verified_at,
-                        'created_at' => $client->client->user->created_at,
-                        'updated_at' => $client->client->user->updated_at,
-                        'deleted_at' => $client->client->user->deleted_at,
-                        'first_name' => $client->client->user->first_name,
-                        'last_name' => $client->client->user->last_name,
-                        'user_type_id' => $client->client->user->user_type_id,
-                        'department' => $client->client->user->department,
-                        'status' => $client->client->user->status,
-                        'phone' => $client->client->user->phone,
-                        'profile_image' => $client->client->user->profile_image,
-                        'gender' => $client->client->user->gender,
-                        'created_by_id' => $client->client->user->created_by_id,
-                        'updated_by_id' => $client->client->user->updated_by_id,
-                        'country_code' => $client->client->user->country_code
-                    ]
-                ];
-            });
-    
-            
-            $clientsFromBookingCorporate->load('user');
-            $clientsFromBookingCorporate = collect($clientsFromBookingCorporate);
-            $clientsFromLinkedCorporates = collect($clientsFromLinkedCorporates);
-            $clients = $clientsFromBookingCorporate->merge($clientsFromLinkedCorporates)->unique('user.id');
-        }
+        // if(in_array($userTypeSlug, ['client-admin', 'client-staff']) && $loggedUserClientId !== null)
+        // {
+        //     $clients = $this->clientService->getClientsByHotel($loggedUserClientId);
+        // }else{
+        // }
+        $clientsFromBookingCorporate = $this->clientService->getClientsByHotel($booking->client_id);        
+        $clientsFromLinkedCorporates = $this->clientService->getClientsByLinkedHotel($booking->client_id)->map(function ($client) {
+            return [
+                'id' => $client->client->id,
+                'user_id' => $client->client->user_id,
+                'hotel_id' => $client->client->hotel_id,
+                'invoice' => $client->client->invoice,
+                'status' => $client->client->status,
+                'created_by_id' => $client->client->created_by_id,
+                'updated_by_id' => $client->client->updated_by_id,
+                'created_at' => $client->client->created_at,
+                'updated_at' => $client->client->updated_at,
+                'deleted_at' => $client->client->deleted_at,
+                'entity' => $client->client->entity,
+                'user' => [
+                    'id' => $client->client->user->id,
+                    'email' => $client->client->user->email,
+                    'email_verified_at' => $client->client->user->email_verified_at,
+                    'created_at' => $client->client->user->created_at,
+                    'updated_at' => $client->client->user->updated_at,
+                    'deleted_at' => $client->client->user->deleted_at,
+                    'first_name' => $client->client->user->first_name,
+                    'last_name' => $client->client->user->last_name,
+                    'user_type_id' => $client->client->user->user_type_id,
+                    'department' => $client->client->user->department,
+                    'status' => $client->client->user->status,
+                    'phone' => $client->client->user->phone,
+                    'profile_image' => $client->client->user->profile_image,
+                    'gender' => $client->client->user->gender,
+                    'created_by_id' => $client->client->user->created_by_id,
+                    'updated_by_id' => $client->client->user->updated_by_id,
+                    'country_code' => $client->client->user->country_code
+                ]
+            ];
+        });
+
+        
+        $clientsFromBookingCorporate->load('user');
+        $clientsFromBookingCorporate = collect($clientsFromBookingCorporate);
+        $clientsFromLinkedCorporates = collect($clientsFromLinkedCorporates);
+        $clients = $clientsFromBookingCorporate->merge($clientsFromLinkedCorporates)->unique('user.id');
 
         $logs =  $this->bookingLogService->getBookingLogs(["searchByBookingId" => $booking->id, 'isNoDateRange' => true]);
 

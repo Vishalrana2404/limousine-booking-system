@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PeakPeriodController;
 use App\Http\Controllers\Admin\UserTypeController;
 use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\Admin\EmailTemplatesController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\VehicleClassController;
 use App\Http\Controllers\Admin\VehicleController;
@@ -114,6 +115,17 @@ Route::middleware(['Auth','SanitizeInput', AuthenticateSession::class])->group(f
         Route::post('deleteUsers', [UserController::class, 'delete'])->name('delete-users');
         Route::post('updateBulkUserStatus', [UserController::class, 'updateBulkStatus'])->name('update-bulk-user-status');
         Route::get('users/filterUsers', [UserController::class, 'filterUsers'])->name('filter-users');
+
+        //Email Templates Routes
+        Route::get('email-templates', [EmailTemplatesController::class, 'index'])->name('email-templates');
+        Route::get('email-templates/create',  [EmailTemplatesController::class, 'create'])->name('create-email-template');
+        Route::post('email-templates/store', [EmailTemplatesController::class, 'store'])->name('save-email-template');
+        Route::get('email-templates/{emailTemplate}/edit', [EmailTemplatesController::class, 'edit'])->name('edit-email-template');
+        Route::post('email-templates/{emailTemplate}', [EmailTemplatesController::class, 'update'])->name('update-email-template');
+        Route::post('deleteEmailTemplates', [EmailTemplatesController::class, 'delete'])->name('delete-email-template');
+        Route::post('updateBulkEmailTemplateStatus', [EmailTemplatesController::class, 'updateBulkStatus'])->name('update-bulk-email-template-status');
+        Route::get('email-templates/filterEmailTemplates', [EmailTemplatesController::class, 'filterEmailTemplates'])->name('filter-email-templates');
+        Route::post('email-templates/check-unique-template-name', [EmailTemplatesController::class, 'checkUniqueTemplateName'])->name('check-unique-template-name');
 
         // Vehicle Class Routes
         Route::get('vehicle-class', [VehicleClassController::class, 'index'])->name('vehicle-class');
@@ -377,6 +389,17 @@ Route::middleware(['Auth','SanitizeInput', AuthenticateSession::class])->group(f
         Route::post('deleteUsers', [UserController::class, 'delete'])->name('delete-users');
         Route::post('updateBulkUserStatus', [UserController::class, 'updateBulkStatus'])->name('update-bulk-user-status');
         Route::get('users/filterUsers', [UserController::class, 'filterUsers'])->name('filter-users');
+
+        //Email Templates Routes
+        Route::get('email-templates', [EmailTemplatesController::class, 'index'])->name('email-templates');
+        Route::get('email-templates/create',  [EmailTemplatesController::class, 'create'])->name('create-email-template');
+        Route::post('email-templates/store', [EmailTemplatesController::class, 'store'])->name('save-email-template');
+        Route::get('email-templates/{emailTemplate}/edit', [EmailTemplatesController::class, 'edit'])->name('edit-email-template');
+        Route::post('email-templates/{email-template}', [EmailTemplatesController::class, 'update'])->name('update-email-template');
+        Route::post('deleteEmailTemplates', [EmailTemplatesController::class, 'delete'])->name('delete-email-template');
+        Route::post('updateBulkEmailTemplateStatus', [EmailTemplatesController::class, 'updateBulkStatus'])->name('update-bulk-email-template-status');
+        Route::get('email-templates/filterEmailTemplates', [EmailTemplatesController::class, 'filterEmailTemplates'])->name('filter-email-templates');
+        Route::post('email-templates/check-unique-template-name', [EmailTemplatesController::class, 'checkUniqueTemplateName'])->name('check-unique-template-name');
 
 
         Route::get('bookings', [BookingController::class, 'index'])->name('bookings');

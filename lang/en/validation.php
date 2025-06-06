@@ -369,6 +369,24 @@ return [
             'min' => 'Name must be at least 2 characters long.',
             'max' => 'Name must not exceed 50 characters.',
         ],
+        'email_template_name' => [
+            'required' => 'Please enter Email Template.',
+            'min' => 'Email Template Name must be at least 2 characters long.',
+            'max' => 'Email Template Name must not exceed 50 characters.',
+            'already_exist' => 'This Email Template Name already exists.',
+        ],
+        'email_template_header' => [
+            'required' => 'Please enter Email Template Header.',
+        ],
+        'email_template_footer' => [
+            'required' => 'Please enter Email Template Footer.',
+        ],
+        'email_template_message' => [
+            'required' => 'Please enter Email Template Message.',
+        ],
+        'email_template_subject' => [
+            'required' => 'Please enter Email Template Subject.',
+        ],
         'only_string' => "Please enter only letters and spaces.",
         'laterThan' => "Date cannot be earlier than or equal to pick up date time.",
         'flight_detail' => [

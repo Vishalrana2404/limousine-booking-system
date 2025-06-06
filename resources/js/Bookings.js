@@ -64,7 +64,7 @@ export default class Bookings extends BaseClass {
         );
         $(document).on(
             "click",
-            "#sortComment, #sortDriverRemark,#sortPickUpDate,#sortInstructions, #sortStatus, #sortVehicleType, #sortDriver, #sortContact, #sortClient, #sortDropOf, #sortPikUp, #sortType, #sortTime, #sortBooking",
+            "#sortComment, #sortDriverRemark,#sortPickUpDate,#sortInstructions,#sortComments, #sortStatus, #sortVehicleType, #sortDriver, #sortContact, #sortClient, #sortDropOf, #sortPikUp, #sortType, #sortTime, #sortBooking",
             this.handleSorting
         );
         $(document).on("keyup", "#search", this.handleFilter);
@@ -209,7 +209,7 @@ export default class Bookings extends BaseClass {
         try {
             const hotelId = $(target).val();
             const url = this.props.routes.getEventsByHotel;
-            
+            console.log(hotelId)
             axios
                 .get(url, {
                     params: {
@@ -258,7 +258,7 @@ export default class Bookings extends BaseClass {
                     
                     if (statusCode === 200) {
 
-                        $('#clientId').val(hotelId).change();
+                        $('#clientId').val('');
 
                         $('#eventId').empty().append('<option value="">Select An Event</option>');
 
@@ -546,6 +546,12 @@ export default class Bookings extends BaseClass {
             case "client_instructions":
                 html += `<form id="inlineEditTableForm">`;
                 html += this.createInput(old, name, "Client Instructions");
+                html += `</form>`;
+                $(target).html(html);
+                break;
+            case "latest_comment":
+                html += `<form id="inlineEditTableForm">`;
+                html += this.createInput(old, name, "Comment");
                 html += `</form>`;
                 $(target).html(html);
                 break;
@@ -1600,7 +1606,8 @@ export default class Bookings extends BaseClass {
                         const pickupLocationId = $row.find(".multiple_pick_up_location_id").val();
 
                         return (
-                            serviceTypeId === "3" ||
+                            (serviceTypeId === "3" &&
+                                ["1", "2", "3", "4", "5"].includes(pickupLocationId)) ||
                             (serviceTypeId === "1" &&
                                 ["1", "2", "3", "4", "5"].includes(pickupLocationId))
                         );
@@ -1752,7 +1759,7 @@ export default class Bookings extends BaseClass {
                         const serviceTypeId = $row.find(".multiple_service_type_id").val();
                         const pickupLocationId = $row.find(".multiple_pick_up_location_id").val();
 
-                        return serviceTypeId === "1" && pickupLocationId === "12";
+                        return (serviceTypeId === "1" || serviceTypeId === "3") && pickupLocationId === "12";
                     },
                 },
                 messages: {
@@ -2196,12 +2203,32 @@ export default class Bookings extends BaseClass {
             }
 
         } else if ($(target).attr("id") === "dropoffLocationId") {
-            if (parseInt($(target).val()) === 12) {
-                $("#dropOffLocationTextBox").show();
-                
-            } else {
-                $("#dropOffLocationTextBox").hide();
-                
+            switch (parseInt($(target).val())) {
+                case 8:
+                    $("#flightDetailSpan").hide();
+                    $("#clientInstructionsSpan").hide();
+                    break;
+                case 9:
+                    $("#flightDetailSpan").hide();
+                    $("#clientInstructionsSpan").hide();
+                    break;
+                case 10:
+                    $("#flightDetailSpan").hide();
+                    $("#clientInstructionsSpan").hide();
+                    break;
+                case 11:
+                    $("#flightDetailSpan").hide();
+                    $("#clientInstructionsSpan").hide();
+                    break;
+                case 12:
+                    $("#dropOffLocationTextBox").show();
+                    $("#clientInstructionsSpan").show();
+                    $("#flightDetailSpan").hide();
+                    break;
+                default:
+                    $("#dropOffLocationTextBox").hide();
+                    $("#clientInstructionsSpan").hide();
+                    $("#flightDetailSpan").show();
             }
         }
         $("#createBookingForm").validate().resetForm();
@@ -2376,7 +2403,7 @@ export default class Bookings extends BaseClass {
                             const pickupLocationId = $("#pickupLocationId").val();
 
                             return (
-                                serviceTypeId === "3" ||
+                                (serviceTypeId === "3"  && ["1", "2", "3", "4", "5"].includes(pickupLocationId)) ||
                                 (serviceTypeId === "1" && ["1", "2", "3", "4", "5"].includes(pickupLocationId))
                             );
                         }
@@ -2470,8 +2497,10 @@ export default class Bookings extends BaseClass {
                     required: {
                         depends: function (element) {
                             return (
-                                $("#serviceTypeId").val() === "1" &&
-                                $("#pickupLocationId").val() === "12"
+                                ($("#serviceTypeId").val() === "3" &&
+                                $("#pickupLocationId").val() === "12") ||
+                                ($("#serviceTypeId").val() === "1" &&
+                                $("#pickupLocationId").val() === "12")
                             );
                         }
                     },
@@ -2650,6 +2679,10 @@ export default class Bookings extends BaseClass {
                         if (statusCode === 200) {
                             this.getEventsAfterCreateEvent({hotelId : hotel_id})
                             this.closeModal("addEventModal");
+                            saveButton.html('Create Event');
+                            saveButton.prop("disabled", false);
+                            $('#clientIdForEvent').val('');
+                            $('#event_name').val('');
                         }
                         throw flash;
                     })

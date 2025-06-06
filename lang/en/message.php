@@ -18,6 +18,11 @@ return [
     "user_deleted_successfully" => "User Deleted Successfully.",
     "user_status_updated_successfully" => "Status Updated Successfully.",
     "user_filtered_successfully" => "User Filtered Successfully.",
+    "email_template_created_successfully" => "Email Template Created Successfully.",
+    "email_template_updated_successfully" => "Email Template Updated Successfully.",
+    "email_template_deleted_successfully" => "Email Template Deleted Successfully.",
+    "email_template_status_updated_successfully" => "Status Updated Successfully.",
+    "email_template_filtered_successfully" => "Email Templates Filtered Successfully.",
     "profile_updated_successfully" => "Profile Updated Successfully.",
     "profile_image_updated_successfully" => "Profile Image Updated Successfully.",
 

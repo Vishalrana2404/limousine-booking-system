@@ -14,8 +14,8 @@
                         $userTypeSlug = $user->userType->slug ?? null;
                     @endphp
                     @if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']))
-                    <th>Corporate <i class="fa fa-sort ml-1 theme-color" id="sortCorporate" aria-hidden="true"></i></th>
                     @endif
+                    <th>Corporate <i class="fa fa-sort ml-1 theme-color" id="sortCorporate" aria-hidden="true"></i></th>
                     <th>Name <i class="fa fa-sort ml-1 theme-color" id="sortName" aria-hidden="true"></i></th>
                     <th>Status<i class="fa fa-sort ml-1 theme-color" id="sortStatus" aria-hidden="true"></i></th>
                     <th style="width: 40px">Action</th>
@@ -36,9 +36,9 @@
                             </div>
                         </td>
                         @if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']))
+                        @endif
                         <td class="text-truncate cell-width-200" title="{{ $event->hotel->name ?? 'N/A' }}">
                             {{ $event->hotel->name ?? 'N/A' }}</td>
-                        @endif
                         <td class="text-truncate cell-width-200" title="{{ $event->name ?? 'N/A' }}">
                             {{ $event->name ?? 'N/A' }}</td>
                         <td>

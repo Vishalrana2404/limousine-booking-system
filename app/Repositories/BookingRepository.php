@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Booking;
 use App\Models\User;
 use App\Models\UserType;
+use App\Models\BookingsCommentLog;
 use App\Repositories\Interfaces\BookingInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -24,7 +25,8 @@ class BookingRepository implements BookingInterface
      */
     public function __construct(
         protected Booking $model,
-        protected User $userModel
+        protected User $userModel,
+        protected BookingsCommentLog $bookingsCommentLogModel,
     ) {
     }
 
@@ -248,6 +250,7 @@ class BookingRepository implements BookingInterface
             $pocCheck = DB::table('hotels_poc')
                     ->where('hotel_id', $loggedUserHotel)
                     ->where('client_id', $loggedClientId)
+                    ->where('deleted_at', null)
                     ->first();
 
             if (!empty($pocCheck)) {
@@ -509,6 +512,9 @@ class BookingRepository implements BookingInterface
                     break;
                 case 'sortBookingDate':
                     $value = $innerQuery->created_at ?? 'zzzz';
+                    break;
+                case 'sortComments':
+                    $value = strtolower($innerQuery->latest_comment ?? 'zzzz');
                     break;
                 default:
                     $value = strtolower($innerQuery->id ?? 'zzzz');
@@ -993,5 +999,10 @@ class BookingRepository implements BookingInterface
         }
 
         return $query;
+    }
+
+    public function addBookingComment(string $comment, int $bookingId, int $loggedUserId)
+    {
+        return $this->bookingsCommentLogModel->create(['booking_id' => $bookingId, 'comment' => $comment, 'created_by_id' => $loggedUserId]);
     }
 }

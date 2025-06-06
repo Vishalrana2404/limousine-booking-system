@@ -40,6 +40,8 @@ export default class EditBookings extends BaseClass {
         );
         $(document).on("change", "#pickup_time_to_be_advised", this.handlePickupTime);
         $(document).on("blur", "#pick-up-time", this.handleToBeAdvised);
+        $(document).on("change", "#pick-up-time", this.handleToBeAdvised);
+        $(document).on("click", "#pick-up-time-picker", this.handleToBeAdvised);
         $(document).on("change", "#driver-id", this.handleDriver);
         $(document).on("click", "#addStop", this.handleAddStop);
         $(document).on("click", "#addClient", this.handleAddClient);
@@ -275,74 +277,80 @@ export default class EditBookings extends BaseClass {
                             const message = response.data.message;
                             const flash = new ErrorHandler(statusCode, message);
                             
-                            if (statusCode === 200) {
-                                if(serviceTypeId == 1)
-                                {
-                                    $('#transfer-charge').val(0.00);
-                                    $('#departure-charge').val(0.00);
-                                    $('#disposal-charge').val(0.00);
-                                    if(response.data.data.amount)
+                            if(response.data && response.data.data && response.data.data.amount)
+                            {
+                                if (statusCode === 200) {
+                                    if(serviceTypeId == 1)
                                     {
-                                        $('#arrival-charge').val(response.data.data.amount.toString());
-                                        $('#arrival-charge').attr('value', response.data.data.amount.toString());
-                                    }else{
-                                        $('#arrival-charge').val('0.00');
-                                        $('#arrival-charge').attr('0.00');
+                                        $('#transfer-charge').val(0.00);
+                                        $('#departure-charge').val(0.00);
+                                        $('#disposal-charge').val(0.00);
+                                        if(response.data.data.amount)
+                                        {
+                                            $('#arrival-charge').val(response.data.data.amount.toString());
+                                            $('#arrival-charge').attr('value', response.data.data.amount.toString());
+                                        }else{
+                                            $('#arrival-charge').val('0.00');
+                                            $('#arrival-charge').attr('0.00');
+                                        }
                                     }
-                                }
-                                if(serviceTypeId == 2)
-                                {
-                                    $('#arrival-charge').val(0.00);
-                                    $('#departure-charge').val(0.00);
-                                    $('#disposal-charge').val(0.00);
-                                    if(response.data.data.amount)
+                                    if(serviceTypeId == 2)
                                     {
-                                        $('#transfer-charge').val(response.data.data.amount.toString());
-                                        $('#transfer-charge').attr('value', response.data.data.amount.toString());
-                                    }else{
-                                        $('#transfer-charge').val('0.00');
-                                        $('#transfer-charge').attr('0.00');
+                                        $('#arrival-charge').val(0.00);
+                                        $('#departure-charge').val(0.00);
+                                        $('#disposal-charge').val(0.00);
+                                        if(response.data.data.amount)
+                                        {
+                                            $('#transfer-charge').val(response.data.data.amount.toString());
+                                            $('#transfer-charge').attr('value', response.data.data.amount.toString());
+                                        }else{
+                                            $('#transfer-charge').val('0.00');
+                                            $('#transfer-charge').attr('0.00');
+                                        }
                                     }
-                                }
-                                if(serviceTypeId == 3)
-                                {
-                                    $('#arrival-charge').val(0.00);
-                                    $('#transfer-charge').val(0.00);
-                                    $('#disposal-charge').val(0.00);
-                                    if(response.data.data.amount)
+                                    if(serviceTypeId == 3)
                                     {
-                                        $('#departure-charge').val(response.data.data.amount.toString());
-                                        $('#departure-charge').attr('value', response.data.data.amount.toString());                                         
-                                    }else{
-                                        $('#departure-charge').val('0.00');
-                                        $('#departure-charge').attr('0.00');                                         
+                                        $('#arrival-charge').val(0.00);
+                                        $('#transfer-charge').val(0.00);
+                                        $('#disposal-charge').val(0.00);
+                                        if(response.data.data.amount)
+                                        {
+                                            $('#departure-charge').val(response.data.data.amount.toString());
+                                            $('#departure-charge').attr('value', response.data.data.amount.toString());                                         
+                                        }else{
+                                            $('#departure-charge').val('0.00');
+                                            $('#departure-charge').attr('0.00');                                         
+                                        }
                                     }
-                                }
-                                if(serviceTypeId == 4)
-                                {
-                                    $('#arrival-charge').val(0.00);
-                                    $('#transfer-charge').val(0.00);
-                                    $('#departure-charge').val(0.00);
-                                    if(response.data.data.amount)
+                                    if(serviceTypeId == 4)
                                     {
-                                        $('#disposal-charge').val(($('#no-of-hours').val() * response.data.data.amount).toString());
-                                        $('#disposal-charge').attr('value', ($('#no-of-hours').val() * response.data.data.amount).toString());                                         
-                                    }else{
-                                        $('#disposal-charge').val('0.00');
-                                        $('#disposal-charge').attr('0.00');                                        
+                                        $('#arrival-charge').val(0.00);
+                                        $('#transfer-charge').val(0.00);
+                                        $('#departure-charge').val(0.00);
+                                        if(response.data.data.amount)
+                                        {
+                                            $('#disposal-charge').val(($('#no-of-hours').val() * response.data.data.amount).toString());
+                                            $('#disposal-charge').attr('value', ($('#no-of-hours').val() * response.data.data.amount).toString());                                         
+                                        }else{
+                                            $('#disposal-charge').val('0.00');
+                                            $('#disposal-charge').attr('0.00');                                        
+                                        }
                                     }
+                                    this.calculatedBilling();
+                                } else {
+                                    throw flash;
                                 }
-                                this.calculatedBilling();
-                            } else {
-                                throw flash;
+                            }else{
+                                toastr.error("No Fare Found for this Corporate", "Error");
                             }
                         })
                         .catch((error) => {
-                                console.log(error);
-                            this.handleException(error);
+                            toastr.error("No Fare Found for this Corporate", "Error");
+                            // this.handleException(error);
                         });
                 } catch (error) {
-                    this.handleException(error);
+                    toastr.error("Something went wrong. Please try again later.", "Error");
+                    // this.handleException(error);
                 }
             }else{
                 $('#arrival-charge').val(0.00);
@@ -991,13 +999,13 @@ export default class EditBookings extends BaseClass {
                     break;
             }
         } else if ($(target).attr("id") === "pick-up-location-id") {
-            if (parseInt($(target).val()) === 8) {
+            if (parseInt($(target).val()) === 12) {
                 $("#pickUpLocationTextBox").show();
             } else {
                 $("#pickUpLocationTextBox").hide();
             }
         } else if ($(target).attr("id") === "drop-off-location-id") {
-            if (parseInt($(target).val()) === 8) {
+            if (parseInt($(target).val()) === 12) {
                 $("#dropOffLocationtextBox").show();
             } else {
                 $("#dropOffLocationtextBox").hide();
@@ -1132,7 +1140,7 @@ export default class EditBookings extends BaseClass {
                             const pickupLocationId = $("#pick-up-location-id").val();
 
                             return (
-                                serviceTypeId === "3" ||
+                                (serviceTypeId === "3" && ["1", "2", "3", "4", "5"].includes(pickupLocationId)) ||
                                 (serviceTypeId === "1" && ["1", "2", "3", "4", "5"].includes(pickupLocationId))
                             );
                         }
@@ -1266,7 +1274,7 @@ export default class EditBookings extends BaseClass {
                     required: {
                         depends: function (element) {
                             return (
-                                $("#service-types").val() === "1" &&
+                                ($("#service-types").val() === "1" || $("#service-types").val() === "3") &&
                                 $("#pick-up-location-id").val() === "12"
                             );
                         }

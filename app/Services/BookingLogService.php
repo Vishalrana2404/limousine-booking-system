@@ -354,6 +354,12 @@ class BookingLogService
                                     }
                                 }
                                 break;
+                            case "latest_comment":
+                                if(!empty($newValue))
+                                {
+                                    $logMessages[] = "Added a comment : {$newValue}";
+                                }
+                                break;
                             default:
                                 break;
                         }

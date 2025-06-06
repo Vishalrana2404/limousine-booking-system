@@ -165,6 +165,15 @@
                 @endif
                 @if ($loggedUsertypeSlug === null || in_array($loggedUsertypeSlug, ['admin', 'client-admin']))
                     <li class="nav-item">
+                        <a href="{{ route('email-templates') }}" class="nav-link {{ Request::is('email-templates*') ? 'active' : '' }}"
+                            title="Templates">
+                            <span class="icon icon-nav user-icon"></span>
+                            <p>Templates</p>
+                        </a>
+                    </li>
+                @endif
+                @if ($loggedUsertypeSlug === null || in_array($loggedUsertypeSlug, ['admin', 'client-admin']))
+                    <li class="nav-item">
                         <a href="{{ route('users') }}" class="nav-link {{ Request::is('users*') ? 'active' : '' }}"
                             title="Users">
                             <span class="icon icon-nav user-icon"></span>

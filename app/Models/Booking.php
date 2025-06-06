@@ -63,7 +63,8 @@ class Booking extends Model
         'child_1_age',
         'child_2_age',
         'meet_and_greet',
-        'additional_stops'
+        'additional_stops',
+        'latest_comment'
     ];
 
     public function serviceType()
@@ -125,6 +126,15 @@ class Booking extends Model
     public function linkedClients($linkedClients)
     {
         return User::whereIn('id', $linkedClients)->get();
+    }
+
+    public function bookings_comment_log()
+    {
+        return $this->hasMany(BookingsCommentLog::class)->orderBy('id', 'desc');
+    }
+    public function latestComment()
+    {
+        return $this->hasOne(BookingsCommentLog::class)->latest('id');
     }
 
 
