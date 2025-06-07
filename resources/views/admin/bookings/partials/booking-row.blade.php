@@ -235,16 +235,16 @@
       <td @if ($isEditable) data-name="pickup_location" data-old="{{ $pickUpLocation }}"
           data-service-id="{{ $booking->service_type_id }}" data-old-id="{{ $booking->pick_up_location_id }}" @endif
           class="text-truncate" style="max-width: 200px" title="{{ $pickUpLocation ?? 'N/A' }}">
-          1. {{ $pickUpLocation ?? 'N/A' }}
+          {{ $pickupAdditionalStops !== '' ? '1. ' : ''; }} {{ $pickUpLocation ?? 'N/A' }}
           <br>
           {!! $pickupAdditionalStops !!}
         </td>
       <td @if ($isEditable) data-name="drop_of_location" data-old="{{ $dropOffLocationEditVal }}"
           data-service-id="{{ $booking->service_type_id }}" data-old-id="{{ $booking->drop_off_location_id }}" @endif
           class="text-truncate" style="max-width: 200px" title="{{ $dropOffLocation ?? 'N/A' }}">
-          {{ $dropOffLocation ?? 'N/A' }}
-          <br>
           {!! $dropoffAdditionalStops !!}
+          <br>
+          {{ $dropoffAdditionalStops !== '' || $pickupAdditionalStops !== '' ? count($booking->additionalStops) + 2 . '. ' : ''; }}{{ $dropOffLocation ?? 'N/A' }}
       </td>
       <td @if ($isEditable) data-name="guest_name" data-old="{{ $guestNames }}" @endif
           class="text-truncate" style="max-width: 200px" title="{{ $resultGuestName ?? 'N/A' }}">{!! $resultGuestName ?? 'N/A' !!}</td>
