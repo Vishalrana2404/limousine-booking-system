@@ -35,6 +35,7 @@
                             <th>Departure Time</th>
                             <th>Pick Up</th>
                             <th>Drop Off</th>
+                            <th>Additional Stop(s) Required?</th>
                             <th>Additional Stop</th>
                             <th>Vehicle</th>
                             <!-- <th>Class</th> -->
@@ -531,14 +532,51 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="d-flex gap-2 additionalContainer" style="flex-direction: column;">
-                                        <div class="additionalStopInput col-sm-12" style="display:flex; align-items: flex-start; justify-content: center;">
-                                            <input type="text" id="multipleAdditionalStops_0_0"
-                                                name="multiple_additional_stops[0][0]"
-                                                class="form-control col-sm-9 multiple_additional_stops"
-                                                placeholder="Additional Stop(s)" autocomplete="off" autofocus>
-                                            <button type="button" class="col-sm-3 multiple-add-stop"><span class="fa fa-plus mt-3"></span></button>
-                                        </div>
+                                    <div class="form-group">
+                                        <select name="additional_stops_required[]"
+                                            id="additional_stops_required_{{ $index }}"
+                                            class="form-control form-select custom-select additional_stops_required @error('additional_stops_required.' . $index) is-invalid @enderror"
+                                            autocomplete="off">
+                                            <option value="yes">Yes</option>
+                                            <option value="no" selected>No</option>
+                                        </select>
+                                        @error('additional_stops_required.' . $index)
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2 additionalContainer" data-row="0" style="flex-direction: column; display: none !important;">
+                                        <!-- Input and Add Button Row -->
+                                         <div class="col-sm-12">
+                                             <div class="additionalStopInput" style="display:flex; align-items: flex-start; justify-content: center;">
+                                                 <input type="text" id="multipleAdditionalStops_0_0"
+                                                     name="multiple_additional_stops[0][0]"
+                                                     class="form-control col-sm-9 multiple_additional_stops"
+                                                     placeholder="Second Destination" autocomplete="off" autofocus>
+                                                 <button type="button" class="col-sm-3 multiple-add-stop">
+                                                     <span class="fa fa-plus mt-3"></span>
+                                                 </button>
+                                             </div>
+     
+                                             <!-- Pickup & Dropoff Checkboxes Row -->
+                                             <div class="d-flex justify-content-evenly mt-2">
+                                                 <div class="form-check">
+                                                     <input class="form-check-input pickup-dropoff-option pickup-additional" type="checkbox"
+                                                         name="multiple_pickup_dropoff[0][0]" value="pickup"
+                                                         id="pickup_0_0" checked>
+                                                     <label class="form-check-label" for="pickup_0_0">Pickup</label>
+                                                 </div>
+                                                 <div class="form-check">
+                                                     <input class="form-check-input pickup-dropoff-option dropoff-additional" type="checkbox"
+                                                         name="multiple_pickup_dropoff[0][0]" value="dropoff"
+                                                         id="dropoff_0_0">
+                                                     <label class="form-check-label" for="dropoff_0_0">Dropoff</label>
+                                                 </div>
+                                             </div>
+                                         </div>
                                     </div>
                                 </td>
                                 <td>

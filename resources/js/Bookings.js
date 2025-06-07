@@ -24,7 +24,33 @@ export default class Bookings extends BaseClass {
         $(document).on("change", "#vehicleType", this.handleMeetAndGreet);
         $(document).on("change", ".multiple_vehicle_type_id", this.handleMultipleMeetAndGreet);
         $(document).on("click", "#addStop", this.handleAddStop);
+        $(document).on("change", ".additional-stops-required", function() {
+            if(this.value === 'yes')
+            {
+                $('.additionalContainers').show();
+            }else{
+                $('.additionalContainers').hide();
+            }
+        });
+        $(document).on("change", ".pickup-dropoff-option", function() {
+            const $this = $(this);
+            const container = $this.parent().parent().parent();
+            // Uncheck other checkbox in the same group
+            container.find('.pickup-dropoff-option').not($this).prop('checked', false);
+        });
+
         $(document).on("click", ".multiple-add-stop", this.handleMultipleAddStop);
+        $(document).on("change", ".additional_stops_required", function() {
+            let rowIndex = this.id.split("_")[3]; // e.g., from 'pickup_0_0' or 'dropoff_0_0'
+
+            let container = document.querySelector(`.additionalContainer[data-row="${rowIndex}"]`);
+
+            if (this.value === 'yes') {
+                if (container) container.style.display = 'flex';
+            } else {
+                if (container) container.style.display = 'none';
+            }
+        });
         $(document).on("click", ".remove-guest", this.handleRemoveGuest);
         $(document).on("click", ".remove-stop", this.handleRemoveStop);
         $(document).on("click", ".multiple-remove-stop", this.handleMultipleRemoveStop);
@@ -52,8 +78,11 @@ export default class Bookings extends BaseClass {
         $(document).on(
             "change",
             "#serviceTypeId, #pickupLocationId,#dropoffLocationId",
-            console.log('serviceId'),
             this.handlePickupLocationField,
+        );
+        $(document).on(
+            "change",
+            "#serviceTypeId, #pickupLocationId,#dropoffLocationId",
             this.initializeAdditionalStopLimits
         );
         $(document).on("click", "#addNewRow", this.handleNewRow);
@@ -64,7 +93,7 @@ export default class Bookings extends BaseClass {
         );
         $(document).on(
             "click",
-            "#sortComment, #sortDriverRemark,#sortPickUpDate,#sortInstructions,#sortComments, #sortStatus, #sortVehicleType, #sortDriver, #sortContact, #sortClient, #sortDropOf, #sortPikUp, #sortType, #sortTime, #sortBooking",
+            "#sortComment, #sortDriverRemark,#sortPickUpDate,#sortInstructions,#sortAdminComments, #sortStatus, #sortVehicleType, #sortDriver, #sortContact, #sortClient, #sortDropOf, #sortPikUp, #sortType, #sortTime, #sortBooking",
             this.handleSorting
         );
         $(document).on("keyup", "#search", this.handleFilter);
@@ -209,7 +238,6 @@ export default class Bookings extends BaseClass {
         try {
             const hotelId = $(target).val();
             const url = this.props.routes.getEventsByHotel;
-            console.log(hotelId)
             axios
                 .get(url, {
                     params: {
@@ -282,7 +310,6 @@ export default class Bookings extends BaseClass {
     handleMultipleEventsOfCorporate = ({ target }) => {
         try {
             const event_box_id = $(target).attr('id').split("_")[1];
-            // console.log(event_box_id)
             const hotelId = $(target).val();
             const url = this.props.routes.getEventsByHotel;
             
@@ -480,7 +507,6 @@ export default class Bookings extends BaseClass {
             case "additional_stops":
                 html = this.createAdditionalStopField(old, oldId, serviceId);
                 $(target).html(html);
-                // console.log(html)
                 const idValAS = $(html).find("input").attr("id");
                 if (idValAS === "additional_stops") {
                     this.initializeGoogleMapAutoComplete(idValAS);
@@ -549,7 +575,7 @@ export default class Bookings extends BaseClass {
                 html += `</form>`;
                 $(target).html(html);
                 break;
-            case "latest_comment":
+            case "latest_admin_comment":
                 html += `<form id="inlineEditTableForm">`;
                 html += this.createInput(old, name, "Comment");
                 html += `</form>`;
@@ -1751,22 +1777,22 @@ export default class Bookings extends BaseClass {
             });
         });
         
-        $(".multiple_client_instructions").each((i, e) => {
-            $(e).rules("add", {
-                required: {
-                    depends: function () {
-                        const $row = $(e).closest("tr");
-                        const serviceTypeId = $row.find(".multiple_service_type_id").val();
-                        const pickupLocationId = $row.find(".multiple_pick_up_location_id").val();
+        // $(".multiple_client_instructions").each((i, e) => {
+        //     $(e).rules("add", {
+        //         required: {
+        //             depends: function () {
+        //                 const $row = $(e).closest("tr");
+        //                 const serviceTypeId = $row.find(".multiple_service_type_id").val();
+        //                 const pickupLocationId = $row.find(".multiple_pick_up_location_id").val();
 
-                        return (serviceTypeId === "1" || serviceTypeId === "3") && pickupLocationId === "12";
-                    },
-                },
-                messages: {
-                    required: this.languageMessage.client_instructions.required,
-                },
-            });
-        });
+        //                 return (serviceTypeId === "1" || serviceTypeId === "3") && pickupLocationId === "12";
+        //             },
+        //         },
+        //         messages: {
+        //             required: this.languageMessage.client_instructions.required,
+        //         },
+        //     });
+        // });
     };
 
     handleNewRow = () => {
@@ -1984,10 +2010,45 @@ export default class Bookings extends BaseClass {
                         </div>
                     </td>
                     <td>
-                        <div class="d-flex gap-2 additionalContainer" style="flex-direction: column;">
-                            <div class="additionalStopInput col-sm-12" style="display:flex; align-items: flex-start; justify-content: center;">
-                                <input type="text" id="multipleAdditionalStops_${index}_0" value="" name="multiple_additional_stops[${index}][0]" class="form-control col-sm-9 multiple_additional_stops" placeholder="Additional Stops" autocomplete="off">
-                                <button type="button" class="col-sm-3 multiple-add-stop"><span class="fa fa-plus mt-3"></span></button>
+                        <div class="form-group">
+                            <select name="additional_stops_required[]"
+                                id="additional_stops_required_${index}"
+                                class="form-control form-select custom-select additional_stops_required"
+                                autocomplete="off">
+                                <option value="yes">Yes</option>
+                                <option value="no" selected>No</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2 additionalContainer" data-row="${index}" style="flex-direction: column; display: none !important;">
+                            <!-- Input and Add Button Row -->
+                            <div class="col-sm-12">
+                                <div class="additionalStopInput" style="display:flex; align-items: flex-start; justify-content: center;">
+                                    <input type="text" id="multipleAdditionalStops_${index}_0"
+                                        name="multiple_additional_stops[${index}][0]"
+                                        class="form-control col-sm-9 multiple_additional_stops"
+                                        placeholder="Second Destination" autocomplete="off" autofocus>
+                                    <button type="button" class="col-sm-3 multiple-add-stop">
+                                        <span class="fa fa-plus mt-3"></span>
+                                    </button>
+                                </div>
+
+                                <!-- Pickup & Dropoff Checkboxes Row -->
+                                <div class="d-flex justify-content-evenly mt-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input pickup-dropoff-option pickup-additional" type="checkbox"
+                                            name="multiple_pickup_dropoff[${index}][0]" value="pickup"
+                                            id="pickup_${index}_0" checked>
+                                        <label class="form-check-label" for="pickup_${index}_0">Pickup</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input pickup-dropoff-option dropoff-additional" type="checkbox"
+                                            name="multiple_pickup_dropoff[${index}][0]" value="dropoff"
+                                            id="dropoff_${index}_0">
+                                        <label class="form-check-label" for="dropoff_${index}_0">Dropoff</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </td>
@@ -2493,18 +2554,18 @@ export default class Bookings extends BaseClass {
                     minlength: 3,
                     maxlength: 100,
                 },
-                client_instructions: {
-                    required: {
-                        depends: function (element) {
-                            return (
-                                ($("#serviceTypeId").val() === "3" &&
-                                $("#pickupLocationId").val() === "12") ||
-                                ($("#serviceTypeId").val() === "1" &&
-                                $("#pickupLocationId").val() === "12")
-                            );
-                        }
-                    },
-                }
+                // client_instructions: {
+                //     required: {
+                //         depends: function (element) {
+                //             return (
+                //                 ($("#serviceTypeId").val() === "3" &&
+                //                 $("#pickupLocationId").val() === "12") ||
+                //                 ($("#serviceTypeId").val() === "1" &&
+                //                 $("#pickupLocationId").val() === "12")
+                //             );
+                //         }
+                //     },
+                // }
             },
             messages: {
                 departure_time: {
@@ -2584,9 +2645,9 @@ export default class Bookings extends BaseClass {
                     minlength: this.languageMessage.guest_name.min,
                     maxlength: this.languageMessage.guest_name.max,
                 },
-                client_instructions: {
-                    required: this.languageMessage.client_instructions.required,
-                }
+                // client_instructions: {
+                //     required: this.languageMessage.client_instructions.required,
+                // }
                 // Add custom error messages for other fields here
             },
             errorElement: "span",
@@ -2793,9 +2854,10 @@ export default class Bookings extends BaseClass {
     };
 
     handleRemoveStop = ({ target }) => {
-        $(target).closest(".col-md-1").prev(".col-md-3").remove();
-        $(target).closest(".col-md-1").remove();
+        $(target).closest(".form-group").closest(".additionalContainers").remove();
+        // $(target).closest(".col-md-1").remove();
         this.initializeAdditionalStopLimits();
+        this.initializeAdditionalIdsAndValidation();
     };
 
     handleAddStop = () => {
@@ -2806,58 +2868,123 @@ export default class Bookings extends BaseClass {
                 $('#addStop').hide();
             }else
             {                
-                const lastStopInputContainer = $(".additional-stops")
-                    .last()
-                    .closest(".col-md-3");
+                const lastStopInputContainer = $(".additional-stops").last().closest(".form-group").closest('.additionalContainers');
+
                 const lastId = parseInt(
                     lastStopInputContainer.find(".additional-stops").attr("id").split("_")[1]
                 );
                 const newId = lastId + 1;
-                const newStopInput = `
-                    <div class="col-md-3">
+
+                // Determine destination label based on newId
+                const destinationLabels = ["Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth",
+                "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth", "Seventeenth", "Eighteenth", "Nineteenth", "Twentieth",
+                "Twenty-first", "Twenty-second", "Twenty-third", "Twenty-fourth", "Twenty-fifth", "Twenty-sixth", "Twenty-seventh", "Twenty-eighth", "Twenty-ninth", "Thirtieth",
+                "Thirty-first", "Thirty-second", "Thirty-third", "Thirty-fourth", "Thirty-fifth", "Thirty-sixth", "Thirty-seventh", "Thirty-eighth", "Thirty-ninth", "Fortieth",
+                "Forty-first", "Forty-second", "Forty-third", "Forty-fourth", "Forty-fifth", "Forty-sixth", "Forty-seventh", "Forty-eighth", "Forty-ninth", "Fiftieth"];
+                const destinationLabel = destinationLabels[newId] || `Destination ${newId}`;
+
+                // Create new input group
+                const newStopInput = $(`
+                    <div class="col-md-4 additionalContainers">
                         <div class="form-group">
-                            <label for="additionalStops_${newId}">Additional Stop(s) <span class="text-danger">*</span></label>
-                            <input type="text" id="additionalStops_${newId}" name="additional_stops[]" class="form-control additional-stops" placeholder="Additional Stop(s)" autocomplete="off" autofocus>
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <label for="additionalStops_${newId}">${destinationLabel} Destination</label>
+                            </div>                    
+                            <input type="text" id="additionalStops_${newId}" name="additional_stops[]"
+                                value=""
+                                class="form-control additional-stops" placeholder="${destinationLabel} Destination"
+                                autocomplete="off">
+
+                                <div class="mt-2 d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[${newId}]" value="pickup" id="pickup_${newId}" checked>
+                                        <label class="form-check-label" for="pickup_${newId}">Pickup</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[${newId}]" value="dropoff" id="dropoff_${newId}">
+                                        <label class="form-check-label" for="dropoff_${newId}">Dropoff</label>
+                                    </div>
+                                </div>
                         </div>
-                    </div>`;
+                    </div>
+                `);
 
-                const newStopRemoveEl = `
-                    <div class="col-md-1 mt-4 iconContainer">
-                        <button type="button" class="remove-stop"><span class="fas fa-times mt-3 text-danger"></span></button>
-                    </div>`;
+                // Create remove button element
+                const newStopRemoveEl = $(`
+                    <button type="button" class="remove-stop" style="position: absolute; right: 10px;">
+                        <span class="fas fa-times text-danger"></span>
+                    </button>
+                `);
 
-                    
+                // Insert new input after last one
+                newStopInput.insertAfter(lastStopInputContainer);
+
+                // Insert remove button inside the newly added form-group, after the label
+                newStopInput.find("label").after(newStopRemoveEl);
+
+                // Initialize autocomplete
                 this.initializeGoogleMapAutoComplete(`additionalStops_${newId}`);
-                $(newStopInput).insertAfter(lastStopInputContainer);
-                $(newStopRemoveEl).insertAfter(lastStopInputContainer);
             }
         }else{            
-            const lastStopInputContainer = $(".additional-stops")
-                .last()
-                .closest(".col-md-3");
+            const lastStopInputContainer = $(".additional-stops").last().closest(".form-group").closest('.additionalContainers');
+
             const lastId = parseInt(
                 lastStopInputContainer.find(".additional-stops").attr("id").split("_")[1]
             );
             const newId = lastId + 1;
-            const newStopInput = `
-                <div class="col-md-3">
+
+            // Determine destination label based on newId
+            const destinationLabels = ["Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth",
+            "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth", "Seventeenth", "Eighteenth", "Nineteenth", "Twentieth",
+            "Twenty-first", "Twenty-second", "Twenty-third", "Twenty-fourth", "Twenty-fifth", "Twenty-sixth", "Twenty-seventh", "Twenty-eighth", "Twenty-ninth", "Thirtieth",
+            "Thirty-first", "Thirty-second", "Thirty-third", "Thirty-fourth", "Thirty-fifth", "Thirty-sixth", "Thirty-seventh", "Thirty-eighth", "Thirty-ninth", "Fortieth",
+            "Forty-first", "Forty-second", "Forty-third", "Forty-fourth", "Forty-fifth", "Forty-sixth", "Forty-seventh", "Forty-eighth", "Forty-ninth", "Fiftieth"];
+            const destinationLabel = destinationLabels[newId] || `Destination ${newId}`;
+
+            // Create new input group
+            const newStopInput = $(`
+                <div class="col-md-4 additionalContainers">
                     <div class="form-group">
-                        <label for="additionalStops_${newId}">Additional Stop(s) <span class="text-danger">*</span></label>
-                        <input type="text" id="additionalStops_${newId}" name="additional_stops[]" class="form-control additional-stops" placeholder="Additional Stop(s)" autocomplete="off" autofocus>
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <label for="additionalStops_${newId}">${destinationLabel} Destination</label>
+                        </div>                    
+                        <input type="text" id="additionalStops_${newId}" name="additional_stops[]"
+                            value=""
+                            class="form-control additional-stops" placeholder="${destinationLabel} Destination"
+                            autocomplete="off">
+
+                        <div class="mt-2 d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[${newId}]" value="pickup" id="pickup_${newId}" checked>
+                                <label class="form-check-label" for="pickup_${newId}">Pickup</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[${newId}]" value="dropoff" id="dropoff_${newId}">
+                                <label class="form-check-label" for="dropoff_${newId}">Dropoff</label>
+                            </div>
+                        </div>
                     </div>
-                </div>`;
+                </div>
+            `);
 
-            const newStopRemoveEl = `
-                <div class="col-md-1 mt-4 iconContainer">
-                    <button type="button" class="remove-stop"><span class="fas fa-times mt-3 text-danger"></span></button>
-                </div>`;
+            // Create remove button element
+            const newStopRemoveEl = $(`
+                <button type="button" class="remove-stop" style="position: absolute; right: 10px;">
+                    <span class="fas fa-times text-danger"></span>
+                </button>
+            `);
 
-                
+            // Insert new input after last one
+            newStopInput.insertAfter(lastStopInputContainer);
+
+            // Insert remove button inside the newly added form-group, after the label
+            newStopInput.find("label").after(newStopRemoveEl);
+
+            // Initialize autocomplete
             this.initializeGoogleMapAutoComplete(`additionalStops_${newId}`);
-            $(newStopInput).insertAfter(lastStopInputContainer);
-            $(newStopRemoveEl).insertAfter(lastStopInputContainer);
         }
         this.initializeAdditionalStopLimits();
+        this.initializeAdditionalIdsAndValidation();
     };
 
     initializeAdditionalStopLimits = () => {
@@ -2870,19 +2997,70 @@ export default class Bookings extends BaseClass {
             {
                 $('#addStop').show();
             }
-
             if($('.additional-stops').length > 2){
-                $('.additional-stops').slice(2).closest('.col-md-3').remove();
-                $('.remove-stop').slice(1).closest('.col-md-1').remove();
+                $('.additional-stops').slice(2).closest('.col-md-4').remove();
             }
         }else{
             $('#addStop').show();
         }
     };
 
+    initializeAdditionalIdsAndValidation = () => {
+        const destinationLabels = ["Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth",
+    "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth", "Seventeenth", "Eighteenth", "Nineteenth", "Twentieth",
+    "Twenty-first", "Twenty-second", "Twenty-third", "Twenty-fourth", "Twenty-fifth", "Twenty-sixth", "Twenty-seventh", "Twenty-eighth", "Twenty-ninth", "Thirtieth",
+    "Thirty-first", "Thirty-second", "Thirty-third", "Thirty-fourth", "Thirty-fifth", "Thirty-sixth", "Thirty-seventh", "Thirty-eighth", "Thirty-ninth", "Fortieth",
+    "Forty-first", "Forty-second", "Forty-third", "Forty-fourth", "Forty-fifth", "Forty-sixth", "Forty-seventh", "Forty-eighth", "Forty-ninth", "Fiftieth"];
+
+        $('.additional-stops').each(function(index) {
+            const newId = index;
+
+            const label = destinationLabels[newId] || `Destination ${newId + 1}`;
+            const input = $(this);
+            const formGroup = input.closest('.form-group');
+
+            // Update input ID and attributes
+            const newInputId = `additionalStops_${newId}`;
+            input.attr('id', newInputId);
+            input.attr('placeholder', `${label} Destination`);
+            input.attr('name', 'additional_stops[]');
+
+            // Update label
+            formGroup.find('label[for^="additionalStops_"]').attr('for', newInputId).text(`${label} Destination`);
+
+            // Move remove button (if needed)
+            formGroup.find('.remove-stop').detach().insertAfter(formGroup.find('label'));
+
+            // Preserve checked state before removing
+            const wasPickupChecked = formGroup.find('input[id^="pickup_"]').is(':checked');
+            const wasDropoffChecked = formGroup.find('input[id^="dropoff_"]').is(':checked');
+
+            // Remove old checkboxes and labels
+            formGroup.find('.mt-2.d-flex.gap-3').remove();
+
+            // Rebuild checkbox section with preserved states
+            const checkboxHTML = `
+                <div class="mt-2 d-flex gap-3">
+                    <div class="form-check">
+                        <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[${newId}]" value="pickup" id="pickup_${newId}" ${wasPickupChecked ? 'checked' : ''}>
+                        <label class="form-check-label pickup-dropoff-option" for="pickup_${newId}">Pickup</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[${newId}]" value="dropoff" id="dropoff_${newId}" ${wasDropoffChecked ? 'checked' : ''}>
+                        <label class="form-check-label" for="dropoff_${newId}">Dropoff</label>
+                    </div>
+                </div>
+            `;
+
+            // Append updated checkbox HTML
+            formGroup.append(checkboxHTML);
+        });
+    };
+
     handleMultipleAddStop = ({ target }) => {
         const lastStopInputContainer = $(target)
             .closest('.additionalStopInput')
+            .parent('.col-sm-12')
             .parent('.additionalContainer')
             .find('.col-sm-12')
             .last();
@@ -2893,19 +3071,49 @@ export default class Bookings extends BaseClass {
         const serviceType = $(`#serviceTypeId_${lastId}`).val();
         const additionalStopsCount = $(`.multiple_additional_stops[id^="multipleAdditionalStops_${lastId}_"]`).length;
     
+        
         const createNewStopInput = (lastId, newStopId) => {
+
+            const destinationLabels = ["Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth",
+                    "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth", "Seventeenth", "Eighteenth", "Nineteenth", "Twentieth",
+                    "Twenty-first", "Twenty-second", "Twenty-third", "Twenty-fourth", "Twenty-fifth", "Twenty-sixth", "Twenty-seventh", "Twenty-eighth", "Twenty-ninth", "Thirtieth",
+                    "Thirty-first", "Thirty-second", "Thirty-third", "Thirty-fourth", "Thirty-fifth", "Thirty-sixth", "Thirty-seventh", "Thirty-eighth", "Thirty-ninth", "Fortieth",
+                    "Forty-first", "Forty-second", "Forty-third", "Forty-fourth", "Forty-fifth", "Forty-sixth", "Forty-seventh", "Forty-eighth", "Forty-ninth", "Fiftieth"];
+            const destinationLabel = destinationLabels[newStopId] || `Destination ${newStopId}`;
+            
             const newStopInput = `
-                <div class="additionalStopInput col-sm-12" style="display:flex; align-items: flex-start; justify-content: center;">
-                    <input type="text" id="multipleAdditionalStops_${lastId}_${newStopId}"
-                        name="multiple_additional_stops[${lastId}][${newStopId}]"
-                        class="form-control col-sm-9 multiple_additional_stops"
-                        placeholder="Additional Stop(s)" autocomplete="off" autofocus>
-                    <button type="button" class="col-sm-3 multiple-remove-stop">
-                        <span class="fas fa-times mt-3 text-danger"></span>
-                    </button>
+                <div class="d-flex gap-2 additionalContainer" data-row="${lastId}" style="flex-direction: column;">
+                    <!-- Input and Add Button Row -->
+                    <div class="col-sm-12">
+                        <div class="additionalStopInput" style="display:flex; align-items: flex-start; justify-content: center;">
+                            <input type="text" id="multipleAdditionalStops_${lastId}_${newStopId}"
+                                name="multiple_additional_stops[${lastId}][${newStopId}]"
+                                class="form-control col-sm-9 multiple_additional_stops"
+                                placeholder="${destinationLabel} Destination" autocomplete="off" autofocus>
+                            <button type="button" class="col-sm-3 multiple-remove-stop">
+                                <span class="fas fa-times mt-3 text-danger"></span>
+                            </button>
+                        </div>
+
+                        <!-- Pickup & Dropoff Checkboxes Row -->
+                        <div class="d-flex justify-content-evenly mt-2">
+                            <div class="form-check">
+                                <input class="form-check-input pickup-dropoff-option pickup-additional" type="checkbox"
+                                    name="multiple_pickup_dropoff[${lastId}][${newStopId}]" value="pickup"
+                                    id="pickup_${lastId}_${newStopId}" checked>
+                                <label class="form-check-label" for="pickup_${lastId}_${newStopId}">Pickup</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input pickup-dropoff-option dropoff-additional" type="checkbox"
+                                    name="multiple_pickup_dropoff[${lastId}][${newStopId}]" value="dropoff"
+                                    id="dropoff_${lastId}_${newStopId}">
+                                <label class="form-check-label" for="dropoff_${lastId}_${newStopId}">Dropoff</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>`;
     
-                $(newStopInput).insertAfter(lastStopInputContainer);
+                $(newStopInput).insertAfter(lastStopInputContainer.parent());
                 this.handleMultipleAdditionalStopIds();
                 this.initializeMultipleAdditionalStopLimits({lastId});
         };
@@ -2927,7 +3135,7 @@ export default class Bookings extends BaseClass {
 
     handleMultipleRemoveStop = ({ target }) => {
         const lastId = $(target).closest('.col-sm-12').find('.multiple_additional_stops').attr('id').split('_')[1];
-        $(target).closest(".col-sm-12").remove();
+        $(target).closest(".col-sm-12").parent('.additionalContainer').remove();
         this.handleMultipleAdditionalStopIds();
         this.initializeMultipleAdditionalStopLimits({lastId});
     };
@@ -2947,10 +3155,59 @@ export default class Bookings extends BaseClass {
                     rowCounters[i] = 0;
                 }
     
+                const destinationLabels = ["Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth",
+                    "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth", "Seventeenth", "Eighteenth", "Nineteenth", "Twentieth",
+                    "Twenty-first", "Twenty-second", "Twenty-third", "Twenty-fourth", "Twenty-fifth", "Twenty-sixth", "Twenty-seventh", "Twenty-eighth", "Twenty-ninth", "Thirtieth",
+                    "Thirty-first", "Thirty-second", "Thirty-third", "Thirty-fourth", "Thirty-fifth", "Thirty-sixth", "Thirty-seventh", "Thirty-eighth", "Thirty-ninth", "Fortieth",
+                    "Forty-first", "Forty-second", "Forty-third", "Forty-fourth", "Forty-fifth", "Forty-sixth", "Forty-seventh", "Forty-eighth", "Forty-ninth", "Fiftieth"];
+                const destinationLabel = destinationLabels[rowCounters[i]] || `Destination ${rowCounters[i]}`;
+
                 $this.attr('id', `multipleAdditionalStops_${i}_${rowCounters[i]}`);
                 $this.attr('name', `multiple_additional_stops[${i}][${rowCounters[i]}]`);
+                $this.attr('placeholder', `${destinationLabel} Destination`);
     
                 rowCounters[i]++;
+            }
+        });
+    
+        let pickupCounters = {};
+        $(".pickup-additional").each(function () {
+            let $this = $(this);
+            let oldId = $this.attr('id');
+    
+            let match = oldId.match(/pickup_(\d+)_/);
+            if (match) {
+                let i = match[1];
+    
+                if (typeof pickupCounters[i] === 'undefined') {
+                    pickupCounters[i] = 0;
+                }
+
+                $this.attr('id', `pickup_${i}_${pickupCounters[i]}`);
+                $this.attr('name', `multiple_pickup_dropoff[${i}][${pickupCounters[i]}]`);
+    
+                pickupCounters[i]++;
+            }
+        });
+    
+        let dropoffCounters = {};
+
+        $(".dropoff-additional").each(function () {
+            let $this = $(this);
+            let oldId = $this.attr('id');
+    
+            let match = oldId.match(/dropoff_(\d+)_/);
+            if (match) {
+                let i = match[1];
+    
+                if (typeof dropoffCounters[i] === 'undefined') {
+                    dropoffCounters[i] = 0;
+                }
+
+                $this.attr('id', `dropoff_${i}_${dropoffCounters[i]}`);
+                $this.attr('name', `multiple_pickup_dropoff[${i}][${dropoffCounters[i]}]`);
+    
+                dropoffCounters[i]++;
             }
         });
     };

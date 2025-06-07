@@ -74,17 +74,16 @@ class BookingController extends Controller
      */
     public function index(Request $request)
     {
-        $serviceTypes = $this->serviceTypeService->getServiceTypes();
-        $drivers = $this->driverService->getDrivers()->sortBy('name')->values();
-        $locations = $this->locationService->getLocations();
-        $hotels = $this->hotelService->getHotels();
-        $vehicleTypes = $this->vehicleClassService->getVehicleClass()->sortBy('name')->values();
-        $vehicles = $this->vehicleService->getvehicles()->sortBy('vehicle_number')->values();
-        $driverOffDays = $this->driverOffDayService->getSavedDates();
-        $hotelClients = $this->hotelService->getClientAdmins();
-        $bookingData = $this->bookingService->getBookingData($request->query());
-        // return $bookingData;
         try {
+            $serviceTypes = $this->serviceTypeService->getServiceTypes();
+            $drivers = $this->driverService->getDrivers()->sortBy('name')->values();
+            $locations = $this->locationService->getLocations();
+            $hotels = $this->hotelService->getHotels();
+            $vehicleTypes = $this->vehicleClassService->getVehicleClass()->sortBy('name')->values();
+            $vehicles = $this->vehicleService->getvehicles()->sortBy('vehicle_number')->values();
+            $driverOffDays = $this->driverOffDayService->getSavedDates();
+            $hotelClients = $this->hotelService->getClientAdmins();
+            $bookingData = $this->bookingService->getBookingData($request->query());
             return view('admin.bookings.index', compact('serviceTypes', 'locations', 'driverOffDays', 'bookingData', 'hotels', 'vehicleTypes', 'drivers', 'vehicles', 'hotelClients'));
         } catch (\Exception $e) {
             $this->helper->alertResponse(__('messages.something_went_wrong'), 'error');
@@ -259,10 +258,10 @@ class BookingController extends Controller
             
             if(!empty($hotelIdsFromLinkedCorporates))
             {
-                if($booking->createdBy->client->hotel_id == $loggedUserHotelId || $booking->client->hotel_id == $loggedUserHotelId)
+                if(!empty($booking->createdBy->client) && ($booking->createdBy->client->hotel_id == $loggedUserHotelId || $booking->client->hotel_id == $loggedUserHotelId))
                 {
                 }else{
-                    if($hotel->hotel->is_head_office == 1 && ($booking->createdBy->client->hotel->linked_head_office == $loggedUserHotelId || $booking->client->hotel->id == $loggedUserHotelId || $booking->client->hotel->linked_head_office == $loggedUserHotelId))
+                    if($hotel->hotel->is_head_office == 1 && (!empty($booking->createdBy->client) && $booking->createdBy->client->hotel->linked_head_office == $loggedUserHotelId || $booking->client->hotel->id == $loggedUserHotelId || $booking->client->hotel->linked_head_office == $loggedUserHotelId))
                     {
 
                     }else{

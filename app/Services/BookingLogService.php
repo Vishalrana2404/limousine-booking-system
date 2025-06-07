@@ -39,7 +39,7 @@ class BookingLogService
     ) {
     }
 
-    public function addLogMessages(array $requestData, Booking $booking, User $loggedUser, array $linkedClients = null)
+    public function addLogMessages(array $requestData, Booking $booking, User $loggedUser, array $linkedClients = null, array $additionalStopsLogs = null)
     {
         try {
             $logMessages = [];
@@ -289,13 +289,13 @@ class BookingLogService
                                     $logMessages[] = "Changed event from {$oldName} to {$newName}";
                                 }
                                 break;
-                            case "additional_stops":
-                                if ($oldValue === null) {
-                                    $logMessages[] = "Added additional stops: {$newValue}";
-                                } else {
-                                    $logMessages[] = "Changed additional stops from {$oldValue} to {$newValue}";
-                                }
-                                break;
+                            // case "additional_stops":
+                            //     if ($oldValue === null) {
+                            //         $logMessages[] = "Added additional stops: {$newValue}";
+                            //     } else {
+                            //         $logMessages[] = "Changed additional stops from {$oldValue} to {$newValue}";
+                            //     }
+                            //     break;
                             case "child_seat_required":
                                 if ($oldValue === null) {
                                     $logMessages[] = "Added child seats: {$newValue}";
@@ -360,12 +360,32 @@ class BookingLogService
                                     $logMessages[] = "Added a comment : {$newValue}";
                                 }
                                 break;
+                            case "latest_admin_comment":
+                                if(!empty($newValue))
+                                {
+                                    $logMessages[] = "Added a comment : {$newValue}";
+                                }
+                                break;
+                            case "additional_stops_required":
+                                if($oldValue == 'yes')
+                                {
+                                    $logMessages[] = "Additional stops marked not-required.";
+                                }else{
+                                    $logMessages[] = "Additional stops marked required.";
+                                }
+                                break;
                             default:
                                 break;
                         }
                     }
                 }
             }
+
+            if(!empty($additionalStopsLogs) && $additionalStopsLogs !== null)
+            {
+                $logMessages = array_merge($logMessages, $additionalStopsLogs);
+            }
+
             $userType =  $loggedUser->userType->type ?? null;
             if ($userType === null || $userType === UserType::ADMIN) {
                 $notifyUsers = collect([$this->userRepository->getUserById($booking->created_by_id)]);

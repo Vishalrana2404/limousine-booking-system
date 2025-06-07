@@ -109,8 +109,10 @@
                                 </th>
                                 <th>Client Instructions<i class="fa fa-sort ml-1 text-dark" id="sortInstructions"
                                         aria-hidden="true"></i></th>
-                                <th>Comment<i class="fa fa-sort ml-1 text-dark" id="sortComments"
-                                        aria-hidden="true"></i></th>
+                                @if(Auth::user()->userType == null || (Auth::user()->userType->slug === null || in_array(Auth::user()->userType->slug, ['admin', 'admin-staff'])))
+                                    <th>Admin Comment<i class="fa fa-sort ml-1 text-dark" id="sortAdminComments"
+                                            aria-hidden="true"></i></th>
+                                @endif
                                 <!-- <th>Booked On<i class="fa fa-sort ml-1 text-dark" id="sortBookingDate"
                                         aria-hidden="true"></i></th> -->
                                 <!-- @if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']))

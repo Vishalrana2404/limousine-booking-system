@@ -46,7 +46,12 @@
         if ($booking->service_type_id === 1) {
             if($booking->pick_up_location_id == 8 || $booking->pick_up_location_id == 9 || $booking->pick_up_location_id == 10 || $booking->pick_up_location_id == 11 || $booking->pick_up_location_id == 12)
             {
-                $pickUpLocation = $booking->pickUpLocation->name;
+                if($booking->pick_up_location_id == 12)
+                {
+                    $pickUpLocation = $booking->pick_up_location;
+                }else{
+                    $pickUpLocation = $booking->pickUpLocation->name;
+                }
             }else{
                 $pickUpLocation = $booking->flight_detail ?? null;
             }
@@ -58,12 +63,18 @@
                 $pickUpLocation = $booking->pick_up_location;
             }
         }
+
         $dropOffLocation = null;
         $dropOffLocationEditVal = null;
         if ($booking->service_type_id === 3) {
-             if($booking->pick_up_location_id == 8 || $booking->pick_up_location_id == 9 || $booking->pick_up_location_id == 10 || $booking->pick_up_location_id == 11 || $booking->pick_up_location_id == 12)
+             if($booking->drop_off_location_id == 8 || $booking->drop_off_location_id == 9 || $booking->drop_off_location_id == 10 || $booking->drop_off_location_id == 11 || $booking->drop_off_location_id == 12)
             {
-                $dropOffLocation = $booking->dropOffLocation->name;
+                if($booking->drop_off_location_id == 12)
+                {
+                    $dropOffLocation = $booking->drop_of_location;
+                }else{
+                    $dropOffLocation = $booking->dropOffLocation->name;
+                }
             }else{
                 $dropOffLocation = $booking->departure_time
                     ? $booking->flight_detail .
@@ -82,12 +93,30 @@
                 $dropOffLocationEditVal = $booking->drop_of_location ?? null;
             }
         }
-        $additionalStops = $booking->additional_stops;
-        $additionalStopsVal = '';
-        if(!empty($additionalStops))
-        {
-            $additionalStopsVal = explode('||', $booking->additional_stops);
+
+        $pickupAdditionalStops = '';
+        $dropoffAdditionalStops = '';
+
+        if ($booking->additional_stops_required === 'yes') {
+            $destinationLabels = config('constants.destination_labels');
+            $destinationNumbers = config('constants.destination_numbers');
+
+            foreach ($booking->additionalStops as $stop) {
+                $index = array_search($stop->destination_sequence, $destinationLabels);
+
+                // Skip if sequence not found
+                if ($index === false) continue;
+
+                $line = $destinationNumbers[$index] . '. ' . $stop->additional_stop_address;
+
+                if ($stop->destination_type === 'pickup') {
+                    $pickupAdditionalStops .= ($pickupAdditionalStops ? '<br>' : '') . $line;
+                } elseif ($stop->destination_type === 'dropoff') {
+                    $dropoffAdditionalStops .= ($dropoffAdditionalStops ? '<br>' : '') . $line;
+                }
+            }
         }
+
         $countryCodes = explode(',', $booking->country_code ?? '');
         $phones = explode(',', $booking->phone ?? '');
 
@@ -205,18 +234,17 @@
       <td class="text-truncate">{{ $booking->serviceType->name ?? 'N/A' }}</td>
       <td @if ($isEditable) data-name="pickup_location" data-old="{{ $pickUpLocation }}"
           data-service-id="{{ $booking->service_type_id }}" data-old-id="{{ $booking->pick_up_location_id }}" @endif
-          class="text-truncate" style="max-width: 200px" title="{{ $pickUpLocation ?? 'N/A' }}">{{ $pickUpLocation ?? 'N/A' }}</td>
+          class="text-truncate" style="max-width: 200px" title="{{ $pickUpLocation ?? 'N/A' }}">
+          1. {{ $pickUpLocation ?? 'N/A' }}
+          <br>
+          {!! $pickupAdditionalStops !!}
+        </td>
       <td @if ($isEditable) data-name="drop_of_location" data-old="{{ $dropOffLocationEditVal }}"
           data-service-id="{{ $booking->service_type_id }}" data-old-id="{{ $booking->drop_off_location_id }}" @endif
           class="text-truncate" style="max-width: 200px" title="{{ $dropOffLocation ?? 'N/A' }}">
           {{ $dropOffLocation ?? 'N/A' }}
-          @if(!empty($additionalStopsVal))
           <br>
-            @foreach($additionalStopsVal as $key => $additionalStop)
-                {{ $key+1 . '. ' . $additionalStop }}
-                <br>
-            @endforeach
-          @endif
+          {!! $dropoffAdditionalStops !!}
       </td>
       <td @if ($isEditable) data-name="guest_name" data-old="{{ $guestNames }}" @endif
           class="text-truncate" style="max-width: 200px" title="{{ $resultGuestName ?? 'N/A' }}">{!! $resultGuestName ?? 'N/A' !!}</td>
@@ -254,9 +282,12 @@
       <td @if ($isEditable) data-name="client_instructions" data-old="{{ $booking->client_instructions }}" @endif
           class="text-truncate" style="max-width: 200px" title="{{ $booking->client_instructions ?? 'N/A' }}">
           {{ $booking->client_instructions ?? 'N/A' }}</td>
-      <td @if ($isEditable) data-name="latest_comment" data-old="{{ $booking->latest_comment }}" @endif
-          class="text-truncate" style="max-width: 200px" title="{{ $booking->latest_comment ?? 'N/A' }}">
-          {{ $booking->latest_comment ?? 'N/A' }}</td>
+        
+        @if(Auth::user()->userType == null || (Auth::user()->userType->slug === null || in_array(Auth::user()->userType->slug, ['admin', 'admin-staff'])))
+        <td @if ($isEditable) data-name="latest_admin_comment" data-old="{{ $booking->latest_admin_comment }}" @endif
+            class="text-truncate" style="max-width: 200px" title="{{ $booking->latest_admin_comment ?? 'N/A' }}">
+            {{ $booking->latest_admin_comment ?? 'N/A' }}</td>
+        @endif
 
       <!-- <td class="text-truncate">{{ CustomHelper::formatSingaporeDate($booking->created_at) ?? 'N/A' }}</td> -->
       <!-- @if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']))

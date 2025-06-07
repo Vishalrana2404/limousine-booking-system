@@ -64,7 +64,9 @@ class Booking extends Model
         'child_2_age',
         'meet_and_greet',
         'additional_stops',
-        'latest_comment'
+        'latest_comment',
+        'latest_admin_comment',
+        'additional_stops_required'
     ];
 
     public function serviceType()
@@ -135,6 +137,20 @@ class Booking extends Model
     public function latestComment()
     {
         return $this->hasOne(BookingsCommentLog::class)->latest('id');
+    }
+
+    public function bookings_admin_communication_log()
+    {
+        return $this->hasMany(BookingsAdminCommunicationLog::class)->orderBy('id', 'desc');
+    }
+    public function latestAdminComment()
+    {
+        return $this->hasOne(BookingsAdminCommunicationLog::class)->latest('id');
+    }
+
+    public function additionalStops()
+    {
+        return $this->hasMany(BookingsAdditionalStops::class);
     }
 
 

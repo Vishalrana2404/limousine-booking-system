@@ -88,5 +88,20 @@ return [
         ['id' => 10, 'name' => 'Singapore Cruise Centre', 'is_instant_acceptable' => true],
         ['id' => 11, 'name' => 'Marina Bay Cruise Centre', 'is_instant_acceptable' => true],
         ['id' => 12, 'name' => 'Others', 'is_instant_acceptable' => false]
-    ]
+    ],
+    'destination_numbers' => [
+        2, 3, 4, 5, 6, 7, 8, 9, 10,
+        11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+        21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+        31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+        41, 42, 43, 44, 45, 46, 47, 48, 49, 50
+    ],
+
+    'destination_labels' => [
+        "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth",
+        "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth", "Seventeenth", "Eighteenth", "Nineteenth", "Twentieth",
+        "Twenty-first", "Twenty-second", "Twenty-third", "Twenty-fourth", "Twenty-fifth", "Twenty-sixth", "Twenty-seventh", "Twenty-eighth", "Twenty-ninth", "Thirtieth",
+        "Thirty-first", "Thirty-second", "Thirty-third", "Thirty-fourth", "Thirty-fifth", "Thirty-sixth", "Thirty-seventh", "Thirty-eighth", "Thirty-ninth", "Fortieth",
+        "Forty-first", "Forty-second", "Forty-third", "Forty-fourth", "Forty-fifth", "Forty-sixth", "Forty-seventh", "Forty-eighth", "Forty-ninth", "Fiftieth"
+    ],
 ];

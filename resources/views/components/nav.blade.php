@@ -11,7 +11,7 @@
     </ul>
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto align-items-center">
-        <h6><img src="{{asset('images/happy.png')}}" alt="" style="height: 15px; width: 15px;">  Hello {{Auth::user()->first_name}}!</h6>
+        <h6>Hello {{Auth::user()->first_name}}!</h6>
         <li class="nav-item dropdown px-2">
             <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false" title="Quick Add">
                 <span class="icon plus-icon"></span>

@@ -50,12 +50,11 @@
                     $billingAgreement = $booking->client->hotel->billingAgreement ?? null;
                     $serviceTypeId = $booking->service_type_id ?? null;
                     $statusValue = $booking->status ?? null;
-                    $additionalStops = explode('||', $booking->additional_stops);
                     switch ($serviceTypeId) {
                         case 1:
                             $tripEnded = 'none';
                             $pickUpLocationDropdown = 'block';
-                            $pickUpLocationTextBox = 'none';
+                            $pickUpLocationTextBox = $booking->pick_up_location_id == 12 ? 'block' : 'none';
                             $dropOffLocationDropdown = 'none';
                             $dropOffLocationtextBox = 'block';
                             $noOfHours = 'none';
@@ -92,8 +91,8 @@
                             $tripEnded = 'none';
                             $pickUpLocationDropdown = 'none';
                             $pickUpLocationTextBox = 'block';
-                            $dropOffLocationDropdown = 'block';
-                            $dropOffLocationtextBox = 'none';
+                            $dropOffLocationDropdown =  'block';
+                            $dropOffLocationtextBox =  $booking->drop_off_location_id == 12 ? 'block' : 'none';
                             $noOfHours = 'none';
                             $crossBorderDropDown = 'none';
                             $flightDetailRows = 'block';
@@ -214,7 +213,7 @@
                             $childSeatOptions = 'none';
                     }
 
-                    $additionalStopAddBtn = (($booking->service_type_id == 1 || $booking->service_type_id == 2 || $booking->service_type_id == 3) && count($additionalStops) > 2) ? 'none' : 'block';
+                    $additionalStopAddBtn = (($booking->service_type_id == 1 || $booking->service_type_id == 2 || $booking->service_type_id == 3) && count($booking->additionalStops) >= 2) ? 'none' : 'block';
                 @endphp
                 <div class="row row row-gap-3">
                     <div class="col-md-6">
@@ -733,7 +732,7 @@
                                     <li class="list-group-item border-top-0">
                                         <div class="form-group row row-gap-2 mb-0">
                                             <label for="pick-up-location-id"
-                                                class="col-sm-6 col-form-label">Pick-up</label>
+                                                class="col-sm-6 col-form-label">Pick-up Location</label>
                                                 <div class="col-sm-6 d-flex align-items-center justify-content-center flex-column">
                                                     <div class="w-100 mb-2" id="pickUpLocationDropdown"
                                                         style="display:{{ $pickUpLocationDropdown }};">
@@ -772,10 +771,89 @@
                                                 </div>
                                         </div>
                                     </li>
+                                    
+                                    <li class="list-group-item">
+                                        <div class="form-group row row-gap-2 mb-0">
+                                            <label class="col-sm-6 col-form-label" for="additional_stops_required">Additional Stops? <span class="text-danger">*</span></label>
+                                            <div class="col-sm-6">
+                                                <div class="form-check">
+                                                    <input class="form-check-input additional-stops-required @error('additional_stops_required') is-invalid @enderror" type="radio" name="additional_stops_required" id="additionalStopsRequiredYes" value="yes" autocomplete="off" autofocus {{ $booking->additional_stops_required == 'yes' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="additionalStopsRequiredYes">Yes</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input additional-stops-required @error('additional_stops_required') is-invalid @enderror" type="radio" name="additional_stops_required" id="additionalStopsRequiredNo" value="no" autocomplete="off" autofocus {{ $booking->additional_stops_required == 'no' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="additionalStopsRequiredNo">No</label>
+                                                </div>
+                                                @error('additional_stops_required')
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $message }}</strong>
+                                                    </span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </li>
+                                    @if($booking->additional_stops_required == 'yes' && !empty($booking->additionalStops) && count($booking->additionalStops) > 0)
+                                        @foreach($booking->additionalStops as $stopKey => $stop)                                        
+                                        <li class="list-group-item border-top-0 all-additional-stops">
+                                            <div class="form-group row row-gap-2 mb-0">
+                                                <label for="additionalStops_{{$stopKey}}" class="col-sm-6 col-form-label" id="additional_stop_label_{{$stopKey}}">{{ $stop->destination_sequence }} Destination</label>
+                                                <div class="col-sm-6">
+                                                    <div class="col-sm-12" style="display:flex; align-items:center; justify-content: space-between;">
+                                                        <input type="text" id="additionalStops_{{$stopKey}}" name="additional_stops[]"
+                                                        value="{{ $stop->additional_stop_address }}"
+                                                        class="form-control col-sm-9 additional-stops"
+                                                        placeholder="{{ $stop->destination_sequence }} Destination">
+                                                        @if ($stopKey == 0)
+                                                            <button type="button" id="addStop" class="col-sm-3" style="display: {{$additionalStopAddBtn}}"><span class="fa fa-plus mt-3"></span></button>
+                                                        @else
+                                                            <button type="button" class="remove-stop col-sm-3"><span
+                                                                    class="fas fa-times mt-3 text-danger"></span></button>
+                                                        @endif
+                                                    </div>
+                                                    <div class="mt-2 d-flex justify-content-evenly">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[{{ $stopKey }}]" value="pickup" id="pickup_{{ $stopKey }}" {{ $stop->destination_type == 'pickup' ? 'checked' : ''; }}>
+                                                            <label class="form-check-label" for="pickup_{{ $stopKey }}">Pickup</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[{{ $stopKey }}]" value="dropoff" id="dropoff_{{ $stopKey }}" {{ $stop->destination_type == 'dropoff' ? 'checked' : ''; }}>
+                                                            <label class="form-check-label" for="dropoff_{{ $stopKey }}">Dropoff</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        @endforeach
+                                    @else
+                                        <li class="list-group-item border-top-0 all-additional-stops" style="display: none;">
+                                            <div class="form-group row row-gap-2 mb-0">
+                                                <label for="additionalStops_0" class="col-sm-6 col-form-label" id="additional_stop_label_0">Second Destination</label>
+                                                <div class="col-sm-6">
+                                                    <div class="col-sm-12" style="display:flex; align-items:center; justify-content: space-between;">
+                                                        <input type="text" id="additionalStops_0" name="additional_stops[]"
+                                                        value=""
+                                                        class="form-control col-sm-9 additional-stops"
+                                                        placeholder="Second Destination">
+                                                        <button type="button" id="addStop" class="col-sm-3"><span class="fa fa-plus mt-3"></span></button>
+                                                    </div>
+                                                    <div class="mt-2 d-flex justify-content-evenly">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[0]" value="pickup" id="pickup_0" checked>
+                                                            <label class="form-check-label" for="pickup_0">Pickup</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[0]" value="dropoff" id="dropoff_0">
+                                                            <label class="form-check-label" for="dropoff_0">Dropoff</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    @endif
                                     <li class="list-group-item">
                                         <div class="form-group row row-gap-2 mb-0">
                                             <label for="drop-of-location-id"
-                                                class="col-sm-6 col-form-label">Drop-off</label>
+                                                class="col-sm-6 col-form-label">Drop-off Location</label>
                                             <div class="col-sm-6 d-flex align-items-center justify-content-center flex-column">
                                                 <div id="dropOffLocationDropdown" class="w-100 mb-2" style="display:{{ $dropOffLocationDropdown }};">
                                                     <select name="drop_off_location_id" id="drop-off-location-id"
@@ -810,27 +888,6 @@
                                             </div>
                                         </div>
                                     </li>
-                                    @if(!empty($additionalStops))
-                                        @foreach($additionalStops as $stopKey => $stop)
-                                            <li class="list-group-item border-top-0 all-additional-stops">
-                                                <div class="form-group row row-gap-2 mb-0">
-                                                    <label for="additionalStops_{{$stopKey}}" class="col-sm-6 col-form-label" id="additional_stop_label_{{$stopKey}}">Additional Stop {{$stopKey+1}}</label>
-                                                    <div class="col-sm-6" style="display:flex; align-items:center; justify-content: space-between;">
-                                                        <input type="text" id="additionalStops_{{$stopKey}}" name="additional_stops[]"
-                                                        value="{{ $stop }}"
-                                                        class="form-control col-sm-9 additional-stops"
-                                                        placeholder="Additional Stop">
-                                                        @if ($stopKey == 0)
-                                                            <button type="button" id="addStop" class="col-sm-3" style="display: {{$additionalStopAddBtn}}"><span class="fa fa-plus mt-3"></span></button>
-                                                        @else
-                                                            <button type="button" class="remove-stop col-sm-3"><span
-                                                                    class="fas fa-times mt-3 text-danger"></span></button>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        @endforeach
-                                    @endif
                                     <li class="list-group-item">
                                         <div class="form-group row row-gap-2 mb-0">
                                             <label for="vehicle-type" class="col-sm-6 col-form-label">Type of
@@ -995,7 +1052,7 @@
                                                                 @endif
                                                             @else
                                                                 @if ($client)
-                                                                    @if(in_array($client->hotel_id, $hotelIdsFromLinkedCorporates->toArray()) || $client->hotel_id == $booking->client->hotel_id)
+                                                                    @if(in_array($client->hotel_id, $hotelIdsFromLinkedCorporates->toArray()) || $client->hotel_id == $booking->client->hotel_id || (!empty($booking->createdBy->client) && $client->hotel_id == $booking->createdBy->client->hotel_id))
                                                                         <option value="{{ $client->id }}" {{ $booking->client->hotel_id == $client->hotel_id ? 'selected' : ''}}>{{$hotelClient->name  }}</option>
                                                                     @endif
                                                                 @endif
@@ -1193,34 +1250,35 @@
                                             </div>
                                         </div>
                                     </li>
-                                    @if(!empty($booking->latest_comment))
                                     <li class="list-group-item">
                                         <div class="form-group row row-gap-2 mb-0">
-                                            <label class="col-sm-6 col-form-label">Latest Comment</label>
-                                            <div class="col-sm-6">
-                                                <div>
-                                                    <span>{{ $booking->latest_comment }}</span>
-                                                </div>
-                                                @if($booking->latestComment && $booking->latestComment->createdBy)
-                                                    <div class="d-flex justify-content-between mt-1 text-muted small">
-                                                        <span>
-                                                            {{ $booking->latestComment->createdBy->first_name }}
-                                                            {{ $booking->latestComment->createdBy->last_name ?? '' }}
-                                                        </span>
-                                                        <span>
-                                                            {{ \Carbon\Carbon::parse($booking->latestComment->created_at)->format('d-M-Y H:i') }}
-                                                        </span>
-                                                    </div>
-                                                @endif
-                                            </div>
+                                            <label class="col-sm-6 col-form-label">Client Communication</label>
                                         </div>
-                                    </li>
-                                    @endif
-                                    <li class="list-group-item">
+                                        @if(!empty($booking->latest_comment))
+                                            <div class="form-group row row-gap-2 mb-0">
+                                                <label class="col-sm-6 col-form-label">Latest Comment</label>
+                                                <div class="col-sm-6">
+                                                    <div>
+                                                        <span>{{ $booking->latest_comment }}</span>
+                                                    </div>
+                                                    @if($booking->latestComment && $booking->latestComment->createdBy)
+                                                        <div class="d-flex justify-content-between mt-1 text-muted small">
+                                                            <span>
+                                                                {{ $booking->latestComment->createdBy->first_name }}
+                                                                {{ $booking->latestComment->createdBy->last_name ?? '' }}
+                                                            </span>
+                                                            <span>
+                                                                {{ \Carbon\Carbon::parse($booking->latestComment->created_at)->format('d-M-Y H:i') }}
+                                                            </span>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endif
                                         <div class="form-group row row-gap-2 mb-0">
                                             <label class="col-sm-6 col-form-label">Add Comment</label>
                                             <div class="col-sm-6">
-                                                <textarea id="latest_comment" rows="4" name="latest_comment" class="form-control @error('latest_comment') is-invalid @enderror" placeholder="Booking Comment"></textarea>
+                                                <textarea id="latest_comment" rows="4" name="latest_comment" class="form-control @error('latest_comment') is-invalid @enderror" placeholder="Add Comment"></textarea>
                                                 @error('latest_comment')
                                                     <span class="invalid-feedback" role="alert">
                                                         <strong>{{ $message }}</strong>
@@ -1229,6 +1287,45 @@
                                             </div>
                                         </div>
                                     </li>
+                                    @if(Auth::user()->userType == null || (Auth::user()->userType->slug === null || in_array(Auth::user()->userType->slug, ['admin', 'admin-staff'])))
+                                    <li class="list-group-item">
+                                        <div class="form-group row row-gap-2 mb-0">
+                                            <label class="col-sm-6 col-form-label">Admin Communication</label>
+                                        </div>
+                                        @if(!empty($booking->latest_admin_comment))
+                                            <div class="form-group row row-gap-2 mb-0">
+                                                <label class="col-sm-6 col-form-label">Latest Comment</label>
+                                                <div class="col-sm-6">
+                                                    <div>
+                                                        <span>{{ $booking->latest_admin_comment }}</span>
+                                                    </div>
+                                                    @if($booking->latestAdminComment && $booking->latestAdminComment->createdBy)
+                                                        <div class="d-flex justify-content-between mt-1 text-muted small">
+                                                            <span>
+                                                                {{ $booking->latestAdminComment->createdBy->first_name }}
+                                                                {{ $booking->latestAdminComment->createdBy->last_name ?? '' }}
+                                                            </span>
+                                                            <span>
+                                                                {{ \Carbon\Carbon::parse($booking->latestAdminComment->created_at)->format('d-M-Y H:i') }}
+                                                            </span>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endif
+                                        <div class="form-group row row-gap-2 mb-0">
+                                            <label class="col-sm-6 col-form-label">Add Comment</label>
+                                            <div class="col-sm-6">
+                                                <textarea id="latest_admin_comment" rows="4" name="latest_admin_comment" class="form-control @error('latest_admin_comment') is-invalid @enderror" placeholder="Add Comment"></textarea>
+                                                @error('latest_admin_comment')
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $message }}</strong>
+                                                    </span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </li>
+                                    @endif
                                 </ul>
                             </div>
                         </div>
@@ -1973,7 +2070,7 @@
                                                 <div class="col-sm-1">
                                                     <div class="custom-control custom-checkbox">
                                                         @php
-                                                            $isAdditionalStopSurcharge = !empty($booking->bookingBilling->is_additional_stop_surcharge) || !empty($booking->additional_stops) ? true : false;
+                                                            $isAdditionalStopSurcharge = !empty($booking->bookingBilling->is_additional_stop_surcharge) || (!empty($booking->additionalStops) && count($booking->additionalStops) > 0) ? true : false;
                                                             $isAdditionalStopSurchargeValue = $isAdditionalStopSurcharge
                                                                 ? 'checked'
                                                                 : '';
@@ -2006,7 +2103,7 @@
                                                     $isMultiplierAdditionalStopCharge = null;
                                                         $additionalStopChargeValue = null;
                                                         $additionalStopSurcharge = $booking->bookingBilling->additional_stop_surcharge ?? null;
-                                                        $additional_stop_charges_from_stops = !empty($booking->additional_stops) && ($booking->service_type_id === 1 || $booking->service_type_id === 2 || $booking->service_type_id === 3) ? number_format(count(explode("||", $booking->additional_stops)) * 5, 2, '.', '') : number_format(0, 2, '.', '');
+                                                        $additional_stop_charges_from_stops = (!empty($booking->additionalStops) && count($booking->additionalStops) > 0) && ($booking->service_type_id === 1 || $booking->service_type_id === 2 || $booking->service_type_id === 3) ? number_format(count($booking->additionalStops) * 5, 2, '.', '') : number_format(0, 2, '.', '');
                                                         if ($additionalStopSurcharge) {
                                                             $additionalStopChargeValue = $additionalStopSurcharge + $additional_stop_charges_from_stops;
                                                             $isFixedAdditionalStopSurcharge = $booking->bookingBilling->is_fixed_additional_stop_surcharge ?? null;
@@ -2191,11 +2288,11 @@
                             </div>
                         </div>
                     @endif
-                    @if(!empty($booking->bookings_comment_log))
+                    @if(!empty($booking->bookings_comment_log) && count($booking->bookings_comment_log) > 0)
                     <div class="col-md-6">
-                        <div class="card mt-3">
+                        <div class="card">
                             <div class="card-header">
-                                <h3 class="head-sm medium">Comment Logs</h3>
+                                <h3 class="head-sm medium">Client Communication Logs</h3>
                             </div>
                             <div class="card-body">
                                 <div class="row">
@@ -2206,6 +2303,24 @@
                             </div>
                         </div>
                     </div>
+                    @endif
+                    @if(Auth::user()->userType == null || (Auth::user()->userType->slug === null || in_array(Auth::user()->userType->slug, ['admin', 'admin-staff'])))
+                        @if(!empty($booking->bookings_admin_communication_log) && count($booking->bookings_admin_communication_log) > 0)
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="head-sm medium">Admin Communication Logs</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                @include('admin.logs.partials.booking-admin-comments-logs')
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     @endif
                 </div>
                 <div class="card mt-3">

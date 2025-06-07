@@ -6,6 +6,8 @@ use App\Models\Booking;
 use App\Models\User;
 use App\Models\UserType;
 use App\Models\BookingsCommentLog;
+use App\Models\BookingsAdminCommunicationLog;
+use App\Models\BookingsAdditionalStops;
 use App\Repositories\Interfaces\BookingInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -27,6 +29,8 @@ class BookingRepository implements BookingInterface
         protected Booking $model,
         protected User $userModel,
         protected BookingsCommentLog $bookingsCommentLogModel,
+        protected BookingsAdminCommunicationLog $bookingsAdminCommentLogModel,
+        protected BookingsAdditionalStops $bookingsAdditionalStopsModel,
     ) {
     }
 
@@ -212,6 +216,7 @@ class BookingRepository implements BookingInterface
         // Now build the main query
         $query = $this->model
             ->with([
+                'additionalStops',
                 'serviceType',
                 'event',
                 'pickUpLocation',
@@ -513,8 +518,8 @@ class BookingRepository implements BookingInterface
                 case 'sortBookingDate':
                     $value = $innerQuery->created_at ?? 'zzzz';
                     break;
-                case 'sortComments':
-                    $value = strtolower($innerQuery->latest_comment ?? 'zzzz');
+                case 'sortAdminComments':
+                    $value = strtolower($innerQuery->latest_admin_comment ?? 'zzzz');
                     break;
                 default:
                     $value = strtolower($innerQuery->id ?? 'zzzz');
@@ -1004,5 +1009,143 @@ class BookingRepository implements BookingInterface
     public function addBookingComment(string $comment, int $bookingId, int $loggedUserId)
     {
         return $this->bookingsCommentLogModel->create(['booking_id' => $bookingId, 'comment' => $comment, 'created_by_id' => $loggedUserId]);
+    }
+
+    public function addBookingAdminComment(string $comment, int $bookingId, int $loggedUserId)
+    {
+        return $this->bookingsAdminCommentLogModel->create(['booking_id' => $bookingId, 'comment' => $comment, 'created_by_id' => $loggedUserId]);
+    }
+
+    public function addAdditionalStops(array $additional_stops, array $stop_type, int $booking_id, int $loggedUserId)
+    {
+        $destinationLabels = config('constants.destination_labels');
+        $destinationNumbers = config('constants.destination_numbers');
+
+        $logs = [];
+
+        if(!empty($additional_stops) && !empty($stop_type))
+        {
+            foreach($additional_stops as $key => $stop)
+            {
+                $stop_data = [];
+                $stop_data['booking_id'] = $booking_id;
+                $stop_data['destination_sequence'] = $destinationLabels[$key];
+                $stop_data['additional_stop_address'] = $stop;
+                $stop_data['destination_type'] = $stop_type[$key] ? $stop_type[$key] : 'pickup';
+                $stop_data['created_by_id'] = $loggedUserId;
+
+                $this->bookingsAdditionalStopsModel->create($stop_data);
+
+                $logs[] = "Added {$stop_data['destination_sequence']} destination: {$stop} for {$stop_data['destination_type']}";
+            }
+        }
+
+        return $logs;
+    }
+
+    public function editAdditionalStops(array $additional_stops, array $stop_type, Booking $booking, int $loggedUserId)
+    {
+        $destinationLabels = config('constants.destination_labels');
+        $destinationNumbers = config('constants.destination_numbers');
+
+        $old_additional_stops = $booking->additionalStops;
+        $new_additional_stops = $additional_stops;
+
+        $logs = [];
+
+        $old = $old_additional_stops->map(function ($stop) {
+            return [
+                'sequence' => $stop->destination_sequence,
+                'address' => trim($stop->additional_stop_address),
+                'type' => $stop->destination_type,
+                'id' => $stop->id
+            ];
+        })->toArray();
+
+        $new = collect($new_additional_stops)->map(function ($stop, $key) use ($destinationLabels, $stop_type) {
+            return [
+                'sequence' => $destinationLabels[$key] ?? "Destination " . ($key + 2),
+                'address' => trim($stop),
+                'type' => $stop_type[$key]
+            ];
+        })->toArray();
+
+        // Convert new to key => value map by sequence for faster lookup
+        $newBySequence = collect($new)->keyBy('sequence');
+
+        // Handle deletions and updates
+        foreach ($old as $old_stop) {
+            $sequence = $old_stop['sequence'];
+
+            if (!isset($newBySequence[$sequence])) {
+                // Deleted
+                $this->bookingsAdditionalStopsModel->where('id', $old_stop['id'])->delete();
+                $logs[] = "Removed {$sequence} destination: {$old_stop['address']}";
+                continue;
+            }
+
+            $new_stop = $newBySequence[$sequence];
+            $updated = false;
+
+            $oldStopUpdate = [];
+
+            // Update address if different
+            if ($old_stop['address'] !== $new_stop['address']) {
+                $oldStopUpdate['additional_stop_address'] = $new_stop['address'];
+                $logs[] = "Changed {$sequence} destination from '{$old_stop['address']}' to '{$new_stop['address']}'";
+                $updated = true;
+            }
+
+            // Update type if different
+            if ($old_stop['type'] !== $new_stop['type']) {
+                $oldStopUpdate['destination_type'] = $new_stop['type'];
+                $logs[] = "Changed {$sequence} destination type from '{$old_stop['type']}' to '{$new_stop['type']}'";
+                $updated = true;
+            }
+
+            if ($updated) {
+                $oldStopUpdate['updated_by_id'] = $loggedUserId;
+                $this->bookingsAdditionalStopsModel->where('id', $old_stop['id'])->update($oldStopUpdate);
+            }
+        }
+
+        // Get all old sequences for comparison
+        $oldSequences = collect($old)->pluck('sequence')->toArray();
+
+        // Handle additions
+        foreach ($new as $new_stop) {
+            if (!in_array($new_stop['sequence'], $oldSequences)) {
+                $this->bookingsAdditionalStopsModel->create([
+                    'booking_id' => $booking->id,
+                    'destination_sequence' => $new_stop['sequence'],
+                    'additional_stop_address' => $new_stop['address'],
+                    'destination_type' => $new_stop['type'],
+                    'created_by_id' => $loggedUserId,
+                ]);
+
+                $logs[] = "Added new additional stop: {$new_stop['sequence']} destination, {$new_stop['address']} for {$new_stop['type']}";
+            }
+        }
+
+        return $logs;
+    }
+
+    public function deleteAdditionalStops(int $bookingId, int $loggedUserId)
+    {
+        $logs = [];
+
+        // Fetch all stops before deleting to use their info for logs
+        $stops = $this->bookingsAdditionalStopsModel
+            ->where('booking_id', $bookingId)
+            ->get();
+
+        foreach ($stops as $stop) {
+            $logs[] = "Removed {$stop->destination_sequence} destination: {$stop->additional_stop_address}";
+        }
+
+        // Perform the delete after logging
+        $this->bookingsAdditionalStopsModel->where('booking_id', $bookingId)->delete();
+
+        return $logs;
     }
 }

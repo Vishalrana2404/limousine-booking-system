@@ -214,9 +214,9 @@ class BookingService
             $guestname = join(',', $requestData['guest_name']);
             $countryCode = join(',', $requestData['country_code']);
             $phone = join(',', $requestData['phone']);
-            $additional_stops = !empty($requestData['additional_stops']) 
-            ? join('||', array_filter($requestData['additional_stops'])) 
-            : '';
+            // $additional_stops = !empty($requestData['additional_stops']) 
+            // ? join('||', array_filter($requestData['additional_stops'])) 
+            // : '';
             $bookingData['client_id'] = $clientId;
             $bookingData['event_id'] = $eventId;
             $bookingData['service_type_id'] = $requestData['service_type_id'];
@@ -263,7 +263,7 @@ class BookingService
             }
             $bookingData['meet_and_greet'] = $requestData['meet_and_greet'];
             $bookingData['guest_name'] = $guestname;
-            $bookingData['additional_stops'] = $additional_stops;
+            // $bookingData['additional_stops'] = $additional_stops;
             $bookingData['status'] = $status;
             $bookingData['created_by_id'] = $loggedUser->id;
             if ($file && $file->isValid()) {
@@ -274,8 +274,19 @@ class BookingService
                 // Upload the new profile image and update user data
                 $bookingData['attachment'] = $this->uploadService->upload($file, $fileName);
             }
+
+            $bookingData['additional_stops_required'] = $requestData['additional_stops_required'];
             // Add the booking using the booking repository
             $booking = $this->bookingRepository->addBooking($bookingData);
+
+            // additional stops
+            if($requestData['additional_stops_required'] == 'yes')
+            {
+                if(!empty($requestData['additional_stops']))
+                {
+                    $addAdditionalStops = $this->bookingRepository->addAdditionalStops($requestData['additional_stops'], $requestData['pickup_dropoff'], $booking->id, $loggedUser->id);
+                }
+            }
             $message="Created";
             $logData = ["message" => $message, "booking_id" => $booking->id, "user_id" => $loggedUser->id];
             $this->bookingLogRepository->addLogs($logData);
@@ -347,9 +358,9 @@ class BookingService
 
                 $bookingData['country_code'] = $countryCodes;
                 $bookingData['phone'] = $phones;
-                $additionalStops = !empty($requestData['multiple_additional_stops'][$key]) 
-                                        ? join('||', array_filter($requestData['multiple_additional_stops'][$key])) 
-                                        : '';
+                // $additionalStops = !empty($requestData['multiple_additional_stops'][$key]) 
+                //                         ? join('||', array_filter($requestData['multiple_additional_stops'][$key])) 
+                //                         : '';
                 $bookingData['client_id'] = $clientId;
                 $bookingData['event_id'] = $eventId;
                 $bookingData['service_type_id'] = $requestData['multiple_service_type_id'][$key] ?? null;
@@ -397,7 +408,7 @@ class BookingService
                 }
                 $bookingData['meet_and_greet'] = $requestData['multiple_meet_and_greet'][$key] ?? NULL;
                 $bookingData['guest_name'] = $guestname;
-                $bookingData['additional_stops'] = $additionalStops;
+                // $bookingData['additional_stops'] = $additionalStops;
                 $bookingData['status'] = $status;
                 $bookingData['created_by_id'] = $loggedUser->id;
                 if (isset($files[$key]) && $files[$key]->isValid()) {
@@ -409,8 +420,18 @@ class BookingService
                     $bookingData['attachment'] = $this->uploadService->upload($files[$key], $fileName);
                 }
 
+                $bookingData['additional_stops_required'] = $requestData['additional_stops_required'][$key];
                 // Add the booking using the booking repository
                 $booking = $this->bookingRepository->addBooking($bookingData);
+
+                // additional stops
+                if($requestData['additional_stops_required'][$key] == 'yes')
+                {
+                    if(!empty($requestData['multiple_additional_stops'][$key]))
+                    {
+                        $addAdditionalStops = $this->bookingRepository->addAdditionalStops($requestData['multiple_additional_stops'][$key], $requestData['multiple_pickup_dropoff'][$key], $booking->id, $loggedUser->id);
+                    }
+                }
                 $message="Created";
                 $logData = ["message" => $message, "booking_id" => $booking->id, "user_id" => $loggedUser->id];
                 $this->bookingLogRepository->addLogs($logData);
@@ -437,18 +458,18 @@ class BookingService
             $loggedUserId = Auth::user()->id;
             $loggedUserType = Auth::user()->userType->name ?? null;
             $userTypeSlug = Auth::user()->userType->slug ?? null;
-
+    
             $clientId = null;
             if (isset($requestData['client_id']) && !empty($requestData['client_id'])) {
                 $clientId = $requestData['client_id'];
             } elseif ($userTypeSlug === 'client-staff' || $userTypeSlug === 'client-admin') {
                 $clientId = $loggedUserForNotification->client->id;
             }
-
+    
             $serviceTypeId = $requestData['service_type_id'] ?? null;
-            $additional_stops = !empty($requestData['additional_stops']) 
-                                ? join('||', array_filter($requestData['additional_stops'])) 
-                                : '';
+            // $additional_stops = !empty($requestData['additional_stops']) 
+            //                     ? join('||', array_filter($requestData['additional_stops'])) 
+            //                     : '';
     
             $linkedClients = NULL;
             $linkedClients = join(',', $requestData['access_given_clients']);
@@ -569,13 +590,42 @@ class BookingService
             }
             $bookingData['meet_and_greet'] = $requestData['meet_and_greet'];
     
-            $bookingData['additional_stops'] = $additional_stops;
-
+            // $bookingData['additional_stops'] = $additional_stops;
+    
             
             if (isset($requestData['latest_comment']))
             {
                 $bookingData['latest_comment'] = $requestData['latest_comment'];
                 $this->bookingRepository->addBookingComment($bookingData['latest_comment'], $booking->id, $loggedUserId);
+            }
+            
+            if (isset($requestData['latest_admin_comment']))
+            {
+                $bookingData['latest_admin_comment'] = $requestData['latest_admin_comment'];
+                $this->bookingRepository->addBookingAdminComment($bookingData['latest_admin_comment'], $booking->id, $loggedUserId);
+            }
+    
+            $bookingData['additional_stops_required'] = $requestData['additional_stops_required'];
+    
+            $additionalStopsLogs = [];
+
+            // additional stops
+            if($booking->additional_stops_required == 'yes')
+            {
+                if($requestData['additional_stops_required'] == 'no')
+                {
+                    $additionalStopsLogs = $this->bookingRepository->deleteAdditionalStops($booking->id, $loggedUserId);
+                }else{
+                    if(!empty($requestData['additional_stops']))
+                    {
+                        $additionalStopsLogs = $this->bookingRepository->editAdditionalStops($requestData['additional_stops'], $requestData['pickup_dropoff'], $booking, $loggedUserId);
+                    }
+                }
+            }else{
+                if($requestData['additional_stops_required'] == 'yes')
+                {
+                    $additionalStopsLogs = $this->bookingRepository->addAdditionalStops($requestData['additional_stops'], $requestData['pickup_dropoff'], $booking->id, $loggedUserId);
+                }
             }
     
             if ($file && $file->isValid()) {
@@ -589,8 +639,8 @@ class BookingService
                 // Upload the new profile image and update user data
                 $bookingData['attachment'] = $this->uploadService->upload($file, $fileName);
             }
-    
-            $logMessage = $this->bookingLogService->addLogMessages($bookingData, $booking, Auth::user(), $requestData['access_given_clients']);
+
+            $logMessage = $this->bookingLogService->addLogMessages($bookingData, $booking, Auth::user(), $requestData['access_given_clients'], $additionalStopsLogs);
             $bookingData['updated_by_id'] = $loggedUserId;
             
             $this->bookingRepository->updateBooking($booking, $bookingData);
@@ -700,7 +750,8 @@ class BookingService
             
             $linkedClients = !empty($booking->linked_clients) ? explode(',', $booking->linked_clients) : [];
             
-            $this->bookingLogService->addLogMessages($bookingData, $booking, Auth::user(), $linkedClients);
+            $additionalStopsLogs = [];
+            $this->bookingLogService->addLogMessages($bookingData, $booking, Auth::user(), $linkedClients, $additionalStopsLogs);
 
             $bookingData['updated_by_id'] = $loggedUserId;
 
@@ -736,8 +787,8 @@ class BookingService
             
             $linkedClients = !empty($booking->linked_clients) ? explode(',', $booking->linked_clients) : [];
             
-            
-            $this->bookingLogService->addLogMessages($bookingData, $booking, Auth::user(), $linkedClients);
+            $additionalStopsLogs = [];
+            $this->bookingLogService->addLogMessages($bookingData, $booking, Auth::user(), $linkedClients, $additionalStopsLogs);
 
             $bookingData['updated_by_id'] = $loggedUserId;
 
@@ -778,7 +829,8 @@ class BookingService
             
                 $linkedClients = !empty($booking->linked_clients) ? explode(',', $booking->linked_clients) : [];
 
-                $this->bookingLogService->addLogMessages($bookingData, $booking, Auth::user(), $linkedClients);
+                $additionalStopsLogs = [];
+                $this->bookingLogService->addLogMessages($bookingData, $booking, Auth::user(), $linkedClients, $additionalStopsLogs);
                 $bookingData['updated_by_id'] = $loggedUserId;
                 $this->bookingRepository->updateBooking($booking, $bookingData);
             }
@@ -868,8 +920,15 @@ class BookingService
                     $this->bookingRepository->addBookingComment($bookingData['latest_comment'], $booking->id, $loggedUserId);
                 }
             
+                if (isset($requestData['latest_admin_comment']))
+                {
+                    $bookingData['latest_admin_comment'] = $requestData['latest_admin_comment'];
+                    $this->bookingRepository->addBookingAdminComment($bookingData['latest_admin_comment'], $booking->id, $loggedUserId);
+                }
+            
+                $additionalStopsLogs = [];
                 $linkedClients = !empty($booking->linked_clients) ? explode(',', $booking->linked_clients) : [];
-                $this->bookingLogService->addLogMessages($bookingData, $booking, Auth::user(), $linkedClients);
+                $this->bookingLogService->addLogMessages($bookingData, $booking, Auth::user(), $linkedClients, $additionalStopsLogs);
                 $bookingData['updated_by_id'] = $loggedUserId;
                 $this->bookingRepository->updateBooking($booking, $bookingData);
             }

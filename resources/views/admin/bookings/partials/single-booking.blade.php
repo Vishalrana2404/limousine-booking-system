@@ -101,11 +101,11 @@
         $crossBorder = old('is_cross_border') ? 'checked' : '';
         $pickupLocationId = (int) old('pick_up_location_id');
         if ($pickupLocationId) {
-            $pickupLocationTextBox = $pickupLocationId === 8 ? 'block' : 'none';
+            $pickupLocationTextBox = $pickupLocationId == 12 ? 'block' : 'none';
         }
         $dropoffLocationId = (int) old('drop_off_location_id');
         if ($dropoffLocationId) {
-            if ($dropoffLocationId === 8) {
+            if ($dropoffLocationId === 12) {
                 $pickupLocationTextBox = 'block';
                 $dropOffLocationTextBox = 'block';
             } else {
@@ -262,6 +262,67 @@
                 @enderror
             </div>
         </div>
+        <div class="col-md-4 additionalContainers" style="display:none;">
+            @foreach (old('additional_stops', ['']) as $index => $stop)
+                <div class="form-group">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <label for="additionalStops_{{$index}}">Second Destination</label>
+                        @if ($loop->last)
+                            <button type="button" id="addStop"><span class="fa fa-plus"></span></button>
+                        @else
+                            <button type="button" class="remove-stop"><span
+                                    class="fas fa-times text-danger"></span></button>
+                        @endif
+                    </div>                    
+                    <input type="text" id="additionalStops_{{$index}}" name="additional_stops[]"
+                        value="{{ $stop }}"
+                        class="form-control additional-stops @error('additional_stops.' . $index) is-invalid @enderror" placeholder="Second Destination"
+                        autocomplete="off">
+                    @error('additional_stops.' . $index)
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                    <div class="mt-2 d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[0]" value="pickup" id="pickup_{{ $index }}" checked>
+                            <label class="form-check-label" for="pickup_{{ $index }}">Pickup</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[0]" value="dropoff" id="dropoff_{{ $index }}">
+                            <label class="form-check-label" for="dropoff_{{ $index }}">Dropoff</label>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        <!-- <div class="row" id="additionalContainer">
+            @foreach (old('additional_stops', ['']) as $index => $stop)
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="additionalStops_{{ $index }}">Additional Stop(s)</label>
+                        <input type="text" id="additionalStops_{{ $index }}" name="additional_stops[]"
+                            value="{{ $stop }}"
+                            class="form-control additional-stops @error('additional_stops.' . $index) is-invalid @enderror"
+                            placeholder="Additional Stop(s)" autocomplete="off" autofocus>
+                        @error('additional_stops.' . $index)
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                    </div>
+                </div>
+                <div class="col-md-1 mt-4 iconContainer">
+                    @if ($loop->last)
+                        <button type="button" id="addStop"><span class="fa fa-plus mt-3"></span></button>
+                    @else
+                        <button type="button" class="remove-stop"><span
+                                class="fas fa-times mt-3 text-danger"></span></button>
+                    @endif
+                </div>
+            @endforeach
+        </div> -->
         <div class="col-md-4" id="dropoffLocationDropdown" style="display:{{ $dropoffLocationDropdown }};">
             <div class="form-group">
                 <label for="dropoffLocationId">Departure Drop Off Location </label>
@@ -299,32 +360,27 @@
             </div>
         </div>
         
-        <div class="row" id="additionalContainer">
-            @foreach (old('additional_stops', ['']) as $index => $stop)
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="additionalStops_{{ $index }}">Additional Stop(s)</label>
-                        <input type="text" id="additionalStops_{{ $index }}" name="additional_stops[]"
-                            value="{{ $stop }}"
-                            class="form-control additional-stops @error('additional_stops.' . $index) is-invalid @enderror"
-                            placeholder="Additional Stop(s)" autocomplete="off" autofocus>
-                        @error('additional_stops.' . $index)
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
+        <div class="row" id="additionalStopsContainer">
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label class="form-label fw-bold" style="padding-bottom:0">Additional Stops? <span class="text-danger">*</span></label>
+                    <div class="form-check">
+                        <input class="form-check-input additional-stops-required @error('additional_stops_required') is-invalid @enderror" type="radio" name="additional_stops_required" id="additionalStopsYes" value="yes" autocomplete="off">
+                        <label class="form-check-label" for="additionalStopsYes">Yes</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input additional-stops-required @error('additional_stops_required') is-invalid @enderror" type="radio" name="additional_stops_required" id="additionalStopsNo" value="no" autocomplete="off" checked>
+                        <label class="form-check-label" for="additionalStopsNo">No</label>
                     </div>
                 </div>
-                <div class="col-md-1 mt-4 iconContainer">
-                    @if ($loop->last)
-                        <button type="button" id="addStop"><span class="fa fa-plus mt-3"></span></button>
-                    @else
-                        <button type="button" class="remove-stop"><span
-                                class="fas fa-times mt-3 text-danger"></span></button>
-                    @endif
-                </div>
-            @endforeach
+                @error('additional_stops_required')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
         </div>
+
         <div class="col-md-4">
             <div class="form-group">
                 <label for="vehicleType">Type of Vehicle <span class="text-danger">*</span></label>
@@ -482,8 +538,7 @@
         </div>
         <div class="col-md-4">
             <div class="form-group">
-                <label for="clientInstructions">Client Instructions<span class="text-danger" id="clientInstructionsSpan"
-                        style="display:none">*</span></label>
+                <label for="clientInstructions">Client Instructions</label>
                 <input type="text" id="clientInstructions" name="client_instructions"
                     value="{{ old('client_instructions') }}"
                     class="form-control @error('client_instructions') is-invalid @enderror"

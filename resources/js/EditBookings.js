@@ -44,6 +44,20 @@ export default class EditBookings extends BaseClass {
         $(document).on("click", "#pick-up-time-picker", this.handleToBeAdvised);
         $(document).on("change", "#driver-id", this.handleDriver);
         $(document).on("click", "#addStop", this.handleAddStop);
+        $(document).on("change", ".pickup-dropoff-option", function() {
+            const $this = $(this);
+            const container = $this.parent().parent().parent();
+            // Uncheck other checkbox in the same group
+            container.find('.pickup-dropoff-option').not($this).prop('checked', false);
+        });
+        $(document).on("change", ".additional-stops-required", function() {
+            if(this.value === 'yes')
+            {
+                $('.all-additional-stops').show();
+            }else{
+                $('.all-additional-stops').hide();
+            }
+        });
         $(document).on("click", "#addClient", this.handleAddClient);
         $(document).on("click", ".remove-stop", this.handleRemoveStop);
         $(document).on("click", ".remove-client", this.handleRemoveClient);
@@ -451,21 +465,44 @@ export default class EditBookings extends BaseClass {
             {
                 const lastStopInputContainer = $(".additional-stops").last();
                 const lastId = parseInt(lastStopInputContainer.attr("id").split("_")[1]);
-        
+                
                 const newId = lastId + 1;
+        
+                const destinationLabels = ["Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth",
+                    "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth", "Seventeenth", "Eighteenth", "Nineteenth", "Twentieth",
+                    "Twenty-first", "Twenty-second", "Twenty-third", "Twenty-fourth", "Twenty-fifth", "Twenty-sixth", "Twenty-seventh", "Twenty-eighth", "Twenty-ninth", "Thirtieth",
+                    "Thirty-first", "Thirty-second", "Thirty-third", "Thirty-fourth", "Thirty-fifth", "Thirty-sixth", "Thirty-seventh", "Thirty-eighth", "Thirty-ninth", "Fortieth",
+                    "Forty-first", "Forty-second", "Forty-third", "Forty-fourth", "Forty-fifth", "Forty-sixth", "Forty-seventh", "Forty-eighth", "Forty-ninth", "Fiftieth"
+                ];
+
+                const destinationLabel = destinationLabels[newId] || `Destination ${newId}`;
+
                 const newStopInput = `
                     <li class="list-group-item border-top-0 all-additional-stops">
-                        <div class="form-group row row-gap-2 mb-0">
-                            <label for="additionalStops_${newId}" class="col-sm-6 col-form-label" id="additional_stop_label_${newId}">Additional Stop ${newId + 1}</label>
-                            <div class="col-sm-6" style="display:flex; align-items:center; justify-content: space-between;">
+                    <div class="form-group row row-gap-2 mb-0">
+                        <label for="additionalStops_${newId}" class="col-sm-6 col-form-label" id="additional_stop_label_${newId}">${destinationLabel} Destination</label>
+                        <div class="col-sm-6">
+                            <div class="col-sm-12" style="display:flex; align-items:center; justify-content: space-between;">
                                 <input type="text" id="additionalStops_${newId}" name="additional_stops[]"
                                 value=""
                                 class="form-control col-sm-9 additional-stops"
-                                placeholder="Additional Stop">
-                                <button type="button" class="remove-stop col-sm-3"><span class="fas fa-times mt-3 text-danger"></span></button>
+                                placeholder="${destinationLabel} Destination">
+                                <button type="button" class="remove-stop col-sm-3"><span
+                                        class="fas fa-times mt-3 text-danger"></span></button>
+                            </div>
+                            <div class="mt-2 d-flex justify-content-evenly">
+                                <div class="form-check">
+                                    <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[${newId}]" value="pickup" id="pickup_${newId}" checked>
+                                    <label class="form-check-label" for="pickup_${newId}">Pickup</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[${newId}]" value="dropoff" id="dropoff_${newId}">
+                                    <label class="form-check-label" for="dropoff_${newId}">Dropoff</label>
+                                </div>
                             </div>
                         </div>
-                    </li>`;
+                    </div>
+                </li>`;
         
                     
                 this.initializeGoogleMapAutoComplete(`additionalStops_${newId}`);
@@ -476,16 +513,39 @@ export default class EditBookings extends BaseClass {
             const lastId = parseInt(lastStopInputContainer.attr("id").split("_")[1]);
     
             const newId = lastId + 1;
+        
+            const destinationLabels = ["Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth",
+                "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth", "Seventeenth", "Eighteenth", "Nineteenth", "Twentieth",
+                "Twenty-first", "Twenty-second", "Twenty-third", "Twenty-fourth", "Twenty-fifth", "Twenty-sixth", "Twenty-seventh", "Twenty-eighth", "Twenty-ninth", "Thirtieth",
+                "Thirty-first", "Thirty-second", "Thirty-third", "Thirty-fourth", "Thirty-fifth", "Thirty-sixth", "Thirty-seventh", "Thirty-eighth", "Thirty-ninth", "Fortieth",
+                "Forty-first", "Forty-second", "Forty-third", "Forty-fourth", "Forty-fifth", "Forty-sixth", "Forty-seventh", "Forty-eighth", "Forty-ninth", "Fiftieth"
+            ];
+
+            const destinationLabel = destinationLabels[newId] || `Destination ${newId}`;
+
             const newStopInput = `
                 <li class="list-group-item border-top-0 all-additional-stops">
                     <div class="form-group row row-gap-2 mb-0">
-                        <label for="additionalStops_${newId}" class="col-sm-6 col-form-label" id="additional_stop_label_${newId}">Additional Stop ${newId + 1}</label>
-                        <div class="col-sm-6" style="display:flex; align-items:center; justify-content: space-between;">
-                            <input type="text" id="additionalStops_${newId}" name="additional_stops[]"
-                            value=""
-                            class="form-control col-sm-9 additional-stops"
-                            placeholder="Additional Stop">
-                            <button type="button" class="remove-stop col-sm-3"><span class="fas fa-times mt-3 text-danger"></span></button>
+                        <label for="additionalStops_${newId}" class="col-sm-6 col-form-label" id="additional_stop_label_${newId}">${destinationLabel} Destination</label>
+                        <div class="col-sm-6">
+                            <div class="col-sm-12" style="display:flex; align-items:center; justify-content: space-between;">
+                                <input type="text" id="additionalStops_${newId}" name="additional_stops[]"
+                                value=""
+                                class="form-control col-sm-9 additional-stops"
+                                placeholder="${destinationLabel} Destination">
+                                <button type="button" class="remove-stop col-sm-3"><span
+                                        class="fas fa-times mt-3 text-danger"></span></button>
+                            </div>
+                            <div class="mt-2 d-flex justify-content-evenly">
+                                <div class="form-check">
+                                    <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[${newId}]" value="pickup" id="pickup_${newId}" checked>
+                                    <label class="form-check-label" for="pickup_${newId}">Pickup</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input pickup-dropoff-option" type="checkbox" name="pickup_dropoff[${newId}]" value="dropoff" id="dropoff_${newId}">
+                                    <label class="form-check-label" for="dropoff_${newId}">Dropoff</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </li>`;
@@ -565,21 +625,50 @@ export default class EditBookings extends BaseClass {
         this.initializeAdditionalStopCharges()
     }
     handleAdditionalStopIds = () => {
-        var i = 0;
-        $(".additional-stops").each(function () {
-            let $this = $(this);
-            let oldId = $(this).attr('id');
-            $this.attr("id", "additionalStops_" + i);
+        const destinationLabels = [
+            "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth",
+            "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth", "Seventeenth", "Eighteenth", "Nineteenth", "Twentieth",
+            "Twenty-first", "Twenty-second", "Twenty-third", "Twenty-fourth", "Twenty-fifth", "Twenty-sixth", "Twenty-seventh", "Twenty-eighth", "Twenty-ninth", "Thirtieth",
+            "Thirty-first", "Thirty-second", "Thirty-third", "Thirty-fourth", "Thirty-fifth", "Thirty-sixth", "Thirty-seventh", "Thirty-eighth", "Thirty-ninth", "Fortieth",
+            "Forty-first", "Forty-second", "Forty-third", "Forty-fourth", "Forty-fifth", "Forty-sixth", "Forty-seventh", "Forty-eighth", "Forty-ninth", "Fiftieth"
+        ];
 
-            let label = $('#additional_stop_label_' + oldId.split('_')[1]);
+        $('.additional-stops').each(function(index) {
+            const newId = index;
+            const destinationLabel = destinationLabels[newId] || `Destination ${newId + 1}`;
+            const input = $(this);
+            const listItem = input.closest('li');
+            const formGroup = input.closest('.form-group');
+            const inputWrapper = input.closest('div.col-sm-12');
 
+            // Update input
+            const newInputId = `additionalStops_${newId}`;
+            input.attr('id', newInputId).attr('placeholder', `${destinationLabel} Destination`);
 
-            label.text("Additional Stop " + (i + 1));
-            label.attr("id", "additional_stop_label_" + i);
-            label.attr("for", "additionalStops_" + i);
+            // Update label
+            const label = formGroup.find(`label[id^="additional_stop_label_"]`);
+            label.attr('for', newInputId).attr('id', `additional_stop_label_${newId}`).text(`${destinationLabel} Destination`);
 
-    
-            i++; // Increment the index
+            // Update remove button (keep position)
+            formGroup.find('.remove-stop').detach().insertAfter(input);
+
+            // Update checkboxes
+            inputWrapper.parent().find('.pickup-dropoff-option').each(function() {
+                const checkbox = $(this);
+                const isPickup = checkbox.val() === 'pickup';
+                const wasChecked = checkbox.prop('checked');
+
+                const newCheckboxId = isPickup ? `pickup_${newId}` : `dropoff_${newId}`;
+                const newCheckboxName = `pickup_dropoff[${newId}]`;
+
+                checkbox.attr('id', newCheckboxId)
+                        .attr('name', newCheckboxName)
+                        .prop('checked', wasChecked);
+
+                // Update corresponding label
+                const label = checkbox.closest('.form-check').find('label');
+                label.attr('for', newCheckboxId);
+            });
         });
     };
     
