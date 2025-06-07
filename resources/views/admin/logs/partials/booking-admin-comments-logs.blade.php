@@ -20,9 +20,12 @@
             </div>
 
             @foreach ($logGroup as $log)
-                <div>
+                @php
+                    $position = $log->created_by_id == Auth::user()->id ? 'display : flex; justify-content : flex-end;' : 'display : flex; justify-content : flex-start;';
+                @endphp
+                <div style="{{ $position }}">
                     <i class="fas fa-user bg-dark"></i>
-                    <div class="timeline-item">
+                    <div class="timeline-item col-md-9">
                         <div class="timeline-body">
                             <span class="semibold">
                                 {{ $log->createdBy->first_name ?? 'N/A' }}
