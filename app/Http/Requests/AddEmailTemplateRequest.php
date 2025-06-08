@@ -21,7 +21,7 @@ class AddEmailTemplateRequest extends FormRequest
             'footer' => 'required|string',
             'message' => 'required|string',
             'subject' => 'required|string',
-            'qr_code_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'qr_code' => 'nullable|image|mimes:jpeg,png,jpg',
         ];
     }
 

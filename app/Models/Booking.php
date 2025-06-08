@@ -16,6 +16,7 @@ class Booking extends Model
     const COMPLETED = 'COMPLETED';
     const CANCELLED = 'CANCELLED';
     const SCHEDULED = 'SCHEDULED';
+    const CANCELLEDWITHCHARGES = 'CANCELLED WITH CHARGES';
 
 
     protected $fillable = [

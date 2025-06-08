@@ -132,7 +132,7 @@
         $hotel = $booking->client->hotel->name ?? null;
         $event = $booking->event->name ?? null;
         if ($hotel) {
-            $hotelValue = $hotel . '<br> (' . $event . ')';
+            $hotelValue = $hotel;
         } else {
             $hotelValue = 'N/A';
         }
@@ -164,6 +164,8 @@
                 $rowClass = 'cancelled-status';
             } elseif ($booking->status === 'COMPLETED') {
                 $rowClass = 'completed-status';
+            } elseif ($booking->status === 'CANCELLED WITH CHARGES') {
+                $rowClass = 'cancelled-with-charges';
             }elseif($booking->status !== 'CANCELLED' && $booking->client_asked_to_cancel === 'yes'){
                 $rowClass = 'requested-to-cancel';
             } elseif (($booking->status === 'PENDING' || is_null($booking->driver_id) || is_null($booking->vehicle_id)) && $booking->status !== 'ACCEPTED') {
@@ -242,14 +244,17 @@
       <td @if ($isEditable) data-name="drop_of_location" data-old="{{ $dropOffLocationEditVal }}"
           data-service-id="{{ $booking->service_type_id }}" data-old-id="{{ $booking->drop_off_location_id }}" @endif
           class="text-truncate" style="max-width: 200px" title="{{ $dropOffLocation ?? 'N/A' }}">
-          {!! $dropoffAdditionalStops !!}
-          <br>
+          
+          @if($dropoffAdditionalStops !== '')
+            {!! $dropoffAdditionalStops !!}
+            <br>
+          @endif
           {{ $dropoffAdditionalStops !== '' || $pickupAdditionalStops !== '' ? count($booking->additionalStops) + 2 . '. ' : ''; }}{{ $dropOffLocation ?? 'N/A' }}
       </td>
       <td @if ($isEditable) data-name="guest_name" data-old="{{ $guestNames }}" @endif
           class="text-truncate" style="max-width: 200px" title="{{ $resultGuestName ?? 'N/A' }}">{!! $resultGuestName ?? 'N/A' !!}</td>
       @if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']))
-          <td class="text-truncate" title="{{ strip_tags($hotelValue) }}">{{ \Illuminate\Support\Str::limit(strip_tags($hotelValue), 22) }}</td>
+          <td class="text-truncate" title="{{ strip_tags($hotelValue) }}">{{ \Illuminate\Support\Str::limit(strip_tags($hotelValue), 22) }} <br> {{ $event }}</td>
       @endif
         <td @if ($isEditable) data-name="phone" data-old="{{ $booking->phone }}" data-country-code="{{ $booking->country_code }}" @endif
           class="text-truncate" style="max-width: 200px" title="{{ $booking->country_code ? '+(' . $booking->country_code . ')' : '' }}{{ $booking->phone ?? 'N/A' }}">            

@@ -484,7 +484,7 @@ Route::middleware(['Auth','SanitizeInput', AuthenticateSession::class])->group(f
 //     try {
 //         // Run specific migrations
 //         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_05_29_001257_add_meet_greet_column_in_vehicle_classes_table.php',
+//             '--path' => 'database/migrations/2025_05_29_002522_add_sequence_column_in_vehicle_classes_table.php',
 //             '--force' => true
 //         ]);
 //         return 'Selected migrations ran successfully.';

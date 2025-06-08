@@ -63,14 +63,15 @@ export default class EditBookings extends BaseClass {
         $(document).on("click", ".remove-client", this.handleRemoveClient);
         $(document).on("click", "#addGuest", this.handleAddGuest);
         $(document).on("click", ".remove-guest", this.handleRemoveGuest);
+        $(document).on("change", "#is_discount", this.handleIsDiscount);
         $(document).on(
             "change",
-            "#service-types, #is-peak-period-surcharge, #trip-ended, #is-mid-night-surcharge, #is-arr-waiting-time-surcharge, #is-out-of-city-surcharge, #is-last-minute-booking-surcharge, #is-additional-stop-charge, #is-misc-surcharge",
+            "#service-types, #is-peak-period-surcharge, #trip-ended, #is-mid-night-surcharge, #is-arr-waiting-time-surcharge, #is-out-of-city-surcharge, #is-last-minute-booking-surcharge, #is-additional-stop-charge, #is-misc-surcharge, #is_discount, #discount_type",
             this.calculatedBilling
         );
         $(document).on(
             "keyup",
-            "#peak-period-surcharge,#no-of-hours, #mid-night-surcharge, #arrivel-waiting-time, #out-of-city-surcharge, #last-minute-surcharge, #additional-stop-surcharge, #misc-surcharge, #departure-charge, #arrival-charge, #transfer-charge, #disposal-charge,#delivery-charge",
+            "#peak-period-surcharge,#no-of-hours, #mid-night-surcharge, #arrivel-waiting-time, #out-of-city-surcharge, #last-minute-surcharge, #additional-stop-surcharge, #misc-surcharge, #departure-charge, #arrival-charge, #transfer-charge, #disposal-charge,#delivery-charge, #discount_value",
             this.calculatedBilling
         );
         $(document).on("change", "#status", this.handleStatus);
@@ -102,7 +103,37 @@ export default class EditBookings extends BaseClass {
             "#clientId",
             this.handleCorporateIdChange
         );
+        $(document).on("change", ".invoice-check", this.handleInvoiceButton);
     };
+
+    handleIsDiscount = () => {
+        const isDiscount = $('#is_discount').is(':checked');
+        const discountType = $('#discount_type').val();
+        const discountValue = parseFloat($('#discount_value').val()) || 0;
+
+        if(isDiscount)
+        {
+            if(discountType == '')
+            {
+                $('#discount_type').val('fixed');
+                $('#discount_value').val('0');
+            }
+        }else{
+            $('#discount_type').val('');
+            $('#discount_value').val('');
+        }
+    }
+
+    handleInvoiceButton = () => {
+        const btn = $('#generate-invoice-btn');
+        btn.css('display', this.canShowInvoiceButton() ? 'inline-block' : 'none');
+    }
+
+    canShowInvoiceButton = () => {
+        const allChecked = $('.invoice-check:checked').length === $('.invoice-check').length;
+        const status = $('#booking-status').text().toUpperCase();
+        return allChecked && (status === 'COMPLETED' || status === 'CANCELLED WITH CHARGES');
+    }
 
     handleCorporateIdChange = () => {
         const newCorporateId = $('#clientId').val();
@@ -865,7 +896,36 @@ export default class EditBookings extends BaseClass {
             miscCharges+
             extraChildSeatCharges;
         totalCharges = $('#booking-status-for-total-charges').val() == 'CANCELLED' ? 0 : totalCharges;
-        $("#total-charges").text(totalCharges);
+        
+        const isDiscount = $('#is_discount').is(':checked');
+        const discountType = $('#discount_type').val();
+        const discountValue = $('#discount_value').val();
+        const discountValueFloat = parseFloat($('#discount_value').val()) || 0;
+
+
+        $("#sub-total-charges").text('$' + totalCharges);
+        $("#sub-total-charge").val(totalCharges);
+
+
+        if (!isNaN(discountValue) && discountValue.trim() !== '') {
+            if (isDiscount) {
+                if (discountType === 'fixed') {
+                    $('#discount_value').parent().find('.input-group-text').html('<i class="fas fa-dollar-sign"></i>');
+                    $('#total-discount-value').text('$' + discountValueFloat);
+                    totalCharges -= discountValueFloat;
+                } else if (discountType === 'percentage') {
+                    $('#discount_value').parent().find('.input-group-text').html('<i class="fas fa-percentage"></i>');
+                    $('#total-discount-value').text('$' + totalCharges * discountValueFloat / 100);
+                    totalCharges -= (totalCharges * discountValueFloat / 100);
+                }
+            }else{
+                $('#total-discount-value').text('$0');
+            }
+        } else {
+            $('#total-discount-value').text('$0');
+        }
+                
+        $("#total-charges").text('$' + totalCharges);
         $("#total-charge").val(totalCharges);
     };
     addChargeInTripCharge = (selector, tripCharge, newValue, isFixed) => {
@@ -1227,10 +1287,11 @@ export default class EditBookings extends BaseClass {
                         depends: function (element) {
                             const serviceTypeId = $("#service-types").val();
                             const pickupLocationId = $("#pick-up-location-id").val();
+                            const dropoffLocationId = $("#drop-off-location-id").val();
 
                             return (
-                                (serviceTypeId === "3" && ["1", "2", "3", "4", "5"].includes(pickupLocationId)) ||
-                                (serviceTypeId === "1" && ["1", "2", "3", "4", "5"].includes(pickupLocationId))
+                                (serviceTypeId === "3" && ["1", "2", "3", "4", "7"].includes(dropoffLocationId)) ||
+                                (serviceTypeId === "1" && ["1", "2", "3", "4", "7"].includes(pickupLocationId))
                             );
                         }
                     },
@@ -1359,16 +1420,16 @@ export default class EditBookings extends BaseClass {
                 misc_surcharge: {
                     pattern: /^\d{1,8}(?:\.\d{1,2})?$/,
                 },
-                client_instructions: {
-                    required: {
-                        depends: function (element) {
-                            return (
-                                ($("#service-types").val() === "1" || $("#service-types").val() === "3") &&
-                                $("#pick-up-location-id").val() === "12"
-                            );
-                        }
-                    },
-                }
+                // client_instructions: {
+                //     required: {
+                //         depends: function (element) {
+                //             return (
+                //                 ($("#service-types").val() === "1" || $("#service-types").val() === "3") &&
+                //                 $("#pick-up-location-id").val() === "12"
+                //             );
+                //         }
+                //     },
+                // }
             },
             messages: {
                 departure_time: {
@@ -1488,9 +1549,9 @@ export default class EditBookings extends BaseClass {
                     minlength: this.languageMessage.guest_name.min,
                     maxlength: this.languageMessage.guest_name.max,
                 },
-                client_instructions: {
-                    required: this.languageMessage.client_instructions.required,
-                }
+                // client_instructions: {
+                //     required: this.languageMessage.client_instructions.required,
+                // }
                 // Add custom error messages for other fields here
             },
             errorElement: "span",
@@ -1543,6 +1604,8 @@ export default class EditBookings extends BaseClass {
         
         this.calculatedBilling();
         this.validateEditBooking();
+
+        this.handleInvoiceButton();
 
         
 

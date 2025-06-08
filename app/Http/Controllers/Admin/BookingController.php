@@ -28,6 +28,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\CorporateFairBillingRepository;
+use App\Services\EmailTemplatesService;
 use DateTime;
 /**
  * Class BookingController
@@ -61,6 +62,7 @@ class BookingController extends Controller
         private BookingLogService $bookingLogService,
         private ClientService $clientService,
         private CorporateFairBillingRepository $corporateFairBillingRepository,
+        private EmailTemplatesService $emailTemplateService,
         private CustomHelper $helper
     ) {
     }
@@ -115,7 +117,7 @@ class BookingController extends Controller
                 $loggedUser->client->load(['hotel', 'multiCorporates.hotel']);
 
                 $loggedInUserHotelDetails = $loggedUser->client->hotel;
-                $hotel_id = $loggedUser->client->id;
+                $hotel_id = $loggedUser->client->hotel_id;
 
                 $multiCorporates = $loggedUser->client->multiCorporates;
 
@@ -293,7 +295,13 @@ class BookingController extends Controller
         $vehicles = $this->vehicleService->getvehicles();
         $peakPeriods = $this->peakPeriodService->getAllPeakPeriod();
         $driverOffDays = $this->driverOffDayService->getSavedDates();
-        $events = $this->eventService->getEventDataByHotel($booking->client_id);
+
+        if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']))
+        {
+            $events = $this->eventService->getEventDataByHotel($booking->client_id);
+        }else{
+            $events = $this->eventService->getEventDataByHotel($booking->client->hotel_id);
+        }
         
         // if(in_array($userTypeSlug, ['client-admin', 'client-staff']) && $loggedUserClientId !== null)
         // {
@@ -371,7 +379,10 @@ class BookingController extends Controller
         }
         $hotelClients = $this->hotelService->getClientAdmins();
         // return explode(',', $booking->linked_clients);
-        return view('admin.bookings.edit-booking', compact('serviceTypes', 'driverOffDays', 'logs', 'vehicles', 'drivers', 'booking', 'locations', 'peakPeriods', 'vehicleTypes', 'events', 'corporateFairBillingDetailsService', 'corporateFairBillingDetailsPerHour', 'clients', 'hotelIdsFromLinkedCorporates', 'hotelClients'));
+
+        $emailTemplates = $this->emailTemplateService->getAllTemplates();
+
+        return view('admin.bookings.edit-booking', compact('serviceTypes', 'driverOffDays', 'logs', 'vehicles', 'drivers', 'booking', 'locations', 'peakPeriods', 'vehicleTypes', 'events', 'corporateFairBillingDetailsService', 'corporateFairBillingDetailsPerHour', 'clients', 'hotelIdsFromLinkedCorporates', 'hotelClients', 'emailTemplates'));
     }
 
     public function update(EditBookingRequest $request, Booking $booking)
@@ -402,8 +413,8 @@ class BookingController extends Controller
             $currentTimeStamp = strtotime(date('Y-m-d H:i'));
             $hoursDifference = ($pickupDateTimeStamp - $currentTimeStamp) / 3600;
     
-            if (in_array($userTypeSlug, ['client-admin', 'client-staff']) && $loggedUserHotelId !== null && $bookedByHotelId !== $loggedUserHotelId) {
-    
+            if (in_array($userTypeSlug, ['client-admin', 'client-staff']) && $loggedUserHotelId !== null) 
+            {
                  $client = $user->load('client');
                 $hotel = $user->client->load('hotel');
                 
@@ -433,8 +444,8 @@ class BookingController extends Controller
                     }
                 }
                 
-            } else if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']) || (in_array($userTypeSlug, ['client-admin', 'client-staff']) && ($booking->status === 'PENDING' || ($booking->status === 'ACCEPTED' && $hoursDifference > 24)))) {
-            
+            } else if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']) || (in_array($userTypeSlug, ['client-admin', 'client-staff']) && ($booking->status === 'PENDING' || ($booking->status === 'ACCEPTED' && $hoursDifference > 24)))) 
+            {                
             }else if($userTypeSlug && in_array($userTypeSlug, ['client-admin', 'client-staff']) && $booking->status !== 'PENDING')
             {
                 $this->helper->alertResponse(__('message.permission_denied'), 'error');

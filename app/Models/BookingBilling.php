@@ -37,6 +37,7 @@ class BookingBilling extends Model
         'is_last_minute_surcharge',
         'is_additional_stop_surcharge',
         'is_misc_surcharge',
+        'sub_total_charge',
         'total_charge',
         'arrival_charge_description',
         'transfer_charge_description',
@@ -50,6 +51,9 @@ class BookingBilling extends Model
         'last_minute_charge_description',
         'additional_charge_description',
         'misc_charge_description',
+        'is_discount',
+        'discount_type',
+        'discount_value',
         'created_by_id',
         'updated_by_id',
     ];

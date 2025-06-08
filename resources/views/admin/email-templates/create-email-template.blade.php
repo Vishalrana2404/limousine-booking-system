@@ -1,6 +1,6 @@
 @extends('components.layout')
 @section('content')
-<form id="createEmailTemplateForm" method="post" action="{{ route('save-email-template') }}">
+<form id="createEmailTemplateForm" method="post" action="{{ route('save-email-template') }}" enctype="multipart/form-data">
     @csrf
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
@@ -65,28 +65,6 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="header">Header <span class="text-danger">*</span></label>
-                                            <input type="text" id="header" name="header" value="{{ old('header') }}" class="form-control @error('header') is-invalid @enderror" placeholder="Header">
-                                            @error('header')
-                                            <span class="invalid-feedback" role="alert">
-                                                <strong>{{ $message }}</strong>
-                                            </span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label for="footer">Footer <span class="text-danger">*</span></label>
-                                            <input type="text" id="footer" name="footer" value="{{ old('footer') }}" class="form-control @error('footer') is-invalid @enderror" placeholder="Footer">
-                                            @error('footer')
-                                            <span class="invalid-feedback" role="alert">
-                                                <strong>{{ $message }}</strong>
-                                            </span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
                                             <label for="message">Message <span class="text-danger">*</span></label>
                                             <input type="text" id="message" name="message" value="{{ old('message') }}" class="form-control @error('message') is-invalid @enderror" placeholder="Message">
                                             @error('message')
@@ -113,8 +91,36 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="qr_code">QR Code</label>
-                                            <input type="file" id="qr_code" name="qr_code" value="{{ old('qr_code') }}" class="form-control @error('qr_code') is-invalid @enderror" placeholder="QR Code">
+                                            <input type="file" id="qr_code" name="qr_code" value="{{ old('qr_code') }}" class="form-control @error('qr_code') is-invalid @enderror" placeholder="QR Code" accept="image/*">
                                             @error('qr_code')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="qrCodePreview">QR Code Preview</label><br>
+                                            <img id="qrCodePreview" src="{{ asset('images/default-preview.png') }}" alt="QR Code Preview" style="width:100px; height:100px; object-fit: contain; border-radius: 10px;" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="header">Header <span class="text-danger">*</span></label>
+                                            <textarea id="header" name="header" class="form-control @error('header') is-invalid @enderror" placeholder="Header" style="min-height: 200px;">{{ old('header') }}</textarea>
+                                            @error('header')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="footer">Footer <span class="text-danger">*</span></label>
+                                            <textarea id="footer" name="footer" class="form-control @error('footer') is-invalid @enderror" placeholder="Footer" style="min-height: 200px;">{{ old('footer') }}</textarea>
+                                            @error('footer')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
                                             </span>
@@ -137,4 +143,49 @@
         },
     };
 </script>
+
+<script>
+    function initializeEditor(selector) {
+        ClassicEditor
+            .create(document.querySelector(selector), {
+                toolbar: [
+                    'heading', '|',
+                    'bold', 'italic', 'link', 'blockQuote',
+                    'bulletedList', 'numberedList', 'todoList',
+                    '|',
+                    'outdent', 'indent',
+                    '|',
+                    'undo', 'redo',
+                    '|',
+                    'insertTable',
+                    'mediaEmbed',
+                    'codeBlock',
+                    'fontColor', 'fontBackgroundColor', 'fontFamily', 'fontSize',
+                    'alignment',
+                    'horizontalLine',
+                    'pageBreak',
+                ],
+                removePlugins: [
+                    'ImageUpload', 'EasyImage', 'ImageResize', 'ImageInsert', 'ImageStyle',
+                    'CKFinder', 'CKFinderUploadAdapter', 'CKBox'
+                ]
+            })
+            .then(editor => {
+                // Apply height styling via editor editing view, not directly on DOM
+                editor.editing.view.change(writer => {
+                    writer.setStyle('min-height', '200px', editor.editing.view.document.getRoot());
+                    writer.setStyle('resize', 'vertical', editor.editing.view.document.getRoot());
+                    writer.setStyle('overflow', 'auto', editor.editing.view.document.getRoot());
+                });
+            })
+            .catch(error => {
+                console.error('CKEditor initialization error:', error);
+            });
+    }
+
+    // Initialize editors on multiple elements
+    initializeEditor('#header');
+    initializeEditor('#footer');
+</script>
+
 @endsection

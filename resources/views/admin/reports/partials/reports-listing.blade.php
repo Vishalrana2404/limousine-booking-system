@@ -80,6 +80,8 @@
         $rowClass = '';
         if ($drivers->status === 'PENDING') {
             $rowClass = 'pending-status';
+        } elseif ($booking->status === 'CANCELLED WITH CHARGES') {
+            $rowClass = 'cancelled-with-charges';
         } elseif ($drivers->status === 'COMPLETED') {
             $rowClass = 'completed-status';
         } elseif ($drivers->status === 'CANCELLED') {

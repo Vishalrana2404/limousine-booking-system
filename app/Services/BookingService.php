@@ -476,8 +476,23 @@ class BookingService
     
             if (isset($requestData['access_given_clients']))
                 $bookingData['linked_clients'] = $linkedClients;
-            if (isset($requestData['status']))
-                $bookingData['status'] = $requestData['status'];
+            if (isset($requestData['status'])) {
+                $canUpdateStatus = false;
+
+                $isAdminOrStaff = is_null($userTypeSlug) || in_array($userTypeSlug, ['admin', 'admin-admin']);
+                $isInAllowedDepartment = in_array($loggedUserForNotification->department, [null, 'Management', 'Finance']);
+                $isNotCancelledWithCharges = $booking->status !== 'CANCELLED WITH CHARGES';
+
+                if ($isAdminOrStaff && $isInAllowedDepartment) {
+                    $canUpdateStatus = true;
+                } elseif ($isNotCancelledWithCharges) {
+                    $canUpdateStatus = true;
+                }
+
+                if ($canUpdateStatus) {
+                    $bookingData['status'] = $requestData['status'];
+                }
+            }
             if (isset($requestData['pickup_date']))
                 $bookingData['pickup_date'] =  Carbon::createFromFormat('d/m/Y', $requestData['pickup_date'])->format('Y-m-d');
             if(isset($requestData['pickup_time_to_be_advised']))
@@ -504,8 +519,11 @@ class BookingService
                 $bookingData['client_id'] = $clientId;
             if (isset($requestData['service_type_id']))
                 $bookingData['service_type_id'] = $serviceTypeId;
-            if (isset($requestData['flight_detail']))
+            if (isset($requestData['flight_detail'])){
                 $bookingData['flight_detail'] = $requestData['flight_detail'];
+            }else{
+                $bookingData['flight_detail'] = null;
+            }
             if (isset($requestData['departure_time']))
                 $bookingData['departure_time'] = Carbon::createFromFormat('d/m/Y H:i', $requestData['departure_time'])->format('Y-m-d H:i:s');
             if (isset($requestData['trip_ended']))
@@ -717,6 +735,19 @@ class BookingService
                     $bookingBillingData['additional_charge_description'] = $requestData['additional_charge_description'];
                 if (isset($requestData['misc_charge_description']) && !empty($requestData['misc_charge_description']))
                     $bookingBillingData['misc_charge_description'] = $requestData['misc_charge_description'];
+
+                    
+                $bookingBillingData['is_discount'] = !empty($requestData['is_discount']) ? '1' : '0';
+                if (isset($requestData['discount_type']) && !empty($requestData['discount_type']))
+                {
+                    $bookingBillingData['discount_type'] = $requestData['discount_type'];
+                }
+                $bookingBillingData['discount_value'] = !empty($requestData['discount_value']) ? $requestData['discount_value'] : null;
+
+                if (isset($requestData['sub_total_charge']) && !empty($requestData['sub_total_charge']))
+                {
+                    $bookingBillingData['sub_total_charge'] = $requestData['sub_total_charge'];
+                }
                 $bookingBillingData['is_mid_night_surcharge'] = $isMidNight;
                 $bookingBillingData['is_arr_waiting_time_surcharge'] = $isWaitingTime;
                 $bookingBillingData['is_outside_city_surcharge'] = $isOutsideCity;
@@ -927,8 +958,12 @@ class BookingService
                 }
             
                 $additionalStopsLogs = [];
-                $linkedClients = !empty($booking->linked_clients) ? explode(',', $booking->linked_clients) : [];
-                $this->bookingLogService->addLogMessages($bookingData, $booking, Auth::user(), $linkedClients, $additionalStopsLogs);
+                if(isset($requestData['latest_admin_comment']) && !empty($requestData['latest_admin_comment']))
+                {
+                }else{
+                    $linkedClients = !empty($booking->linked_clients) ? explode(',', $booking->linked_clients) : [];
+                    $this->bookingLogService->addLogMessages($bookingData, $booking, Auth::user(), $linkedClients, $additionalStopsLogs);
+                }
                 $bookingData['updated_by_id'] = $loggedUserId;
                 $this->bookingRepository->updateBooking($booking, $bookingData);
             }

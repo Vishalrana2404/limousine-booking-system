@@ -7,6 +7,8 @@ use App\Repositories\Interfaces\EmailTemplatesInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
 
 class EmailTemplatesService
 {
@@ -30,6 +32,14 @@ class EmailTemplatesService
         return $this->emailTemplatesRepository->getEmailTemplates(
             $loggedUser, $search, $page, $sortField, $sortDirection
         );
+    }
+
+    /**
+     * Get list of email templates with optional filters.
+     */
+    public function getAllTemplates()
+    {
+        return $this->emailTemplatesRepository->getAllTemplates();
     }
 
     /**
@@ -57,7 +67,39 @@ class EmailTemplatesService
                 'created_by_id' => Auth::id(),
             ];
 
+            // Save the template first to get its ID
             $template = $this->emailTemplatesRepository->addTemplate($templateData);
+
+            // Handle file upload if exists
+            if (isset($requestData['qr_code']) && $requestData['qr_code']->isValid()) {
+                $file = $requestData['qr_code'];
+                $originalName = $file->getClientOriginalName();
+                $newFileName = now()->format('YmdHis') . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+
+                $basePath = "email-templates/qr-codes/{$template->id}";
+
+                // Create nested directories if not exist
+                $pathsToCheck = [
+                    'email-templates',
+                    'email-templates/qr-codes',
+                    "email-templates/qr-codes/{$template->id}",
+                    $basePath
+                ];
+
+                foreach ($pathsToCheck as $path) {
+                    if (!Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->makeDirectory($path);
+                    }
+                }
+
+                // Store the file
+                Storage::disk('public')->putFileAs($basePath, $file, $newFileName);
+
+                // Update the template with image names
+                $template->qr_code_image_name = $originalName;
+                $template->qr_code_image = $newFileName;
+                $template->save();
+            }
 
             $this->activityLogService->addActivityLog(
                 'create', EmailTemplates::class, json_encode([]), json_encode($templateData),
@@ -79,10 +121,43 @@ class EmailTemplatesService
     {
         DB::beginTransaction();
         try {
+            unset($requestData['qr_code_image']);
             $requestData['updated_by_id'] = Auth::id();
             $oldData = json_encode($template);
 
+            // Handle file upload if exists
+            if (isset($requestData['qr_code']) && $requestData['qr_code']->isValid()) {
+                $file = $requestData['qr_code'];
+                $originalName = $file->getClientOriginalName();
+                $newFileName = now()->format('YmdHis') . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+
+                $basePath = "email-templates/qr-codes/{$template->id}";
+
+                // Create nested directories if not exist
+                $pathsToCheck = [
+                    'email-templates',
+                    'email-templates/qr-codes',
+                    "email-templates/qr-codes/{$template->id}",
+                    $basePath
+                ];
+
+                foreach ($pathsToCheck as $path) {
+                    if (!Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->makeDirectory($path);
+                    }
+                }
+
+                // Store the file
+                Storage::disk('public')->putFileAs($basePath, $file, $newFileName);
+
+                // Update the template with image names
+                $requestData['qr_code_image_name'] = $originalName;
+                $requestData['qr_code_image'] = $newFileName;
+            }
+
             $updatedTemplate = $this->emailTemplatesRepository->updateTemplate($template, $requestData);
+
+
 
             $this->activityLogService->addActivityLog(
                 'update', EmailTemplates::class, $oldData, json_encode($requestData),
@@ -149,36 +224,6 @@ class EmailTemplatesService
     }
 
     /**
-     * Upload a QR code image and update the template for the logged-in user.
-     */
-    public function changeQrCodeImage($qrCodeImage)
-    {
-        DB::beginTransaction();
-        try {
-            $loggedUser = Auth::user();
-            $folderName = 'qr_codes/';
-
-            $this->uploadService->setPath($folderName);
-            if (!Storage::exists($folderName)) {
-                Storage::makeDirectory($folderName);
-            }
-
-            $fileName = time() . '.' . $qrCodeImage->getClientOriginalExtension();
-            $uploadedPath = $this->uploadService->upload($qrCodeImage, $fileName);
-
-            $updatedTemplate = $this->emailTemplatesRepository->updateTemplate($loggedUser->id, [
-                'qr_code_image' => $uploadedPath
-            ]);
-
-            DB::commit();
-            return $updatedTemplate;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw new \Exception('Failed to update QR code image: ' . $e->getMessage());
-        }
-    }
-
-    /**
      * Check if a template name is unique.
      */
     public function checkUniqueTemplateName(string $templateName, int $templateId = null)
@@ -191,35 +236,6 @@ class EmailTemplatesService
         } catch (\Exception $e) {
             // If an exception occurs, rollback and throw an exception
             DB::rollback();
-            throw new \Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Remove profile image of the logged-in user (generic method, not specific to email template).
-     */
-    public function removeProfileImage(): bool
-    {
-        DB::beginTransaction();
-        try {
-            $loggedUser = Auth::user();
-            $oldProfileImage = $loggedUser->profile_image;
-
-            if ($oldProfileImage) {
-                $filePath = storage_path('app/public/' . $oldProfileImage);
-                if (file_exists($filePath)) {
-                    unlink($filePath);
-                }
-
-                $this->uploadService->setPath('profile_image/' . $loggedUser->id);
-                // This assumes updateUser is available (you had `$this->userRepository` before, which was undeclared)
-                $this->emailTemplatesRepository->updateTemplate($loggedUser->id, ['profile_image' => null]);
-            }
-
-            DB::commit();
-            return true;
-        } catch (\Exception $e) {
-            DB::rollBack();
             throw new \Exception($e->getMessage());
         }
     }

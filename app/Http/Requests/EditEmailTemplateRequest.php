@@ -17,12 +17,12 @@ class EditEmailTemplateRequest extends FormRequest
         $templateId = $this->route('id');
 
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('email_templates')->ignore($templateId)->whereNull('deleted_at')],
+            'name' => ['required', 'string', 'max:255'],
             'subject' => 'required|string|max:255',
             'header' => 'required|string',
             'footer' => 'required|string',
             'message' => 'required|string',
-            'qr_code_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'qr_code' => 'nullable|image|mimes:jpeg,png,jpg',
         ];
     }
 

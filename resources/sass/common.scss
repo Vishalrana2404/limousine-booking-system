@@ -424,6 +424,12 @@ label:not(.form-check-label):not(.custom-file-label){
     padding: 6px 20px;
     @extend .radius-10;
 }
+.bg-cancelled-with-charges-badge{
+    background: #f54b4b;
+    color: #FFFFFF;
+    padding: 6px 20px;
+    @extend .radius-10;
+}
 .bg-canceled-badge{
     background: #FF0000;
     color: #FFFFFF;
@@ -438,6 +444,9 @@ label:not(.form-check-label):not(.custom-file-label){
 }
 .completed-status td{
     background-color: #9df57b;
+}
+.cancelled-with-charges td{
+    background-color: #f54b4b;
 }
 
 .requested-to-cancel td{

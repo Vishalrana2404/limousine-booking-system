@@ -235,4 +235,9 @@ class EmailTemplatesRepository implements EmailTemplatesInterface
         // Execute the query and return the result
         return $query->get();
     }
+
+    public function getAllTemplates()
+    {
+        return $this->model->where('status', 'ACTIVE')->get();
+    }
 }

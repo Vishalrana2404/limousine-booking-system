@@ -563,6 +563,7 @@ export default class Bookings extends BaseClass {
                     { id: "COMPLETED", name: "Completed" },
                     { id: "CANCELLED", name: "Cancelled" },
                     { id: "SCHEDULED", name: "Scheduled" },
+                    { id: "CANCELLED WITH CHARGES", name: "Cancelled With Charges" },
                 ];
                 html += `<form id="inlineEditTableForm">`;
                 html += this.createDropdown(statusArray, name, oldId);
@@ -1630,12 +1631,13 @@ export default class Bookings extends BaseClass {
                         const $row = $(e).closest("tr");
                         const serviceTypeId = $row.find(".multiple_service_type_id").val();
                         const pickupLocationId = $row.find(".multiple_pick_up_location_id").val();
+                        const dropoffLocationId = $row.find(".multiple_drop_off_location_id").val();
 
                         return (
                             (serviceTypeId === "3" &&
-                                ["1", "2", "3", "4", "5"].includes(pickupLocationId)) ||
+                                ["1", "2", "3", "4", "7"].includes(dropoffLocationId)) ||
                             (serviceTypeId === "1" &&
-                                ["1", "2", "3", "4", "5"].includes(pickupLocationId))
+                                ["1", "2", "3", "4", "7"].includes(pickupLocationId))
                         );
                     },
                 },
@@ -2462,10 +2464,11 @@ export default class Bookings extends BaseClass {
                         depends: function (element) {
                             const serviceTypeId = $("#serviceTypeId").val();
                             const pickupLocationId = $("#pickupLocationId").val();
+                            const dropoffLocationId = $("#dropoffLocationId").val();
 
                             return (
-                                (serviceTypeId === "3"  && ["1", "2", "3", "4", "5"].includes(pickupLocationId)) ||
-                                (serviceTypeId === "1" && ["1", "2", "3", "4", "5"].includes(pickupLocationId))
+                                (serviceTypeId === "3"  && ["1", "2", "3", "4", "7"].includes(dropoffLocationId)) ||
+                                (serviceTypeId === "1" && ["1", "2", "3", "4", "7"].includes(pickupLocationId))
                             );
                         }
                     },

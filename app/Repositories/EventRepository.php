@@ -8,6 +8,7 @@ use App\Models\Client;
 use App\Repositories\Interfaces\EventInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Class EventRepository
@@ -241,8 +242,18 @@ class EventRepository implements EventInterface
     }
     public function getEventsByHotel(User $loggedUser, int $client_id = null)
     {
-        $hotelId = Client::where('id', $client_id)->select('hotel_id')->first();
-        $events = $this->filterEventResultByHotel($loggedUser, $hotelId->hotel_id)->get();
+        $loggedUser = Auth::user();
+        $loggedUserId = $loggedUser->id;
+        $loggedUserTypeSlug = $loggedUser->userType->slug ?? null;
+
+        if($loggedUserTypeSlug === null || in_array($loggedUserTypeSlug, ['admin', 'admin-staff']))
+        {
+            $client = Client::where('id', $client_id)->select('hotel_id')->first();
+            $hotelId = $client->hotel_id;
+        }else{
+            $hotelId = $client_id;
+        }
+        $events = $this->filterEventResultByHotel($loggedUser, $hotelId)->get();
 
         return $events;
     }

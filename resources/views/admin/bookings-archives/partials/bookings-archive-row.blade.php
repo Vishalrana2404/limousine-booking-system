@@ -109,6 +109,8 @@
         if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff'])) {
             if ($booking->status === 'CANCELLED') {
                 $rowClass = 'cancelled-status';
+            } elseif ($booking->status === 'CANCELLED WITH CHARGES') {
+                $rowClass = 'cancelled-with-charges';
             } elseif ($booking->status === 'COMPLETED') {
                 $rowClass = 'completed-status';
             } elseif (($booking->status === 'PENDING' || is_null($booking->driver_id) || is_null($booking->vehicle_id)) && $booking->status !== 'ACCEPTED') {

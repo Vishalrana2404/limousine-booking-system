@@ -387,6 +387,9 @@ return [
         'email_template_subject' => [
             'required' => 'Please enter Email Template Subject.',
         ],
+        'qr_code' => [
+            'extension' => 'Please upload only .jpg/.jpeg/.png file.',
+        ],
         'only_string' => "Please enter only letters and spaces.",
         'laterThan' => "Date cannot be earlier than or equal to pick up date time.",
         'flight_detail' => [

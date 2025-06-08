@@ -226,32 +226,64 @@
                                     <li class="list-group-item border-top-0">
                                         <div class="form-group row row-gap-2 mb-0">
                                             <label for="status" class="col-sm-6 col-form-label">Reservation Status</label>
+                                            @php
+                                                $status = $booking->status ?? null;
+                                                switch ($status) {
+                                                    case 'ACCEPTED':
+                                                        $badge = 'bg-accepted-badge';
+                                                        break;
+                                                    case 'PENDING':
+                                                        $badge = 'bg-pending-badge';
+                                                        break;
+                                                    case 'COMPLETED':
+                                                        $badge = 'bg-completed-badge';
+                                                        break;
+                                                    case 'CANCELLED':
+                                                        $badge = 'bg-canceled-badge';
+                                                        break;
+                                                    case 'SCHEDULED':
+                                                        $badge = 'bg-completed-badge';
+                                                        break;
+                                                    case 'CANCELLED WITH CHARGES':
+                                                        $badge = 'bg-cancelled-with-charges-badge';
+                                                        break;
+                                                    default:
+                                                        $badge = 'bg-pending-badge';
+                                                        break;
+                                                }
+                                            @endphp
                                             <div class="col-sm-6">
                                                 @php
-                                                    $status = $booking->status ?? null;
-                                                    switch ($status) {
-                                                        case 'ACCEPTED':
-                                                            $badge = 'bg-accepted-badge';
-                                                            break;
-                                                        case 'PENDING':
-                                                            $badge = 'bg-pending-badge';
-                                                            break;
-                                                        case 'COMPLETED':
-                                                            $badge = 'bg-completed-badge';
-                                                            break;
-                                                        case 'CANCELLED':
-                                                            $badge = 'bg-canceled-badge';
-                                                            break;
-                                                        case 'SCHEDULED':
-                                                            $badge = 'bg-completed-badge';
-                                                            break;
-                                                        default:
-                                                            $badge = 'bg-pending-badge';
-                                                            break;
-                                                    }
+                                                    $user = Auth::user();
+                                                    $userSlug = optional($user->userType)->slug;
+                                                    $isAdminOrStaff = is_null($userSlug) || in_array($userSlug, ['admin', 'admin-staff']);
+                                                    $isAllowedDept = in_array($user->department, [null, 'Management', 'Finance']);
+                                                    $isStatusLocked = $booking->status === 'CANCELLED WITH CHARGES';
+
+                                                    $statusOptions = [
+                                                        'PENDING' => 'Pending',
+                                                        'ACCEPTED' => 'Accepted',
+                                                        'COMPLETED' => 'Completed',
+                                                        'CANCELLED' => 'Cancelled',
+                                                        'SCHEDULED' => 'Scheduled',
+                                                        'CANCELLED WITH CHARGES' => 'Cancelled With Charges',
+                                                    ];
                                                 @endphp
-                                                <span
-                                                    class="badge {{ $badge }}">{{ ucfirst(strtolower($status)) }}</span>
+
+                                                @if(($isAdminOrStaff && $isAllowedDept) || !$isStatusLocked)
+                                                    <select name="status" id="status"
+                                                        class="form-control form-select custom-select @error('status') is-invalid @enderror"
+                                                        autocomplete="off" style="border: 1px solid black;">
+                                                        <option value="">Select One</option>
+                                                        @foreach($statusOptions as $value => $label)
+                                                            <option value="{{ $value }}" {{ $booking->status === $value ? 'selected' : '' }}>
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                @else
+                                                    <span class="badge {{ $badge }}">{{ ucfirst(strtolower($status)) }}</span>
+                                                @endif
                                             </div>
                                         </div>
                                     </li>
@@ -1797,7 +1829,7 @@
                                                     Waiting
                                                     Time Surcharge</label>
                                                 <div class="col-sm-4 text-sm">
-                                                    <input type="text" id="'arrivel-waiting-charge-description"
+                                                    <input type="text" id="arrivel-waiting-charge-description"
                                                         name="arrivel_waiting_charge_description"
                                                         value="{{ $booking->bookingBilling->arrivel_waiting_charge_description ?? null }}"
                                                         class="form-control @error('arrivel_waiting_charge_description') is-invalid @enderror"
@@ -1898,7 +1930,7 @@
                                                     City
                                                     Surcharge</label>
                                                 <div class="col-sm-4 text-sm">
-                                                    <input type="text" id="'outside-city-charge-description"
+                                                    <input type="text" id="outside-city-charge-description"
                                                         name="outside_city_charge_description"
                                                         value="{{ $booking->bookingBilling->outside_city_charge_description ?? null }}"
                                                         class="form-control @error('outside_city_charge_description') is-invalid @enderror"
@@ -1993,7 +2025,7 @@
                                                 <label for="last-minute-surcharge"
                                                     class="col-sm-4 col-form-label py-0">Additional Charges</label>
                                                 <div class="col-sm-4 text-sm">
-                                                    <input type="text" id="'last-minute-charge-description"
+                                                    <input type="text" id="last-minute-charge-description"
                                                         name="last_minute_charge_description"
                                                         value="{{ $booking->bookingBilling->last_minute_charge_description ?? null }}"
                                                         class="form-control @error('last_minute_charge_description') is-invalid @enderror"
@@ -2087,7 +2119,7 @@
                                                     class="col-sm-4 col-form-label py-0">Additional
                                                     Stop Charges</label>
                                                 <div class="col-sm-4 text-sm">
-                                                    <input type="text" id="'additional-charge-description"
+                                                    <input type="text" id="additional-charge-description"
                                                         name="additional_charge_description"
                                                         value="{{ $booking->bookingBilling->additional_charge_description ?? null }}"
                                                         class="form-control @error('additional_charge_description') is-invalid @enderror"
@@ -2165,7 +2197,7 @@
                                                 <label for="misc-surcharge" class="col-sm-4 col-form-label py-0">Misc
                                                     Charges</label>
                                                 <div class="col-sm-4 text-sm">
-                                                    <input type="text" id="'misc-charge-description"
+                                                    <input type="text" id="misc-charge-description"
                                                         name="misc_charge_description"
                                                         value="{{ $booking->bookingBilling->misc_charge_description ?? null }}"
                                                         class="form-control @error('misc_charge_description') is-invalid @enderror"
@@ -2224,11 +2256,12 @@
                                         </li>
                                         @php
                                             $extraChildSeatChargesDiv = ($booking->child_seat_required == 'yes' && $booking->no_of_seats_required == 2) ? 'block' : 'none';
-                                            $totalBillingCharges = $booking->bookingBilling->total_charge ?? 0;
+                                            $subTotalBillingCharges = $booking->bookingBilling->sub_total_charge ?? 0;
                                             if($booking->child_seat_required == 'yes' && $booking->no_of_seats_required == 2)
                                             {
-                                                $totalBillingCharges =  (int)($totalBillingCharges) + 10;
+                                                $subTotalBillingCharges =  (int)($subTotalBillingCharges) + 10;
                                             }
+                                            $totalBillingCharges = $booking->bookingBilling->total_charge ?? 0;
                                         @endphp
                                         <li class="list-group-item" style="display: {{$extraChildSeatChargesDiv}}" id="extra-child-seat-charges-div">
                                             <div class="form-group row row-gap-2 mb-0">
@@ -2272,6 +2305,78 @@
                                         </li>
                                         <li class="list-group-item">
                                             <div class="form-group row row-gap-2 mb-0">
+                                                <div class="col-sm-1">
+                                                    <div class="custom-control custom-checkbox">
+                                                        @php
+                                                            $isDiscount = $booking->bookingBilling->is_discount ?? null;
+                                                            $isDiscountApplied = $isDiscount ? 'checked' : '';
+                                                            $discountType = $booking->bookingBilling->discount_type ?? null;
+                                                            $discountValue = $booking->bookingBilling->discount_value ?? null;
+                                                        @endphp
+                                                        <input class="custom-control-input" type="checkbox"
+                                                            name="is_discount" id="is_discount"
+                                                            {{ $isDiscountApplied }}>
+                                                        <label for="is_discount"
+                                                            class="custom-control-label"></label>
+                                                    </div>
+                                                </div>
+                                                <label for="discount_type" class="col-sm-4 col-form-label py-0">Discount</label>
+                                                <div class="col-sm-4 text-sm">
+                                                    <select name="discount_type" id="discount_type" class="form-control">
+                                                        <option value="" {{ !$isDiscount ? 'selected' : ''; }}>Select Discount</option>
+                                                        <option value="fixed" {{ $isDiscount && $discountType == 'fixed' ? 'selected' : ''; }}>Fixed</option>
+                                                        <option value="percentage" {{ $isDiscount && $discountType == 'percentage' ? 'selected' : ''; }}>Percentage</option>
+                                                    </select>
+                                                    @error('discount_type')
+                                                        <span class="invalid-feedback" role="alert">
+                                                            <strong>{{ $message }}</strong>
+                                                        </span>
+                                                    @enderror
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <div class="input-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">
+                                                                    {!! $isDiscount && $discountType == 'percentage' ? '<i class="fas fa-percentage"></i>' : '<i class="fas fa-dollar-sign"></i>' !!}
+                                                                </span>
+                                                            </div>
+                                                            <input type="text" id="discount_value"
+                                                                name="discount_value"
+                                                                value="{{ $discountValue ?? null }}"
+                                                                class="form-control @error('discount_value') is-invalid @enderror"
+                                                                placeholder="Discount">
+                                                        </div>
+                                                    </div>
+                                                    @error('discount_value')
+                                                        <span class="invalid-feedback" role="alert">
+                                                            <strong>{{ $message }}</strong>
+                                                        </span>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <div class="form-group row row-gap-2 mb-0">
+                                                <div class="col-sm-1"></div>
+                                                <div class="col-sm-5 text-left"><span class="bold">Sub Total</span></div>
+                                                <div class="col-sm-6 text-right"><span
+                                                        id="sub-total-charges">{{ $booking->status == 'CANCELLED' ? 0 : $subTotalBillingCharges; }}</span>
+                                                </div>
+                                                <input type="hidden" name="sub_total_charge" id="sub-total-charge"
+                                                    value="{{ $booking->status == 'CANCELLED' ? 0 : $subTotalBillingCharges; }}" />
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <div class="form-group row row-gap-2 mb-0">
+                                                <div class="col-sm-1"></div>
+                                                <div class="col-sm-5 text-left"><span class="bold">Discount</span></div>
+                                                <div class="col-sm-6 text-right"><span id="total-discount-value">{{ $discountValue ?? 0; }}</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <div class="form-group row row-gap-2 mb-0">
                                                 <div class="col-sm-1"></div>
                                                 <div class="col-sm-5 text-left"><span class="bold">Total</span></div>
                                                 <div class="col-sm-6 text-right"><span
@@ -2284,6 +2389,117 @@
                                             </div>
                                         </li>
                                     </ul>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                    @if (in_array($loggedUserType, [null, 'admin']) && in_array(Auth::user()->department, [null, 'Management', 'Finance']))
+                        <div class="col-md-6">
+                            <div class="card card-outline no-box-shadow border-1 p-3 h-100">
+                                <div class="card-header px-0">
+                                    <h3 class="head-sm medium">Invoice Information</h3>
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul class="list-group list-group-unbordered mb-3">
+                                        @php
+                                            $bookingStatus = $booking->status ?? '';
+                                        @endphp
+
+                                        <li class="list-group-item">
+                                            <div class="form-group row row-gap-2 mb-0 align-items-center">
+                                                <div class="col-sm-1">
+                                                    <input type="checkbox" class="invoice-check" id="check-final-billing">
+                                                </div>
+                                                <label for="final-billing-amount-value" class="col-sm-4 col-form-label py-0">Final Billing Amount</label>
+                                                <div class="col-sm-7">
+                                                    <p id="final-billing-amount">${{ $subTotalBillingCharges ?? 'N/A' }}</p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li class="list-group-item">
+                                            <div class="form-group row row-gap-2 mb-0 align-items-center">
+                                                <div class="col-sm-1">
+                                                    <input type="checkbox" class="invoice-check" id="check-discount-type">
+                                                </div>
+                                                <label for="discount-type-value" class="col-sm-4 col-form-label py-0">Discount Type</label>
+                                                <div class="col-sm-7">
+                                                    <p id="discount-type">{{ $isDiscount && $discountType == 'fixed' ? 'Fixed' : ($isDiscount && $discountType == 'percentage' ? 'Percentage' : '')  }}</p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li class="list-group-item">
+                                            <div class="form-group row row-gap-2 mb-0 align-items-center">
+                                                <div class="col-sm-1">
+                                                    <input type="checkbox" class="invoice-check" id="check-discount-amount">
+                                                </div>
+                                                <label for="discount-amount-value" class="col-sm-4 col-form-label py-0">Discount Amount</label>
+                                                <div class="col-sm-7">
+                                                    <p id="discount-amount">{{ $discountValue ? '$' . $discountValue : ''; }}</p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li class="list-group-item">
+                                            <div class="form-group row row-gap-2 mb-0 align-items-center">
+                                                <div class="col-sm-1">
+                                                    <input type="checkbox" class="invoice-check" id="check-corporate">
+                                                </div>
+                                                <label for="hotel-value" class="col-sm-4 col-form-label py-0">Corporate</label>
+                                                <div class="col-sm-7">
+                                                    <p id="corporate">{{ $booking->client->hotel->name ?? 'N/A' }}</p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li class="list-group-item">
+                                            <div class="form-group row row-gap-2 mb-0 align-items-center">
+                                                <div class="col-sm-1">
+                                                    <input type="checkbox" class="invoice-check" id="check-event">
+                                                </div>
+                                                <label for="event-value" class="col-sm-4 col-form-label py-0">Event</label>
+                                                <div class="col-sm-7">
+                                                    <p id="event">{{ $booking->event->name ?? 'N/A' }}</p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li class="list-group-item">
+                                            <div class="form-group row row-gap-2 mb-0 align-items-center">
+                                                <div class="col-sm-1">
+                                                    <input type="checkbox" class="invoice-check" id="check-status">
+                                                </div>
+                                                <label for="status-value" class="col-sm-4 col-form-label py-0">Status</label>
+                                                <div class="col-sm-7">
+                                                    <p id="booking-status">{{ $bookingStatus ?: 'N/A' }}</p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li class="list-group-item">
+                                            <div class="form-group row row-gap-2 mb-0 align-items-center">
+                                                <div class="col-sm-1">
+                                                    <input type="checkbox" class="invoice-check" id="check-email-template-for-invoice">
+                                                </div>
+                                                <label for="email_template_for_invoice" class="col-sm-4 col-form-label py-0">Select Template</label>
+                                                <div class="col-sm-7">
+                                                    <select name="email_template_for_invoice" id="email_template_for_invoice" class="form-control form-select custom-select @error('email_template_for_invoice') is-invalid @enderror">
+                                                        <option value="">Select Template</option>
+                                                        @if(!empty($emailTemplates))
+                                                            @foreach($emailTemplates as $template)
+                                                                <option value="{{ $template->id }}">{{ $template->name }}</option>
+                                                            @endforeach
+                                                        @endif
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+
+                                    <div class="text-center mb-3">
+                                        <button type="button" id="generate-invoice-btn" class="btn btn-primary" style="display: none;">Generate Invoice</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

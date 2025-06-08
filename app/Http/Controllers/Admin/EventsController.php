@@ -81,7 +81,7 @@ class EventsController extends Controller
                 $loggedUser->client->load(['hotel', 'multiCorporates.hotel']);
 
                 $loggedInUserHotelDetails = $loggedUser->client->hotel;
-                $hotel_id = $loggedUser->client->id;
+                $hotel_id = $loggedUser->client->hotel_id;
                 $multiCorporates = $loggedUser->client->multiCorporates;
 
                 $multipleCorporatesHotelData = $multiCorporates->pluck('hotel');
@@ -142,7 +142,7 @@ class EventsController extends Controller
                 $loggedUser->client->load(['hotel', 'multiCorporates.hotel']);
 
                 $loggedInUserHotelDetails = $loggedUser->client->hotel;
-                $hotel_id = $loggedUser->client->id;
+                $hotel_id = $loggedUser->client->hotel_id;
                 $multiCorporates = $loggedUser->client->multiCorporates;
 
                 $multipleCorporatesHotelData = $multiCorporates->pluck('hotel');

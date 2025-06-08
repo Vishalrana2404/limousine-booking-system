@@ -18,6 +18,7 @@ export default class EmailTemplates extends BaseClass {
         $(document).on("click", "#addEmailTemplateFormButton", this.handleSaveEmailTemplate);
         $(document).on("click", "#updateEmailTemplateFormButton", this.handleEditEmailTemplate);
         $(document).on("click", ".fa-trash", this.handleDeleteModal);
+        $(document).on("change", "#qr_code", this.handleQrCodeImagePreview);
         $(document).on("click", "#deleteConfirmButton", this.handleDeleteEmailTemplate);
         $(document).on(
             "click",
@@ -46,6 +47,23 @@ export default class EmailTemplates extends BaseClass {
             "#emailTemplatesPagination .pagination a",
             this.handlePagnation
         );
+    }
+
+    handleQrCodeImagePreview = (event) => {
+        const preview = $('#qrCodePreview');
+        const file = event.target.files[0];
+        
+        if (file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.attr('src', e.target.result);
+            };
+
+            reader.readAsDataURL(file);
+        } else {
+            preview.attr('src', "{{ asset('images/default-preview.png') }}");
+        }
     }
 
     handlePagnation = (event) => {
@@ -337,6 +355,9 @@ export default class EmailTemplates extends BaseClass {
                     required: true,
                     customStatus: true,
                 },
+                qr_code: {
+                    extension: "jpg|jpeg|png"
+                },
             },
             messages: {
                 name: {
@@ -358,6 +379,9 @@ export default class EmailTemplates extends BaseClass {
                 },
                 status: {
                     required: this.languageMessage.status.required,
+                },
+                qr_code: {
+                    extension: this.languageMessage.qr_code.extension
                 },
             },
             errorElement: "span",
@@ -417,6 +441,9 @@ export default class EmailTemplates extends BaseClass {
                     required: true,
                     customStatus: true,
                 },
+                qr_code: {
+                    extension: "jpg|jpeg|png"
+                },
             },
             messages: {
                 name: {
@@ -438,6 +465,9 @@ export default class EmailTemplates extends BaseClass {
                 },
                 status: {
                     required: this.languageMessage.status.required,
+                },
+                qr_code: {
+                    extension: this.languageMessage.qr_code.extension
                 },
             },
             errorElement: "span",
