@@ -76,6 +76,7 @@ return [
     'booking_filtered' => 'Bookings filtered successfully.',
     'booking_notification_subject' => 'Changes made on booking.',
     'booking_notification_message' => 'New booking has been created by :created_by',
+    'invoice_generated_successfully' => 'Invoice generated successfully.',
     'notification_marked_as_read' => 'Notification marked as read.',
     'booking_updated' => "Booking updated successfully.",
     'booking_cancelled_request' => 'Your request for cancel this booking is submitted.',

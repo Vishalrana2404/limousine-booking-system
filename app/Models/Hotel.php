@@ -71,4 +71,9 @@ class Hotel extends Model
     {
         return $this->hasMany(ClientMultiCorporates::class);
     }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoices::class);
+    }
 }

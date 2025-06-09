@@ -562,7 +562,7 @@ export default class Bookings extends BaseClass {
                     { id: "PENDING", name: "Pending" },
                     { id: "COMPLETED", name: "Completed" },
                     { id: "CANCELLED", name: "Cancelled" },
-                    { id: "SCHEDULED", name: "Scheduled" },
+                    // { id: "SCHEDULED", name: "Scheduled" },
                     { id: "CANCELLED WITH CHARGES", name: "Cancelled With Charges" },
                 ];
                 html += `<form id="inlineEditTableForm">`;
@@ -2888,7 +2888,7 @@ export default class Bookings extends BaseClass {
 
                 // Create new input group
                 const newStopInput = $(`
-                    <div class="col-md-4 additionalContainers">
+                    <div class="col-md-4 additionalContainers" style="min-height: 120px;">
                         <div class="form-group">
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <label for="additionalStops_${newId}">${destinationLabel} Destination</label>
@@ -2946,7 +2946,7 @@ export default class Bookings extends BaseClass {
 
             // Create new input group
             const newStopInput = $(`
-                <div class="col-md-4 additionalContainers">
+                <div class="col-md-4 additionalContainers" style="min-height: 120px;">
                     <div class="form-group">
                         <div style="display: flex; align-items: center; justify-content: space-between;">
                             <label for="additionalStops_${newId}">${destinationLabel} Destination</label>

@@ -246,13 +246,9 @@ class EventRepository implements EventInterface
         $loggedUserId = $loggedUser->id;
         $loggedUserTypeSlug = $loggedUser->userType->slug ?? null;
 
-        if($loggedUserTypeSlug === null || in_array($loggedUserTypeSlug, ['admin', 'admin-staff']))
-        {
-            $client = Client::where('id', $client_id)->select('hotel_id')->first();
-            $hotelId = $client->hotel_id;
-        }else{
-            $hotelId = $client_id;
-        }
+        $client = Client::where('id', $client_id)->select('hotel_id')->first();
+        $hotelId = $client->hotel_id;
+        
         $events = $this->filterEventResultByHotel($loggedUser, $hotelId)->get();
 
         return $events;

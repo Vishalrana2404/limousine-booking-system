@@ -348,9 +348,9 @@ export default class EmailTemplates extends BaseClass {
                 footer: {
                     required: true,
                 },
-                message: {
-                    required: true,
-                },
+                // message: {
+                //     required: true,
+                // },
                 status: {
                     required: true,
                     customStatus: true,
@@ -373,9 +373,6 @@ export default class EmailTemplates extends BaseClass {
                 },
                 footer: {
                     required: this.languageMessage.email_template_footer.required,
-                },
-                message: {
-                    required: this.languageMessage.email_template_message.required,
                 },
                 status: {
                     required: this.languageMessage.status.required,

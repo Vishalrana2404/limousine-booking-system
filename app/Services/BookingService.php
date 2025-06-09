@@ -508,13 +508,14 @@ class BookingService
             $eventId = null;
             if (isset($requestData['event_id']) && !empty($requestData['event_id'])) {
                 $eventId = $requestData['event_id'];
+            }else{
+                $eventId = NULL;
             }
             $guestname = join(',', $requestData['guest_name']);
             $countryCode = join(',', $requestData['country_code']);
             $phone = join(',', $requestData['phone']);
     
-            if (isset($requestData['event_id']))
-                $bookingData['event_id'] = $eventId;
+            $bookingData['event_id'] = $eventId;
             if (isset($requestData['client_id']))
                 $bookingData['client_id'] = $clientId;
             if (isset($requestData['service_type_id']))

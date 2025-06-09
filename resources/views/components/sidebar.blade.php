@@ -1,6 +1,7 @@
 <!-- Main Sidebar Container -->
 @php
     $loggedUsertypeSlug = Auth::user()->userType->slug ?? null;
+    $loggedUserDepartment = Auth::user()->department ?? null;
 @endphp
 <aside class="main-sidebar sidebar-light-primary border-right custom-sidebar">
     <!-- Brand Logo -->
@@ -163,13 +164,25 @@
                     </ul>
                 </li>
                 @endif
-                @if ($loggedUsertypeSlug === null || in_array($loggedUsertypeSlug, ['admin', 'client-admin']))
-                    <li class="nav-item">
-                        <a href="{{ route('email-templates') }}" class="nav-link {{ Request::is('email-templates*') ? 'active' : '' }}"
-                            title="Templates">
-                            <span class="icon icon-nav user-icon"></span>
-                            <p>Templates</p>
+                @if ($loggedUserDepartment === null || in_array($loggedUserDepartment, ['Management', 'Finance', 'Supervisor']))
+                    <li
+                        class="nav-item {{ Request::is('email-templates*') ? 'menu-open' : '' }}">
+                        <a href="javascript:void(0);" class="nav-link" title="Billing">
+                            <span class="icon icon-nav billing-icon"></span>
+                            <p>
+                                Billing
+                                <i class="right fas fa-angle-right"></i>
+                            </p>
                         </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{{ route('email-templates') }}" class="nav-link {{ Request::is('email-templates*') ? 'active' : '' }}"
+                                    title="Email Templates">
+                                    <span class="icon icon-nav"></span>
+                                    <p>Email Templates</p>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 @endif
                 @if ($loggedUsertypeSlug === null || in_array($loggedUsertypeSlug, ['admin', 'client-admin']))

@@ -132,7 +132,7 @@
         $hotel = $booking->client->hotel->name ?? null;
         $event = $booking->event->name ?? null;
         if ($hotel) {
-            $hotelValue = $hotel;
+            $hotelValue = $hotel . '<br>(' . $event . ')';
         } else {
             $hotelValue = 'N/A';
         }
@@ -254,7 +254,10 @@
       <td @if ($isEditable) data-name="guest_name" data-old="{{ $guestNames }}" @endif
           class="text-truncate" style="max-width: 200px" title="{{ $resultGuestName ?? 'N/A' }}">{!! $resultGuestName ?? 'N/A' !!}</td>
       @if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']))
-          <td class="text-truncate" title="{{ strip_tags($hotelValue) }}">{{ \Illuminate\Support\Str::limit(strip_tags($hotelValue), 22) }} <br> {{ $event }}</td>
+        @php
+            $hotelTruncated = \Illuminate\Support\Str::limit(strip_tags($hotel), 22);
+        @endphp
+          <td class="text-truncate" title="{{ strip_tags($hotel . ' (' . $event . ')') }}">{{ $hotelTruncated }}<br>({{ $event }})</td>
       @endif
         <td @if ($isEditable) data-name="phone" data-old="{{ $booking->phone }}" data-country-code="{{ $booking->country_code }}" @endif
           class="text-truncate" style="max-width: 200px" title="{{ $booking->country_code ? '+(' . $booking->country_code . ')' : '' }}{{ $booking->phone ?? 'N/A' }}">            

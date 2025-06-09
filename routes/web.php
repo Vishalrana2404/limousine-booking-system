@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\InvoicesController;
 use \Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Artisan;
 
@@ -246,6 +247,9 @@ Route::middleware(['Auth','SanitizeInput', AuthenticateSession::class])->group(f
         Route::post('/export', [DriverScheduleController::class, 'export'])->name('export');
         Route::post('/sendDriverSchedule', [DriverScheduleController::class, 'sendDriverSchedule'])->name('send-driver-schedule');
 
+
+        // Invoices Routes
+        Route::post('generate-invoice', [InvoicesController::class, 'create'])->name('generate-invoice');
     });
 
 
@@ -484,7 +488,7 @@ Route::middleware(['Auth','SanitizeInput', AuthenticateSession::class])->group(f
 //     try {
 //         // Run specific migrations
 //         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_05_29_002522_add_sequence_column_in_vehicle_classes_table.php',
+//             '--path' => 'database/migrations/2025_06_08_224137_add_columns_in_bookings_table.php',
 //             '--force' => true
 //         ]);
 //         return 'Selected migrations ran successfully.';

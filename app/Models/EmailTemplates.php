@@ -15,7 +15,7 @@ class EmailTemplates extends Model
 
     protected $table = 'email_templates';
 
-    protected $fillable = ['name','subject', 'header', 'footer', 'message', 'qr_code_image', 'qr_code_image_name', 'status', 'created_by_id', 'updated_by_id'];
+    protected $fillable = ['name','subject', 'header', 'footer', 'qr_code_image', 'qr_code_image_name', 'status', 'created_by_id', 'updated_by_id'];
 
     public function createdBy()
     {
@@ -37,5 +37,10 @@ class EmailTemplates extends Model
 
         // Use Storage facade to get public url assuming you saved in 'public' disk
         return Storage::disk('public')->url($path);
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoices::class);
     }
 }

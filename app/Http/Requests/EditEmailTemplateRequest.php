@@ -21,7 +21,6 @@ class EditEmailTemplateRequest extends FormRequest
             'subject' => 'required|string|max:255',
             'header' => 'required|string',
             'footer' => 'required|string',
-            'message' => 'required|string',
             'qr_code' => 'nullable|image|mimes:jpeg,png,jpg',
         ];
     }
@@ -34,7 +33,6 @@ class EditEmailTemplateRequest extends FormRequest
             'subject.required' => __('validation.required'),
             'header.required' => __('validation.required'),
             'footer.required' => __('validation.required'),
-            'message.required' => __('validation.required'),
             'qr_code_image.image' => __('validation.image'),
             'qr_code_image.mimes' => __('validation.mimes'),
             'qr_code_image.max' => __('validation.max.file'),

@@ -67,7 +67,10 @@ class Booking extends Model
         'additional_stops',
         'latest_comment',
         'latest_admin_comment',
-        'additional_stops_required'
+        'additional_stops_required',
+        'invoice_generated',
+        'invoice_booking_id',
+        'invoice_generated_by'
     ];
 
     public function serviceType()
@@ -152,6 +155,16 @@ class Booking extends Model
     public function additionalStops()
     {
         return $this->hasMany(BookingsAdditionalStops::class);
+    }
+
+    public function invoiceBooking()
+    {
+        return $this->belongsTo(InvoiceBookings::class, 'invoice_booking_id');
+    }
+
+    public function invoiceGeneratedBy()
+    {
+        return $this->belongsTo(User::class, 'invoice_generated_by');
     }
 
 

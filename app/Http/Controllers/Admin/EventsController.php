@@ -81,20 +81,13 @@ class EventsController extends Controller
                 $loggedUser->client->load(['hotel', 'multiCorporates.hotel']);
 
                 $loggedInUserHotelDetails = $loggedUser->client->hotel;
-                $hotel_id = $loggedUser->client->hotel_id;
+                $client_id = $loggedUser->client->id;
                 $multiCorporates = $loggedUser->client->multiCorporates;
 
                 $multipleCorporatesHotelData = $multiCorporates->pluck('hotel');
 
                 if (!$multipleCorporatesHotelData->isEmpty() && !$multipleCorporatesHotelData->contains('id', $loggedInUserHotelDetails->id)) {
                     $multipleCorporatesHotelData->push($loggedInUserHotelDetails);
-                }
-
-                if(!empty($multipleCorporatesHotelData) && count($multipleCorporatesHotelData) > 1)
-                {
-                    $events = NULL;
-                }else{
-                    $events = $this->eventService->getEventDataByHotel($hotel_id);
                 }
             }
         }
@@ -142,20 +135,13 @@ class EventsController extends Controller
                 $loggedUser->client->load(['hotel', 'multiCorporates.hotel']);
 
                 $loggedInUserHotelDetails = $loggedUser->client->hotel;
-                $hotel_id = $loggedUser->client->hotel_id;
+                $client_id = $loggedUser->client->id;
                 $multiCorporates = $loggedUser->client->multiCorporates;
 
                 $multipleCorporatesHotelData = $multiCorporates->pluck('hotel');
 
                 if (!$multipleCorporatesHotelData->isEmpty() && !$multipleCorporatesHotelData->contains('id', $loggedInUserHotelDetails->id)) {
                     $multipleCorporatesHotelData->push($loggedInUserHotelDetails);
-                }
-
-                if(!empty($multipleCorporatesHotelData) && count($multipleCorporatesHotelData) > 1)
-                {
-                    $events = NULL;
-                }else{
-                    $events = $this->eventService->getEventDataByHotel($hotel_id);
                 }
             }
         }
@@ -281,7 +267,8 @@ class EventsController extends Controller
 
     public function getHotelEvents(Request $request)
     {
-        $eventData = $this->eventService->getEventDataByHotel($request->hotel_id);
+        $client_id = $request->hotel_id;
+        $eventData = $this->eventService->getEventDataByHotel($client_id);
 
         if(!empty($eventData))
         {

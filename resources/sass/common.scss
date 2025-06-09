@@ -296,6 +296,12 @@ label:not(.form-check-label):not(.custom-file-label){
     background-repeat: no-repeat;
 }
 
+.billing-icon {
+    @include wh(18px, 18px);
+    @include cover-image("billing.png");
+    background-repeat: no-repeat;
+}
+
 .user-icon {
     @include wh(18px, 18px);
     @include cover-image("user.svg");

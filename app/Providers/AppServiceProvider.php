@@ -44,6 +44,8 @@ use App\Repositories\VehicleRepository;
 use App\Repositories\NotificationRepository;
 use App\Repositories\EmailTemplatesRepository;
 use App\Repositories\Interfaces\EmailTemplatesInterface;
+use App\Repositories\InvoicesRepository;
+use App\Repositories\Interfaces\InvoicesInterface;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -74,6 +76,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PeakPeriodInterface::class, PeakPeriodRepository::class);
         $this->app->bind(CitySurchargeInterface::class, CitySurchargeRepository::class);
         $this->app->bind(EmailTemplatesInterface::class, EmailTemplatesRepository::class);
+        $this->app->bind(InvoicesInterface::class, InvoicesRepository::class);
     }
 
     /**

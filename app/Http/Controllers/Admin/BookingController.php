@@ -117,7 +117,7 @@ class BookingController extends Controller
                 $loggedUser->client->load(['hotel', 'multiCorporates.hotel']);
 
                 $loggedInUserHotelDetails = $loggedUser->client->hotel;
-                $hotel_id = $loggedUser->client->hotel_id;
+                $client_id = $loggedUser->client->id;
 
                 $multiCorporates = $loggedUser->client->multiCorporates;
 
@@ -131,7 +131,7 @@ class BookingController extends Controller
                 {
                     $events = NULL;
                 }else{
-                    $events = $this->eventService->getEventDataByHotel($hotel_id);
+                    $events = $this->eventService->getEventDataByHotel($client_id);
                 }
             }
         }
@@ -296,12 +296,7 @@ class BookingController extends Controller
         $peakPeriods = $this->peakPeriodService->getAllPeakPeriod();
         $driverOffDays = $this->driverOffDayService->getSavedDates();
 
-        if ($userTypeSlug === null || in_array($userTypeSlug, ['admin', 'admin-staff']))
-        {
-            $events = $this->eventService->getEventDataByHotel($booking->client_id);
-        }else{
-            $events = $this->eventService->getEventDataByHotel($booking->client->hotel_id);
-        }
+        $events = $this->eventService->getEventDataByHotel($booking->client_id);
         
         // if(in_array($userTypeSlug, ['client-admin', 'client-staff']) && $loggedUserClientId !== null)
         // {
@@ -423,13 +418,13 @@ class BookingController extends Controller
                 
                 if(!empty($hotelIdsFromLinkedCorporates))
                 {
-                    if($booking->createdBy->client->hotel_id == $loggedUserHotelId)
+                    if($booking->createdBy->client && $booking->createdBy->client->hotel_id == $loggedUserHotelId)
                     {
                         
                     }else{
-                        if($hotel->hotel->is_head_office == 1 && ($booking->createdBy->client->hotel->linked_head_office == $loggedUserHotelId || $booking->client->hotel->id == $loggedUserHotelId || $booking->client->hotel->linked_head_office == $loggedUserHotelId))
+                        if($hotel->hotel->is_head_office == 1 && (($booking->createdBy->client && $booking->createdBy->client->hotel->linked_head_office == $loggedUserHotelId) || $booking->client->hotel->id == $loggedUserHotelId || $booking->client->hotel->linked_head_office == $loggedUserHotelId))
                         {
-
+    
                         }else{
                             if (!in_array($bookedByHotelId, $hotelIdsFromLinkedCorporates->toArray())) {
                                 $this->helper->alertResponse(__('message.permission_denied'), 'error');

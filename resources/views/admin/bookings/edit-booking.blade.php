@@ -257,20 +257,28 @@
                                                     $user = Auth::user();
                                                     $userSlug = optional($user->userType)->slug;
                                                     $isAdminOrStaff = is_null($userSlug) || in_array($userSlug, ['admin', 'admin-staff']);
-                                                    $isAllowedDept = in_array($user->department, [null, 'Management', 'Finance']);
+                                                    $isAllowedDept = in_array($user->department, [null, 'Management', 'Finance', 'Supervisor']);
                                                     $isStatusLocked = $booking->status === 'CANCELLED WITH CHARGES';
 
-                                                    $statusOptions = [
-                                                        'PENDING' => 'Pending',
-                                                        'ACCEPTED' => 'Accepted',
-                                                        'COMPLETED' => 'Completed',
-                                                        'CANCELLED' => 'Cancelled',
-                                                        'SCHEDULED' => 'Scheduled',
-                                                        'CANCELLED WITH CHARGES' => 'Cancelled With Charges',
-                                                    ];
+                                                    if($isAllowedDept)
+                                                    {
+                                                        $statusOptions = [
+                                                            'PENDING' => 'Pending',
+                                                            'ACCEPTED' => 'Accepted',
+                                                            'COMPLETED' => 'Completed',
+                                                            'CANCELLED' => 'Cancelled',
+                                                            'CANCELLED WITH CHARGES' => 'Cancelled With Charges',
+                                                        ];
+                                                    }else{
+                                                        $statusOptions = [
+                                                            'PENDING' => 'Pending',
+                                                            'ACCEPTED' => 'Accepted',
+                                                            'CANCELLED' => 'Cancelled',
+                                                        ];
+                                                    }
                                                 @endphp
 
-                                                @if(($isAdminOrStaff && $isAllowedDept) || !$isStatusLocked)
+                                                @if(($isAdminOrStaff))
                                                     <select name="status" id="status"
                                                         class="form-control form-select custom-select @error('status') is-invalid @enderror"
                                                         autocomplete="off" style="border: 1px solid black;">
@@ -385,7 +393,7 @@
                                         <div class="form-group row row-gap-2 mb-0">
                                             <label for="event-id" class="col-sm-6 col-form-label">Event</label>
                                             <div class="col-sm-6">
-                                                <select name="event_id" id="sevent-id"
+                                                <select name="event_id" id="event-id"
                                                     class="form-control form-select custom-select @error('event_id') is-invalid @enderror"
                                                     autocomplete="off">
                                                     <option value="">Select One</option>
@@ -1073,7 +1081,7 @@
                                                     <select name="client_id" id="clientId"
                                                         class="form-control form-select custom-select @error('client_id') is-invalid @enderror"
                                                         autocomplete="off">
-                                                        <option value="">Select One</option>
+                                                        <option value="" disabled>Select One</option>
                                                         @foreach ($hotelClients as $hotelClient)
                                                             @php
                                                                 $client = $hotelClient->client ?? null;
@@ -2393,7 +2401,7 @@
                             </div>
                         </div>
                     @endif
-                    @if (in_array($loggedUserType, [null, 'admin']) && in_array(Auth::user()->department, [null, 'Management', 'Finance']))
+                    @if (in_array($loggedUserType, [null, 'admin']) && in_array(Auth::user()->department, [null, 'Management', 'Finance', 'Supervisor']))
                         <div class="col-md-6">
                             <div class="card card-outline no-box-shadow border-1 p-3 h-100">
                                 <div class="card-header px-0">
@@ -2412,31 +2420,7 @@
                                                 </div>
                                                 <label for="final-billing-amount-value" class="col-sm-4 col-form-label py-0">Final Billing Amount</label>
                                                 <div class="col-sm-7">
-                                                    <p id="final-billing-amount">${{ $subTotalBillingCharges ?? 'N/A' }}</p>
-                                                </div>
-                                            </div>
-                                        </li>
-
-                                        <li class="list-group-item">
-                                            <div class="form-group row row-gap-2 mb-0 align-items-center">
-                                                <div class="col-sm-1">
-                                                    <input type="checkbox" class="invoice-check" id="check-discount-type">
-                                                </div>
-                                                <label for="discount-type-value" class="col-sm-4 col-form-label py-0">Discount Type</label>
-                                                <div class="col-sm-7">
-                                                    <p id="discount-type">{{ $isDiscount && $discountType == 'fixed' ? 'Fixed' : ($isDiscount && $discountType == 'percentage' ? 'Percentage' : '')  }}</p>
-                                                </div>
-                                            </div>
-                                        </li>
-
-                                        <li class="list-group-item">
-                                            <div class="form-group row row-gap-2 mb-0 align-items-center">
-                                                <div class="col-sm-1">
-                                                    <input type="checkbox" class="invoice-check" id="check-discount-amount">
-                                                </div>
-                                                <label for="discount-amount-value" class="col-sm-4 col-form-label py-0">Discount Amount</label>
-                                                <div class="col-sm-7">
-                                                    <p id="discount-amount">{{ $discountValue ? '$' . $discountValue : ''; }}</p>
+                                                    <p id="final-billing-amount">${{ $totalBillingCharges ?? 'N/A' }}</p>
                                                 </div>
                                             </div>
                                         </li>
@@ -2498,7 +2482,7 @@
                                     </ul>
 
                                     <div class="text-center mb-3">
-                                        <button type="button" id="generate-invoice-btn" class="btn btn-primary" style="display: none;">Generate Invoice</button>
+                                        <button type="button" data-id="{{ $booking->id }}" id="generate-invoice-btn" class="btn btn-primary" style="display: none;">Send To Invoice</button>
                                     </div>
                                 </div>
                             </div>
@@ -2564,6 +2548,8 @@
     <script>
         const props = {
             routes: {
+                generateInvoice: "{{ route('generate-invoice') }}",
+                getEventsByHotel: "{{ route('get-hotel-events') }}",
                 deleteBookings: "{{ route('delete-bookings') }}",
                 cancelBooking: "{{ route('cancel-booking') }}",
                 corporateFareCharges: "{{ route('get-corporate-fare-charges') }}",

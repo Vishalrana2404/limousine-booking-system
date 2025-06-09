@@ -314,7 +314,7 @@ class BookingLogService
                                 if($oldValue == 'no' && $newValue == 'yes')
                                 {
                                     $logMessages[] = "Requested For Cancel.";
-
+    
                                     $this->sendEmailToAdminForCancel($booking, $loggedUser);
                                 }
                                 break;
@@ -363,7 +363,7 @@ class BookingLogService
                             case "latest_admin_comment":
                                 if(!empty($newValue))
                                 {
-                                    $logMessages[] = "Added a comment : {$newValue}";
+                                    $logMessages[] = "Admin added a comment : {$newValue}";
                                 }
                                 break;
                             case "additional_stops_required":
@@ -380,12 +380,12 @@ class BookingLogService
                     }
                 }
             }
-
+    
             if(!empty($additionalStopsLogs) && $additionalStopsLogs !== null)
             {
                 $logMessages = array_merge($logMessages, $additionalStopsLogs);
             }
-
+    
             $userType =  $loggedUser->userType->type ?? null;
             if ($userType === null || $userType === UserType::ADMIN) {
                 $notifyUsers = collect([$this->userRepository->getUserById($booking->created_by_id)]);
@@ -399,22 +399,27 @@ class BookingLogService
     
             // if ($userType === null || $userType === UserType::ADMIN) {
             // }
-            $this->sendEmailToCreator($loggedUserFullName, $logMessages, $booking);
-            $this->sendEmailToPOCandHeadOffice($loggedUserFullName, $logMessages, $booking);
+            $logMessagesWithoutAdminComment = array_filter($logMessages, function ($log) {
+                return strpos($log, 'Admin added a comment') === false;
+            });
+            
+            $this->sendEmailToCreator($loggedUserFullName, $logMessagesWithoutAdminComment, $booking);
+            $this->sendEmailToPOCandHeadOffice($loggedUserFullName, $logMessagesWithoutAdminComment, $booking);
     
             if(!empty($linkedClients))
             {
-                $updateDelinkClients = $this->updateBookingNotification($loggedUser, $logMessages, $booking, $linkedClients);
+                $updateDelinkClients = $this->updateBookingNotification($loggedUser, $logMessagesWithoutAdminComment, $booking, $linkedClients);
             }
             
             if ($userType === UserType::CLIENT) {
-                $this->sendTelegramNotificationToOpsTeam($loggedUserFullName, $logMessages, $booking);
+                $this->sendTelegramNotificationToOpsTeam($loggedUserFullName, $logMessagesWithoutAdminComment, $booking);
             }
-            $this->sendTelegramNotificationToDriver($loggedUserFullName, $logMessages, $booking);
+            $this->sendTelegramNotificationToDriver($loggedUserFullName, $logMessagesWithoutAdminComment, $booking);
             foreach ($logMessages as $message) {
                 $logData = ["message" => $message, "booking_id" => $booking->id, "user_id" => $loggedUser->id];
                 $this->bookingLogRepository->addLogs($logData);
-    
+            }
+            foreach ($logMessagesWithoutAdminComment as $message) {
                 $notificationType = 'booking';
                 $subject = __("message.booking_notification_subject");
                 $template = 'emails.send_notification';

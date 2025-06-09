@@ -65,17 +65,6 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="message">Message <span class="text-danger">*</span></label>
-                                            <input type="text" id="message" name="message" value="{{ old('message') }}" class="form-control @error('message') is-invalid @enderror" placeholder="Message">
-                                            @error('message')
-                                            <span class="invalid-feedback" role="alert">
-                                                <strong>{{ $message }}</strong>
-                                            </span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
                                             <label for="status">Status</label>
                                             <select name="status" id="status" class="form-control form-select custom-select @error('status') is-invalid @enderror">
                                                 <option value="ACTIVE" {{ old('status') === "ACTIVE" ? 'selected' : '' }}>Active</option>
@@ -107,8 +96,8 @@
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="header">Header <span class="text-danger">*</span></label>
-                                            <textarea id="header" name="header" class="form-control @error('header') is-invalid @enderror" placeholder="Header" style="min-height: 200px;">{{ old('header') }}</textarea>
+                                            <label for="header">Message <span class="text-danger">*</span></label>
+                                            <textarea id="header" name="header" class="form-control @error('header') is-invalid @enderror" placeholder="Message" style="min-height: 200px;">{{ old('header') }}</textarea>
                                             @error('header')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>

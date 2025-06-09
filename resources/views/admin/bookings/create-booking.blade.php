@@ -1,6 +1,5 @@
 @extends('components.layout')
 @section('content')
-
 <div class="content-wrapper">
     <section class="content-header border-bottom">
         <div class="container-fluid">

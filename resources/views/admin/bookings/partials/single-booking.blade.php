@@ -175,10 +175,10 @@
                 </div>
             @endif
         @endif
-        <div class="col-md-4">
+        <div class="col-md-4" style="min-height: 102px;">
             <div class="form-group">
                 <div id="EventCreate" style="display: flex; align-items: center; justify-content: space-between;">
-                    <label for="eventId">Event</label>
+                    <label for="eventId" style="padding-bottom: 0;">Event</label>
                     <button type="button" data-bs-toggle="modal" data-bs-target="#addEventModal">
                         <span class="fa fa-plus mt-3"></span>
                     </button>
@@ -226,7 +226,9 @@
                 @enderror
             </div>
         </div>
-        <div class="col-md-4" id="pickupLocationDropdown" style="display:{{ $pickupLocationDropdown }};">
+    </div>
+    <div class="row align-items-center">
+        <div class="col-md-4" id="pickupLocationDropdown" style="display:{{ $pickupLocationDropdown }}; min-height: 125px;">
             <div class="form-group">
                 <label for="pickupLocationId">Arrival Pick Up Location </label>
                 <select name="pick_up_location_id" id="pickupLocationId"
@@ -248,7 +250,7 @@
                 @enderror
             </div>
         </div>
-        <div class="col-md-4" id="pickupLocationTextBox" style="display:{{ $pickupLocationTextBox }};">
+        <div class="col-md-4" id="pickupLocationTextBox" style="display:{{ $pickupLocationTextBox }}; min-height: 125px;">
             <div class="form-group">
                 <label for="pickupLocationtext">Pick Up Location <span class="text-danger">*</span></label>
                 <input type="text" id="pickupLocationtext" name="pick_up_location"
@@ -262,7 +264,7 @@
                 @enderror
             </div>
         </div>
-        <div class="col-md-4 additionalContainers" style="display:none;">
+        <div class="col-md-4 additionalContainers" style="display:none; min-height: 120px;">
             @foreach (old('additional_stops', ['']) as $index => $stop)
                 <div class="form-group">
                     <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -296,34 +298,7 @@
                 </div>
             @endforeach
         </div>
-
-        <!-- <div class="row" id="additionalContainer">
-            @foreach (old('additional_stops', ['']) as $index => $stop)
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="additionalStops_{{ $index }}">Additional Stop(s)</label>
-                        <input type="text" id="additionalStops_{{ $index }}" name="additional_stops[]"
-                            value="{{ $stop }}"
-                            class="form-control additional-stops @error('additional_stops.' . $index) is-invalid @enderror"
-                            placeholder="Additional Stop(s)" autocomplete="off" autofocus>
-                        @error('additional_stops.' . $index)
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
-                    </div>
-                </div>
-                <div class="col-md-1 mt-4 iconContainer">
-                    @if ($loop->last)
-                        <button type="button" id="addStop"><span class="fa fa-plus mt-3"></span></button>
-                    @else
-                        <button type="button" class="remove-stop"><span
-                                class="fas fa-times mt-3 text-danger"></span></button>
-                    @endif
-                </div>
-            @endforeach
-        </div> -->
-        <div class="col-md-4" id="dropoffLocationDropdown" style="display:{{ $dropoffLocationDropdown }};">
+        <div class="col-md-4" id="dropoffLocationDropdown" style="display:{{ $dropoffLocationDropdown }}; min-height: 125px;">
             <div class="form-group">
                 <label for="dropoffLocationId">Departure Drop Off Location </label>
                 <select name="drop_off_location_id" id="dropoffLocationId"
@@ -345,7 +320,7 @@
                 @enderror
             </div>
         </div>
-        <div class="col-md-4" id="dropOffLocationTextBox" style="display:{{ $dropOffLocationTextBox }};">
+        <div class="col-md-4" id="dropOffLocationTextBox" style="display:{{ $dropOffLocationTextBox }}; min-height: 125px;">
             <div class="form-group">
                 <label for="dropOfLocation">Drop Off Location <span class="text-danger" id="dropOffSpan"
                         style="display:{{ $dropOffSpan }};">*</span></label>
@@ -359,6 +334,8 @@
                 @enderror
             </div>
         </div>
+    </div>
+    <div class="row align-items-center">
         
         <div class="row" id="additionalStopsContainer">
             <div class="row mb-3">

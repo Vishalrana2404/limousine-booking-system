@@ -61,7 +61,6 @@ class EmailTemplatesService
                 'name' => $requestData['name'],
                 'subject' => $requestData['subject'],
                 'header' => $requestData['header'],
-                'message' => $requestData['message'],
                 'footer' => $requestData['footer'],
                 'status' => $requestData['status'],
                 'created_by_id' => Auth::id(),

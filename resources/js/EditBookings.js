@@ -103,8 +103,59 @@ export default class EditBookings extends BaseClass {
             "#clientId",
             this.handleCorporateIdChange
         );
-        $(document).on("change", ".invoice-check", this.handleInvoiceButton);
+        $(document).on(
+            "change",
+            "#clientId",
+            this.handleEventsOfCorporate
+        );
+        $(document).on("change", ".invoice-check, #email_template_for_invoice", this.handleInvoiceButton);
+        $(document).on("click", "#generate-invoice-btn", this.handleGenerateInvoice);
     };
+
+    handleGenerateInvoice = ({target}) => {
+
+        const bookingId = $(target).data('id');
+        const emailTemplate = $('#email_template_for_invoice').val();
+
+        const data = {
+            booking_id: bookingId,
+            email_template_id: emailTemplate,
+        };
+
+        if(emailTemplate && bookingId)
+        {
+            try {
+                const url = this.props.routes.generateInvoice;
+                $("#loader").show();
+                axios
+                    .post(url, data)
+                    .then((response) => {
+                        const statusCode = response.data.status.code;
+                        const message = response.data.status.message;
+                        const responseData = response.data.data;
+
+                        if (statusCode === 200) {
+                            toastr.success(message, "Success");
+                        } else {
+                            // Show error from server
+                            const flash = new ErrorHandler(statusCode, message);
+                            throw flash;
+                        }
+                    })
+                    .catch((error) => {
+                        $("#loader").hide();
+                        this.handleException(error);
+                    })
+                    .finally(() => {
+                        $("#loader").hide();
+                    });
+            } catch (error) {
+                this.handleException(error);
+            }
+        }else{
+            toastr.error("Please select email template.", "Error");
+        }
+    }
 
     handleIsDiscount = () => {
         const isDiscount = $('#is_discount').is(':checked');
@@ -132,7 +183,8 @@ export default class EditBookings extends BaseClass {
     canShowInvoiceButton = () => {
         const allChecked = $('.invoice-check:checked').length === $('.invoice-check').length;
         const status = $('#booking-status').text().toUpperCase();
-        return allChecked && (status === 'COMPLETED' || status === 'CANCELLED WITH CHARGES');
+        const emailTemplate = $('#email_template_for_invoice').val();
+        return allChecked && (status === 'COMPLETED' || status === 'CANCELLED WITH CHARGES') && emailTemplate !== '';
     }
 
     handleCorporateIdChange = () => {
@@ -142,6 +194,40 @@ export default class EditBookings extends BaseClass {
 
         this.handleCorporateFairCharges();
     }
+    handleEventsOfCorporate = ({ target }) => {
+        try {
+            const hotelId = $(target).val();
+            const url = this.props.routes.getEventsByHotel;
+            axios
+                .get(url, {
+                    params: {
+                        hotel_id: hotelId,
+                    }
+                })
+                .then((response) => {
+                    const statusCode = response.data.status.code;
+                    const message = response.data.status.message;
+                    const flash = new ErrorHandler(statusCode, message);
+                    
+                    if (statusCode === 200) {
+                        $('#event-id').empty().append('<option value="">Select An Event</option>');
+
+                        if (response.data.data.length > 0) {
+                            $.each(response.data.data, function(index, item) {
+                                $('#event-id').append(`<option value="${item.id}">${item.name}</option>`);
+                            });
+                        }
+                    } else {
+                        throw flash;
+                    }
+                })
+                .catch((error) => {
+                    this.handleException(error);
+                });
+        } catch (error) {
+            this.handleException(error);
+        }
+    };
 
     handleDeleteModal = ({ target }) => {
         try {
@@ -924,7 +1010,7 @@ export default class EditBookings extends BaseClass {
         } else {
             $('#total-discount-value').text('$0');
         }
-                
+        console.log(totalCharges);
         $("#total-charges").text('$' + totalCharges);
         $("#total-charge").val(totalCharges);
     };

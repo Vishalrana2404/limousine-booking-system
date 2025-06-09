@@ -33,4 +33,9 @@ class Events extends Model
     {
         return $this->hasMany(Bookings::class);
     }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoices::class);
+    }
 }
