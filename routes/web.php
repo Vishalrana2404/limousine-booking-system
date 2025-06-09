@@ -476,133 +476,133 @@ Route::middleware(['Auth','SanitizeInput', AuthenticateSession::class])->group(f
     });
 });
 
-// Route::get('/run-migrate', function () {
-//     try {
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_05_29_001257_add_meet_greet_column_in_vehicle_classes_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_05_29_002522_add_sequence_column_in_vehicle_classes_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_05_29_094830_drop_meet_greet_column_from_vehicle_class_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_05_29_095345_add_meet_greet_column_to_bookings_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_05_29_155927_add_columns_to_hotels_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_05_29_165519_create_hotels_poc_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_05_29_180043_create_hotel_linkage_logs_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_05_29_192758_create_client_linkage_logs_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_06_02_095825_create_email_templates_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_06_05_234253_create_bookings_comment_log_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_06_05_234436_add_comment_column_in_bookings_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_06_06_160355_create_bookings_admin_communication_log_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_06_06_160407_add_admin_comment_column_in_bookings_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_06_06_182547_add_additional_stops_required_column_in_bookings.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_06_06_182613_create_bookings_additional_stops_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_06_07_164200_add_column_in_email_templates_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_06_07_220110_update_status_values_in_bookings_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_06_07_234416_add_columns_in_bookings_billing_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_06_08_003042_add_sub_total_charges_column_in_bookings_billing_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_06_08_222412_create_invoices_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_06_08_222426_create_invoice_bookings_table.php',
-//             '--force' => true
-//         ]);
-//         // Run specific migrations
-//         Artisan::call('migrate', [
-//             '--path' => 'database/migrations/2025_06_08_224137_add_columns_in_bookings_table.php',
-//             '--force' => true
-//         ]);
-//         return 'Selected migrations ran successfully.';
-//     } catch (\Exception $e) {
-//         return 'Migration error: ' . $e->getMessage();
-//     }
-// });
+Route::get('/run-migrate', function () {
+    try {
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_05_29_001257_add_meet_greet_column_in_vehicle_classes_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_05_29_002522_add_sequence_column_in_vehicle_classes_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_05_29_094830_drop_meet_greet_column_from_vehicle_class_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_05_29_095345_add_meet_greet_column_to_bookings_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_05_29_155927_add_columns_to_hotels_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_05_29_165519_create_hotels_poc_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_05_29_180043_create_hotel_linkage_logs_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_05_29_192758_create_client_linkage_logs_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_06_02_095825_create_email_templates_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_06_05_234253_create_bookings_comment_log_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_06_05_234436_add_comment_column_in_bookings_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_06_06_160355_create_bookings_admin_communication_log_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_06_06_160407_add_admin_comment_column_in_bookings_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_06_06_182547_add_additional_stops_required_column_in_bookings.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_06_06_182613_create_bookings_additional_stops_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_06_07_164200_add_column_in_email_templates_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_06_07_220110_update_status_values_in_bookings_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_06_07_234416_add_columns_in_bookings_billing_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_06_08_003042_add_sub_total_charges_column_in_bookings_billing_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_06_08_222412_create_invoices_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_06_08_222426_create_invoice_bookings_table.php',
+            '--force' => true
+        ]);
+        // Run specific migrations
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/2025_06_08_224137_add_columns_in_bookings_table.php',
+            '--force' => true
+        ]);
+        return 'Selected migrations ran successfully.';
+    } catch (\Exception $e) {
+        return 'Migration error: ' . $e->getMessage();
+    }
+});
 
-// Route::get('/run-seeder', function () {
-//     try {
-//         // Run specific seeder by class name
-//         Artisan::call('db:seed', [
-//             '--class' => 'LocationTestSeeder',
-//             '--force' => true
-//         ]);
-//         return 'Selected seeder ran successfully.';
-//     } catch (\Exception $e) {
-//         return 'Seeder error: ' . $e->getMessage();
-//     }
-// });
+Route::get('/run-seeder', function () {
+    try {
+        // Run specific seeder by class name
+        Artisan::call('db:seed', [
+            '--class' => 'LocationTestSeeder',
+            '--force' => true
+        ]);
+        return 'Selected seeder ran successfully.';
+    } catch (\Exception $e) {
+        return 'Seeder error: ' . $e->getMessage();
+    }
+});
