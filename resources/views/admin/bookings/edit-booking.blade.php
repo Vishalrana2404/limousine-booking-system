@@ -2416,7 +2416,7 @@
                                         <li class="list-group-item">
                                             <div class="form-group row row-gap-2 mb-0 align-items-center">
                                                 <div class="col-sm-1">
-                                                    <input type="checkbox" class="invoice-check" id="check-final-billing">
+                                                    <input type="checkbox" class="invoice-check" id="check-final-billing" {{ $booking->invoice_generated == '1' ? 'checked' : ''; }}>
                                                 </div>
                                                 <label for="final-billing-amount-value" class="col-sm-4 col-form-label py-0">Final Billing Amount</label>
                                                 <div class="col-sm-7">
@@ -2428,7 +2428,7 @@
                                         <li class="list-group-item">
                                             <div class="form-group row row-gap-2 mb-0 align-items-center">
                                                 <div class="col-sm-1">
-                                                    <input type="checkbox" class="invoice-check" id="check-corporate">
+                                                    <input type="checkbox" class="invoice-check" id="check-corporate" {{ $booking->invoice_generated == '1' ? 'checked' : ''; }}>
                                                 </div>
                                                 <label for="hotel-value" class="col-sm-4 col-form-label py-0">Corporate</label>
                                                 <div class="col-sm-7">
@@ -2440,7 +2440,7 @@
                                         <li class="list-group-item">
                                             <div class="form-group row row-gap-2 mb-0 align-items-center">
                                                 <div class="col-sm-1">
-                                                    <input type="checkbox" class="invoice-check" id="check-event">
+                                                    <input type="checkbox" class="invoice-check" id="check-event" {{ $booking->invoice_generated == '1' ? 'checked' : ''; }}>
                                                 </div>
                                                 <label for="event-value" class="col-sm-4 col-form-label py-0">Event</label>
                                                 <div class="col-sm-7">
@@ -2452,7 +2452,7 @@
                                         <li class="list-group-item">
                                             <div class="form-group row row-gap-2 mb-0 align-items-center">
                                                 <div class="col-sm-1">
-                                                    <input type="checkbox" class="invoice-check" id="check-status">
+                                                    <input type="checkbox" class="invoice-check" id="check-status" {{ $booking->invoice_generated == '1' ? 'checked' : ''; }}>
                                                 </div>
                                                 <label for="status-value" class="col-sm-4 col-form-label py-0">Status</label>
                                                 <div class="col-sm-7">
@@ -2461,29 +2461,27 @@
                                             </div>
                                         </li>
 
+                                        @if($booking->invoice_generated == '1' || !empty($invoiceNumber))
                                         <li class="list-group-item">
                                             <div class="form-group row row-gap-2 mb-0 align-items-center">
                                                 <div class="col-sm-1">
-                                                    <input type="checkbox" class="invoice-check" id="check-email-template-for-invoice">
                                                 </div>
-                                                <label for="email_template_for_invoice" class="col-sm-4 col-form-label py-0">Select Template</label>
+                                                <label for="status-value" class="col-sm-4 col-form-label py-0">Invoice Number</label>
                                                 <div class="col-sm-7">
-                                                    <select name="email_template_for_invoice" id="email_template_for_invoice" class="form-control form-select custom-select @error('email_template_for_invoice') is-invalid @enderror">
-                                                        <option value="">Select Template</option>
-                                                        @if(!empty($emailTemplates))
-                                                            @foreach($emailTemplates as $template)
-                                                                <option value="{{ $template->id }}">{{ $template->name }}</option>
-                                                            @endforeach
-                                                        @endif
-                                                    </select>
+                                                    <p id="booking-status">{{ $booking->invoice_generated == '1' ? $booking->invoiceBooking->invoice->unique_invoice_number : $invoiceNumber; }}</p>
                                                 </div>
                                             </div>
                                         </li>
+                                        @endif
                                     </ul>
 
-                                    <div class="text-center mb-3">
-                                        <button type="button" data-id="{{ $booking->id }}" id="generate-invoice-btn" class="btn btn-primary" style="display: none;">Send To Invoice</button>
-                                    </div>
+                                    @if($booking->invoice_generated == '0')
+                                        <div class="text-center mb-3">
+                                            <button type="button" data-id="{{ $booking->id }}" id="generate-invoice-btn" class="btn btn-primary" style="display: none;">Send To Invoice</button>
+                                        </div>
+                                    @else
+                                        <p class="invoice-sent-p">Booking has been already sent to Invoice by {{ $booking->invoiceGeneratedBy->first_name ?? 'Limousine'; }} {{ $booking->invoiceGeneratedBy->last_name ?? 'User'; }}</p>
+                                    @endif
                                 </div>
                             </div>
                         </div>

@@ -20,6 +20,11 @@ export default class EmailTemplates extends BaseClass {
         $(document).on("click", ".fa-trash", this.handleDeleteModal);
         $(document).on("change", "#qr_code", this.handleQrCodeImagePreview);
         $(document).on("click", "#deleteConfirmButton", this.handleDeleteEmailTemplate);
+        $(document).on("click", ".make-clone", this.handleCloneModal);
+        $(document).on("click", "#create-clone", this.handleCreateClone);
+        $(document).on("keyup", "#cloneTemplateName", this.handleTemplateNameInput);
+        $(document).on("click", "#test-email-button", this.handleEmailTesting);
+        $(document).on("keyup", "#testEmailInput", this.handleEmailInput);
         $(document).on(
             "click",
             "#closeDeleteIcon, #closeDeleteButton",
@@ -47,6 +52,181 @@ export default class EmailTemplates extends BaseClass {
             "#emailTemplatesPagination .pagination a",
             this.handlePagnation
         );
+    }
+
+    handleTemplateNameInput = () => {
+        const templateName = $('#cloneTemplateName').val();
+        if($(templateName).val() !== '')
+        {
+            $('#cloneTemplateName-error').css('display', 'none');
+            $('#cloneTemplateName-error').text('');
+            $('#create-clone').attr('disabled', false);
+        }else{
+            $('#cloneTemplateName-error').css('display', 'block');
+            $('#cloneTemplateName-error').text('Please enter template name.');
+            $('#create-clone').attr('disabled', true);
+        }
+    }
+
+    handleCloneModal = ({target}) => {
+        const templateId = $(target).data('email-template-id');
+        console.log(templateId);
+        $('#cloneTemplateModal').modal('show');
+        $('#cloneTemplateId').val(templateId);
+    }
+
+    handleEmailInput = () => {
+        const testEmailInput = $('#testEmailInput').val();
+        if($(testEmailInput).val() !== '')
+        {
+            $('#testEmailInput-error').css('display', 'none');
+            $('#testEmailInput-error').text('');
+            $('#test-email-button').attr('disabled', false);
+        }else{
+            $('#testEmailInput-error').css('display', 'block');
+            $('#testEmailInput-error').text('Please enter email.');
+            $('#test-email-button').attr('disabled', true);
+        }
+    }
+
+    handleEmailTesting = () => {
+        const templateId = $('#testEmailTemplateId').val();
+        const testEmailInput = $('#testEmailInput').val();
+
+        if(testEmailInput !== '')
+        {
+            const data = {
+                template_id: templateId,
+                test_email: testEmailInput,
+            };
+            // check unique template name
+            try {
+                const url = this.props.routes.sendTestEmail;
+                
+                const sendButton = $("#test-email-button");
+                sendButton.prop("disabled", true);
+                sendButton.html('<span class="spinner-border spinner-border-sm"></span> Testing...');
+
+                axios
+                    .post(url, data)
+                    .then((response) => {
+                        const statusCode = response.data.status.code;
+                        const message = response.data.status.message;
+
+                        if (statusCode === 200) {
+                            sendButton.html('Save');
+                            sendButton.prop("disabled", false);
+                            $('#testEmailModal').modal('hide');
+                            toastr.success(message, "Success");
+                        } else {
+                            // Show error from server
+                            sendButton.html('Test Email');
+                            sendButton.prop("disabled", false);
+                            toastr.error("Something went wrong.", "Error");
+                        }
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        sendButton.html('Test Email');
+                        sendButton.prop("disabled", false);
+                        this.handleException(error);
+                    })
+            } catch (error) {
+                this.handleException(error);
+            }
+        }else{
+            $('#testEmailInput-error').css('display', 'block');
+            $('#testEmailInput-error').text('Please enter email.');
+            $('#test-email-button').attr('disabled', true);
+        }
+    }
+
+    handleCreateClone = () => {
+        const templateId = $('#cloneTemplateId').val();
+        const templateName = $('#cloneTemplateName').val();
+
+        if(templateName !== '')
+        {
+            const data = {
+                // template_id: templateId,
+                template_name: templateName,
+            };
+            // check unique template name
+            try {
+                const url = this.props.routes.checkUniqueEmailTemplateName;
+
+                const sendButton = $("#create-clone");
+                sendButton.prop("disabled", true);
+                sendButton.html('<span class="spinner-border spinner-border-sm"></span> Saving...');
+
+                axios
+                    .post(url, data)
+                    .then((response) => {
+                        const statusCode = response.data.status.code;
+                        const message = response.data.status.message;
+                        const responseData = response.data.data.isvalid;
+
+                        if (statusCode === 200) {
+                            if(responseData)
+                            {
+                                // create clone
+                                const url2 = this.props.routes.cloneTemplate;
+                                
+                                const data2 = {
+                                    template_id: templateId,
+                                    template_name: templateName,
+                                };
+                                axios
+                                    .post(url2, data2)
+                                    .then((responseTwo) => {
+                                        const statusCode = responseTwo.data.status.code;
+                                        const message = responseTwo.data.status.message;
+                                        const responseTwoData = responseTwo.data.data;
+    
+                                        if (statusCode === 200) {
+                                            sendButton.html('Save');
+                                            sendButton.prop("disabled", false);
+                                            $('#cloneTemplateModal').modal('hide');
+                                            toastr.success(message, "Success");
+                                            this.handleFilter();
+                                        } else {
+                                            // Show error from server
+                                            sendButton.html('Save');
+                                            sendButton.prop("disabled", false);
+                                            toastr.error("This template name already exists.", "Error");
+                                        }
+                                    })
+                                    .catch((error) => {
+                                        sendButton.html('Save');
+                                        sendButton.prop("disabled", false);
+                                        this.handleException(error);
+                                    })
+                            }else{
+                                // Show error from server
+                                sendButton.html('Save');
+                                sendButton.prop("disabled", false);
+                                toastr.error("This template name already exists.", "Error");
+                            }
+                        } else {
+                            // Show error from server
+                            sendButton.html('Save');
+                            sendButton.prop("disabled", false);
+                            toastr.error("This template name already exists.", "Error");
+                        }
+                    })
+                    .catch((error) => {
+                        sendButton.html('Save');
+                        sendButton.prop("disabled", false);
+                        this.handleException(error);
+                    })
+            } catch (error) {
+                this.handleException(error);
+            }
+        }else{
+            $('#cloneTemplateName-error').css('display', 'block');
+            $('#cloneTemplateName-error').text('Please enter template name.');
+            $('#create-clone').attr('disabled', true);
+        }
     }
 
     handleQrCodeImagePreview = (event) => {
@@ -331,6 +511,7 @@ export default class EmailTemplates extends BaseClass {
             },
             this.languageMessage.only_string
         );
+
         $("#createEmailTemplateForm").validate({
             rules: {
                 name: {

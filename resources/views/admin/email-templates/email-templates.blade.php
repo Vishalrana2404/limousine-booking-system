@@ -58,6 +58,8 @@
                 updateBulkEmailTemplateStatus: "{{ route('update-bulk-email-template-status') }}",
                 deleteEmailTemplates: "{{ route('delete-email-template') }}",
                 filterEmailTemplates: "{{ route('filter-email-templates') }}",
+                checkUniqueEmailTemplateName: "{{route('check-unique-template-name')}}",
+                cloneTemplate: "{{route('clone-template')}}"
             },
         }
     </script>

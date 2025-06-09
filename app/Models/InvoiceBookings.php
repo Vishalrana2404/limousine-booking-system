@@ -12,7 +12,7 @@ class InvoiceBookings extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'invoices_bookings';
+    protected $table = 'invoice_bookings';
 
     protected $fillable = ['invoice_id','booking_id', 'status', 'created_by_id', 'updated_by_id'];
 

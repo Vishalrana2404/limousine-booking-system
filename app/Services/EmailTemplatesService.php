@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\CustomHelper;
 use App\Models\EmailTemplates;
 use App\Repositories\Interfaces\EmailTemplatesInterface;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,7 @@ class EmailTemplatesService
         private EmailTemplatesInterface $emailTemplatesRepository,
         private UploadService $uploadService,
         private ActivityLogService $activityLogService,
+        private CustomHelper $helper,
     ) {}
 
     /**
@@ -231,10 +233,147 @@ class EmailTemplatesService
             // Call the UserRepository to check the uniqueness of the email
             $template = $this->emailTemplatesRepository->checkUniqueTemplateName($templateName, $templateId);
             // Return true if the email is unique, false otherwise
-            return $template ? "false" : "true";
+            return $template ? false : true;
         } catch (\Exception $e) {
             // If an exception occurs, rollback and throw an exception
             DB::rollback();
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    public function cloneTemplate(string $templateName, int $templateId, array $logHeaders)
+    {
+        // Retrieve the logged-in user
+        $loggedUser = Auth::user();
+        $userTypeSlug = $loggedUser->userType->slug ?? null;
+
+        try {
+            if(!empty($templateId))
+            {
+                $template = $this->emailTemplatesRepository->getEmailTemplateById($templateId);
+
+                if(!empty($template))
+                {
+                    $templateData = [
+                        'name' => $templateName,
+                        'subject' => $template->subject,
+                        'header' => $template->header,
+                        'footer' => $template->footer,
+                        'status' => $template->status,
+                        'qr_code_image_name' => $template->qr_code_image_name,
+                        'qr_code_image' => $template->qr_code_image,
+                        'created_by_id' => Auth::id(),
+                    ];   
+
+                    // Save the template first to get its ID
+                    $createTemplate = $this->emailTemplatesRepository->addTemplate($templateData);
+                    
+                    // Handle file upload if exists
+                    if (!empty($template->qr_code_image_name) && !empty($template->qr_code_image)) {
+                        
+
+                        $basePath = "email-templates/qr-codes/{$createTemplate->id}";
+
+                        // Create nested directories if not exist
+                        $pathsToCheck = [
+                            'email-templates',
+                            'email-templates/qr-codes',
+                            "email-templates/qr-codes/{$createTemplate->id}",
+                            $basePath
+                        ];
+
+                        foreach ($pathsToCheck as $path) {
+                            if (!Storage::disk('public')->exists($path)) {
+                                Storage::disk('public')->makeDirectory($path);
+                            }
+                        }
+
+                        $sourcePath = "email-templates/qr-codes/{$template->id}/{$template->qr_code_image}";
+                        $destinationPath = "email-templates/qr-codes/{$createTemplate->id}/{$template->qr_code_image}";
+
+                        // Check if source file exists before copying
+                        if (Storage::disk('public')->exists($sourcePath)) {
+                            Storage::disk('public')->copy($sourcePath, $destinationPath);
+                        }
+                    }
+
+                    $this->activityLogService->addActivityLog(
+                        'create', EmailTemplates::class, json_encode([]), json_encode($templateData),
+                        $logHeaders['headers']['Origin'], $logHeaders['headers']['User-Agent']
+                    );
+
+                    return [
+                        'success' => true,
+                        'message' => 'Template cloned successfully.',
+                    ];
+                }else{
+                    return [
+                        'success' => false,
+                        'message' => 'Template does not exists',
+                        'data' => []
+                    ];
+                }
+            }else{
+                return [
+                    'success' => false,
+                    'message' => 'Template ID not found',
+                    'data' => []
+                ];
+            }
+        } catch (\Exception $e) {
+            // Throw an exception with the error message if an error occurs
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    public function testEmailTemplate(string $templateEmail, int $templateId, array $logHeaders)
+    {
+        // Retrieve the logged-in user
+        $loggedUser = Auth::user();
+        $userTypeSlug = $loggedUser->userType->slug ?? null;
+
+        try {
+            if(!empty($templateId))
+            {
+                $template = $this->emailTemplatesRepository->getEmailTemplateById($templateId);
+
+                if(!empty($template))
+                {
+                    $header = $template->header;
+                    $footer = $template->footer;
+                    $subject = $template->subject;
+                    $loggedUserFullName = $this->helper->getFullName($loggedUser->first_name, $loggedUser->last_name);
+
+                    $mailDataForTesting = [
+                        'subject' => $subject,
+                        'template' => 'email-template-test',
+                        'name' => 'Limousine Team',
+                        'header' => $header,
+                        'footer' => $footer,
+                        'sent by' => $loggedUserFullName,
+                    ];
+                    $this->helper->sendEmailTemplateTestEmail($templateEmail, $mailDataForTesting);
+
+                    return [
+                        'success' => true,
+                        'message' => 'Email sent successfully.',
+                    ];
+                }else{
+                    return [
+                        'success' => false,
+                        'message' => 'Template does not exists',
+                        'data' => []
+                    ];
+                }
+            }else{
+                return [
+                    'success' => false,
+                    'message' => 'Template ID not found',
+                    'data' => []
+                ];
+            }
+        } catch (\Exception $e) {
+            // Throw an exception with the error message if an error occurs
             throw new \Exception($e->getMessage());
         }
     }

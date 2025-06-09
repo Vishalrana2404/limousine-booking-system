@@ -746,9 +746,9 @@
                                         @endphp
                                         @if ($client)
                                             @if (old('client_id_for_event') == $client->id)
-                                                <option value="{{ $client->hotel_id }}" selected>{{ $hotelClient->name }}</option>
+                                                <option value="{{ $client->id }}" selected>{{ $hotelClient->name }}</option>
                                             @else
-                                                <option value="{{ $client->hotel_id }}">{{$hotelClient->name  }}</option>
+                                                <option value="{{ $client->id }}">{{$hotelClient->name  }}</option>
                                             @endif
                                         @endif
                                     @endforeach
@@ -758,7 +758,7 @@
                             </div>
                         </div>
                     @else
-                        <input type="hidden" name="client_id_for_event" id="clientIdForEvent" value="{{Auth::user()->client->hotel_id}}">
+                        <input type="hidden" name="client_id_for_event" id="clientIdForEvent" value="{{Auth::user()->client->id}}">
                     @endif
                 @endif
                 <div class="col-md-6">

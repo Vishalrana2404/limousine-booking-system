@@ -219,4 +219,11 @@ button {
 h1 {
   background-color: green; }
 
+.invoice-sent-p{
+  color: red; 
+  text-align: center; 
+  font-size: 14px; 
+  font-weight: bold;
+}
+
 /*# sourceMappingURL=style.css.map */

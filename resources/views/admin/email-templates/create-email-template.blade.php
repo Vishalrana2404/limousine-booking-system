@@ -40,6 +40,7 @@
                                 </div>
                             </div>
                             <div class="card-body px-0">
+                                <input type="hidden" name="description" id="description">
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group">
@@ -95,7 +96,7 @@
                                         </div>
                                     </div>
                                     <div class="col-md-12">
-                                        <div class="form-group">
+                                        <div class="form-group" >
                                             <label for="header">Message <span class="text-danger">*</span></label>
                                             <textarea id="header" name="header" class="form-control @error('header') is-invalid @enderror" placeholder="Message" style="min-height: 200px;">{{ old('header') }}</textarea>
                                             @error('header')
@@ -106,9 +107,10 @@
                                         </div>
                                     </div>
                                     <div class="col-md-12">
-                                        <div class="form-group">
+                                        <div class="form-group" id="footerDiv">
                                             <label for="footer">Footer <span class="text-danger">*</span></label>
-                                            <textarea id="footer" name="footer" class="form-control @error('footer') is-invalid @enderror" placeholder="Footer" style="min-height: 200px;">{{ old('footer') }}</textarea>
+                                            <textarea id="footer" name="footer" class="form-control">{{ old('footer') }}</textarea>
+                                            <input type="hidden" name="footer_content" id="footer_content">
                                             @error('footer')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -123,6 +125,7 @@
                 </div>
         </section>
     </div>
+
 </form>
 @vite(['resources/js/EmailTemplates.js'])
 <script>
@@ -132,49 +135,4 @@
         },
     };
 </script>
-
-<script>
-    function initializeEditor(selector) {
-        ClassicEditor
-            .create(document.querySelector(selector), {
-                toolbar: [
-                    'heading', '|',
-                    'bold', 'italic', 'link', 'blockQuote',
-                    'bulletedList', 'numberedList', 'todoList',
-                    '|',
-                    'outdent', 'indent',
-                    '|',
-                    'undo', 'redo',
-                    '|',
-                    'insertTable',
-                    'mediaEmbed',
-                    'codeBlock',
-                    'fontColor', 'fontBackgroundColor', 'fontFamily', 'fontSize',
-                    'alignment',
-                    'horizontalLine',
-                    'pageBreak',
-                ],
-                removePlugins: [
-                    'ImageUpload', 'EasyImage', 'ImageResize', 'ImageInsert', 'ImageStyle',
-                    'CKFinder', 'CKFinderUploadAdapter', 'CKBox'
-                ]
-            })
-            .then(editor => {
-                // Apply height styling via editor editing view, not directly on DOM
-                editor.editing.view.change(writer => {
-                    writer.setStyle('min-height', '200px', editor.editing.view.document.getRoot());
-                    writer.setStyle('resize', 'vertical', editor.editing.view.document.getRoot());
-                    writer.setStyle('overflow', 'auto', editor.editing.view.document.getRoot());
-                });
-            })
-            .catch(error => {
-                console.error('CKEditor initialization error:', error);
-            });
-    }
-
-    // Initialize editors on multiple elements
-    initializeEditor('#header');
-    initializeEditor('#footer');
-</script>
-
 @endsection

@@ -7,7 +7,6 @@ use App\Models\InvoiceBookings;
 use App\Models\Booking;
 use App\Models\Hotel;
 use App\Models\Events;
-use App\Models\EmailTemplates;
 use App\Models\User;
 use App\Repositories\Interfaces\InvoicesInterface;
 use Illuminate\Database\Eloquent\Collection;
@@ -24,7 +23,6 @@ class InvoicesRepository implements InvoicesInterface
         protected Booking $bookingsModel,
         protected Hotel $hotelModel,
         protected Events $eventsModel,
-        protected EmailTemplates $emailTemplatesModel,
         protected User $usersModel,
     )
     {
@@ -64,7 +62,7 @@ class InvoicesRepository implements InvoicesInterface
 
     public function getInvoiceBookingByBookingId(int $bookingId): ?InvoiceBookings
     {
-        return $this->model->where('booking_id', $bookingId)->first();
+        return $this->invoiceBookingsModel->where('booking_id', $bookingId)->first();
     }
 
     public function updateInvoice(Invoices $invoice, array $data): bool

@@ -164,7 +164,7 @@
                     </ul>
                 </li>
                 @endif
-                @if ($loggedUserDepartment === null || in_array($loggedUserDepartment, ['Management', 'Finance', 'Supervisor']))
+                @if ((in_array($loggedUsertypeSlug, [null, 'admin', 'admin-staff'])) && $loggedUserDepartment === null || in_array($loggedUserDepartment, ['Management', 'Finance', 'Supervisor']))
                     <li
                         class="nav-item {{ Request::is('email-templates*') ? 'menu-open' : '' }}">
                         <a href="javascript:void(0);" class="nav-link" title="Billing">

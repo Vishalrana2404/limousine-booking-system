@@ -135,47 +135,18 @@
     }
 </script>
 
-<script>
-    function initializeEditor(selector) {
-        ClassicEditor
-            .create(document.querySelector(selector), {
-                toolbar: [
-                    'heading', '|',
-                    'bold', 'italic', 'link', 'blockQuote',
-                    'bulletedList', 'numberedList', 'todoList',
-                    '|',
-                    'outdent', 'indent',
-                    '|',
-                    'undo', 'redo',
-                    '|',
-                    'insertTable',
-                    'mediaEmbed',
-                    'codeBlock',
-                    'fontColor', 'fontBackgroundColor', 'fontFamily', 'fontSize',
-                    'alignment',
-                    'horizontalLine',
-                    'pageBreak',
-                ],
-                removePlugins: [
-                    'ImageUpload', 'EasyImage', 'ImageResize', 'ImageInsert', 'ImageStyle',
-                    'CKFinder', 'CKFinderUploadAdapter', 'CKBox'
-                ]
-            })
-            .then(editor => {
-                // Apply height styling via editor editing view, not directly on DOM
-                editor.editing.view.change(writer => {
-                    writer.setStyle('min-height', '200px', editor.editing.view.document.getRoot());
-                    writer.setStyle('resize', 'vertical', editor.editing.view.document.getRoot());
-                    writer.setStyle('overflow', 'auto', editor.editing.view.document.getRoot());
-                });
-            })
-            .catch(error => {
-                console.error('CKEditor initialization error:', error);
-            });
-    }
 
-    // Initialize editors on multiple elements
-    initializeEditor('#header');
-    initializeEditor('#footer');
-</script>
+    <script>
+      tinymce.init({
+        selector: '#header',
+        license_key: 'gpl|<your-license-key>'
+      });
+    </script>
+    
+    <script>
+      tinymce.init({
+        selector: '#footer',
+        license_key: 'gpl|<your-license-key>'
+      });
+    </script>
 @endsection

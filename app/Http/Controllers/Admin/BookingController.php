@@ -24,6 +24,7 @@ use App\Services\PeakPeriodService;
 use App\Services\ServiceTypeService;
 use App\Services\VehicleClassService;
 use App\Services\VehicleService;
+use App\Services\InvoicesService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -63,6 +64,7 @@ class BookingController extends Controller
         private ClientService $clientService,
         private CorporateFairBillingRepository $corporateFairBillingRepository,
         private EmailTemplatesService $emailTemplateService,
+        private InvoicesService $invoicesService,
         private CustomHelper $helper
     ) {
     }
@@ -377,7 +379,9 @@ class BookingController extends Controller
 
         $emailTemplates = $this->emailTemplateService->getAllTemplates();
 
-        return view('admin.bookings.edit-booking', compact('serviceTypes', 'driverOffDays', 'logs', 'vehicles', 'drivers', 'booking', 'locations', 'peakPeriods', 'vehicleTypes', 'events', 'corporateFairBillingDetailsService', 'corporateFairBillingDetailsPerHour', 'clients', 'hotelIdsFromLinkedCorporates', 'hotelClients', 'emailTemplates'));
+        $invoiceNumber = $this->invoicesService->getExpectedInvoiceNumberByBookingId($booking->id);
+
+        return view('admin.bookings.edit-booking', compact('serviceTypes', 'driverOffDays', 'logs', 'vehicles', 'drivers', 'booking', 'locations', 'peakPeriods', 'vehicleTypes', 'events', 'corporateFairBillingDetailsService', 'corporateFairBillingDetailsPerHour', 'clients', 'hotelIdsFromLinkedCorporates', 'hotelClients', 'emailTemplates', 'invoiceNumber'));
     }
 
     public function update(EditBookingRequest $request, Booking $booking)

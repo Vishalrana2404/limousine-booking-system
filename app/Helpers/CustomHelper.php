@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Mail\SendEmail;
+use App\Mail\EmailTemplateTest;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -175,6 +176,16 @@ class CustomHelper
     {
         try {
             Mail::to($to)->send(new SendEmail($mailData));
+            return "true";
+        } catch (Exception $e) {
+            return "false";
+        }
+    }
+
+    public static function sendEmailTemplateTestEmail($to, $mailData)
+    {
+        try {
+            Mail::to($to)->send(new EmailTemplateTest($mailData));
             return "true";
         } catch (Exception $e) {
             return "false";

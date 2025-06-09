@@ -108,25 +108,27 @@ export default class EditBookings extends BaseClass {
             "#clientId",
             this.handleEventsOfCorporate
         );
-        $(document).on("change", ".invoice-check, #email_template_for_invoice", this.handleInvoiceButton);
+        $(document).on("change", ".invoice-check", this.handleInvoiceButton);
         $(document).on("click", "#generate-invoice-btn", this.handleGenerateInvoice);
     };
 
     handleGenerateInvoice = ({target}) => {
 
         const bookingId = $(target).data('id');
-        const emailTemplate = $('#email_template_for_invoice').val();
 
         const data = {
             booking_id: bookingId,
-            email_template_id: emailTemplate,
         };
 
-        if(emailTemplate && bookingId)
+        if(bookingId)
         {
             try {
                 const url = this.props.routes.generateInvoice;
-                $("#loader").show();
+
+                const sendButton = $("#generate-invoice-btn");
+                sendButton.prop("disabled", true);
+                sendButton.html('<span class="spinner-border spinner-border-sm"></span> Sending...');
+
                 axios
                     .post(url, data)
                     .then((response) => {
@@ -135,25 +137,28 @@ export default class EditBookings extends BaseClass {
                         const responseData = response.data.data;
 
                         if (statusCode === 200) {
+                            sendButton.html('Send To Invoice');
+                            sendButton.prop("disabled", false);
+                            $('#generate-invoice-btn').remove();
                             toastr.success(message, "Success");
                         } else {
                             // Show error from server
+                            sendButton.html('Send To Invoice');
+                            sendButton.prop("disabled", false);
                             const flash = new ErrorHandler(statusCode, message);
                             throw flash;
                         }
                     })
                     .catch((error) => {
-                        $("#loader").hide();
+                        sendButton.html('Send To Invoice');
+                        sendButton.prop("disabled", false);
                         this.handleException(error);
                     })
-                    .finally(() => {
-                        $("#loader").hide();
-                    });
             } catch (error) {
                 this.handleException(error);
             }
         }else{
-            toastr.error("Please select email template.", "Error");
+            toastr.error("Unable to detect Booking ID.", "Error");
         }
     }
 
@@ -183,8 +188,7 @@ export default class EditBookings extends BaseClass {
     canShowInvoiceButton = () => {
         const allChecked = $('.invoice-check:checked').length === $('.invoice-check').length;
         const status = $('#booking-status').text().toUpperCase();
-        const emailTemplate = $('#email_template_for_invoice').val();
-        return allChecked && (status === 'COMPLETED' || status === 'CANCELLED WITH CHARGES') && emailTemplate !== '';
+        return allChecked && (status === 'COMPLETED' || status === 'CANCELLED WITH CHARGES');
     }
 
     handleCorporateIdChange = () => {

@@ -36,10 +36,9 @@ class InvoicesController extends Controller
     {
         $data = [];
         $data['booking_id'] = $request->booking_id;
-        $data['email_template_id'] = $request->email_template_id;
 
         $generateInvoice = $this->invoicesService->generateInvoice($data);
-        return $generateInvoice;
+        
         if ($generateInvoice['success']) {
             return response()->json([
                 'status' => [

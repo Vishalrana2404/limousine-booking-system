@@ -121,12 +121,15 @@ Route::middleware(['Auth','SanitizeInput', AuthenticateSession::class])->group(f
         Route::get('email-templates', [EmailTemplatesController::class, 'index'])->name('email-templates');
         Route::get('email-templates/create',  [EmailTemplatesController::class, 'create'])->name('create-email-template');
         Route::post('email-templates/store', [EmailTemplatesController::class, 'store'])->name('save-email-template');
-        Route::get('email-templates/{emailTemplate}/edit', [EmailTemplatesController::class, 'edit'])->name('edit-email-template');
-        Route::post('email-templates/{emailTemplate}', [EmailTemplatesController::class, 'update'])->name('update-email-template');
         Route::post('deleteEmailTemplates', [EmailTemplatesController::class, 'delete'])->name('delete-email-template');
         Route::post('updateBulkEmailTemplateStatus', [EmailTemplatesController::class, 'updateBulkStatus'])->name('update-bulk-email-template-status');
         Route::get('email-templates/filterEmailTemplates', [EmailTemplatesController::class, 'filterEmailTemplates'])->name('filter-email-templates');
         Route::post('email-templates/check-unique-template-name', [EmailTemplatesController::class, 'checkUniqueTemplateName'])->name('check-unique-template-name');
+        Route::post('email-templates/clone-template', [EmailTemplatesController::class, 'cloneTemplate'])->name('clone-template');
+        Route::post('email-templates/{templateId}/send-test-email', [EmailTemplatesController::class, 'sendTestEmail'])->name('send-test-email');
+        Route::get('email-templates/{emailTemplate}/view', [EmailTemplatesController::class, 'view'])->name('view-email-template');
+        Route::get('email-templates/{emailTemplate}/edit', [EmailTemplatesController::class, 'edit'])->name('edit-email-template');
+        Route::post('email-templates/{emailTemplate}', [EmailTemplatesController::class, 'update'])->name('update-email-template');
 
         // Vehicle Class Routes
         Route::get('vehicle-class', [VehicleClassController::class, 'index'])->name('vehicle-class');
@@ -394,17 +397,6 @@ Route::middleware(['Auth','SanitizeInput', AuthenticateSession::class])->group(f
         Route::post('updateBulkUserStatus', [UserController::class, 'updateBulkStatus'])->name('update-bulk-user-status');
         Route::get('users/filterUsers', [UserController::class, 'filterUsers'])->name('filter-users');
 
-        //Email Templates Routes
-        Route::get('email-templates', [EmailTemplatesController::class, 'index'])->name('email-templates');
-        Route::get('email-templates/create',  [EmailTemplatesController::class, 'create'])->name('create-email-template');
-        Route::post('email-templates/store', [EmailTemplatesController::class, 'store'])->name('save-email-template');
-        Route::get('email-templates/{emailTemplate}/edit', [EmailTemplatesController::class, 'edit'])->name('edit-email-template');
-        Route::post('email-templates/{email-template}', [EmailTemplatesController::class, 'update'])->name('update-email-template');
-        Route::post('deleteEmailTemplates', [EmailTemplatesController::class, 'delete'])->name('delete-email-template');
-        Route::post('updateBulkEmailTemplateStatus', [EmailTemplatesController::class, 'updateBulkStatus'])->name('update-bulk-email-template-status');
-        Route::get('email-templates/filterEmailTemplates', [EmailTemplatesController::class, 'filterEmailTemplates'])->name('filter-email-templates');
-        Route::post('email-templates/check-unique-template-name', [EmailTemplatesController::class, 'checkUniqueTemplateName'])->name('check-unique-template-name');
-
 
         Route::get('bookings', [BookingController::class, 'index'])->name('bookings');
         Route::get('bookings/create',  [BookingController::class, 'create'])->name('create-booking');
@@ -486,6 +478,111 @@ Route::middleware(['Auth','SanitizeInput', AuthenticateSession::class])->group(f
 
 // Route::get('/run-migrate', function () {
 //     try {
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_05_29_001257_add_meet_greet_column_in_vehicle_classes_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_05_29_002522_add_sequence_column_in_vehicle_classes_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_05_29_094830_drop_meet_greet_column_from_vehicle_class_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_05_29_095345_add_meet_greet_column_to_bookings_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_05_29_155927_add_columns_to_hotels_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_05_29_165519_create_hotels_poc_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_05_29_180043_create_hotel_linkage_logs_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_05_29_192758_create_client_linkage_logs_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_06_02_095825_create_email_templates_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_06_05_234253_create_bookings_comment_log_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_06_05_234436_add_comment_column_in_bookings_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_06_06_160355_create_bookings_admin_communication_log_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_06_06_160407_add_admin_comment_column_in_bookings_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_06_06_182547_add_additional_stops_required_column_in_bookings.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_06_06_182613_create_bookings_additional_stops_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_06_07_164200_add_column_in_email_templates_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_06_07_220110_update_status_values_in_bookings_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_06_07_234416_add_columns_in_bookings_billing_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_06_08_003042_add_sub_total_charges_column_in_bookings_billing_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_06_08_222412_create_invoices_table.php',
+//             '--force' => true
+//         ]);
+//         // Run specific migrations
+//         Artisan::call('migrate', [
+//             '--path' => 'database/migrations/2025_06_08_222426_create_invoice_bookings_table.php',
+//             '--force' => true
+//         ]);
 //         // Run specific migrations
 //         Artisan::call('migrate', [
 //             '--path' => 'database/migrations/2025_06_08_224137_add_columns_in_bookings_table.php',

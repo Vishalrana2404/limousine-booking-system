@@ -40,7 +40,7 @@ class EmailTemplatesController extends Controller
         return view('admin.email-templates.create-email-template');
     }
 
-    public function store(AddEmailTemplateRequest $request)
+    public function store(Request $request)
     {
         try {
             $log_headers = $this->getHttpData($request);
@@ -61,6 +61,11 @@ class EmailTemplatesController extends Controller
     public function edit(EmailTemplates $emailTemplate)
     {
         return view('admin.email-templates.update-email-template', compact('emailTemplate'));
+    }
+
+    public function view(EmailTemplates $emailTemplate)
+    {
+        return view('admin.email-templates.view-email-template', compact('emailTemplate'));
     }
 
     public function update(EditEmailTemplateRequest $request, EmailTemplates $emailTemplate)
@@ -124,6 +129,96 @@ class EmailTemplatesController extends Controller
             $result = $this->emailTemplateService->checkUniqueTemplateName($templateName, $templateId);
             // Generate and return a response indicating whether the name is unique
             return $this->handleResponse(['isvalid' => $result], '', Response::HTTP_OK);
+        } catch (\Exception $e) {
+            // Handle any exceptions that occur
+            $this->helper->handleException($e);
+            // Generate and return a response indicating the error that occurred
+            return $this->handleResponse(['isvalid' => false], $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR, []);
+        }
+    }
+
+    public function cloneTemplate(Request $request)
+    {
+        try {
+            $log_headers = $this->getHttpData($request);
+
+            // Retrieve template ID and name from the request
+            $templateId = !empty($request->input('template_id')) ? $request->input('template_id') : '';
+            $templateName = !empty($request->input('template_name')) ? $request->input('template_name') : '';
+
+            if(!empty($templateId) && !empty($templateName))
+            {
+                $cloneTemplate = $this->emailTemplateService->cloneTemplate($templateName, $templateId, $log_headers);
+
+                if ($cloneTemplate['success']) {
+                    return response()->json([
+                        'status' => [
+                            'code' => 200,
+                            'message' => $cloneTemplate['message']
+                        ],
+                    ], Response::HTTP_OK);
+                }else{
+                    return response()->json([
+                        'status' => [
+                            'code' => 400,
+                            'message' => $cloneTemplate['message']
+                        ]
+                    ], Response::HTTP_BAD_REQUEST);
+                }
+            }else{
+                return response()->json([
+                    'status' => [
+                        'code' => 400,
+                        'message' => 'All required parameters are not provided.'
+                    ],
+                    'data' => []
+                ], Response::HTTP_BAD_REQUEST);
+            }
+        } catch (\Exception $e) {
+            // Handle any exceptions that occur
+            $this->helper->handleException($e);
+            // Generate and return a response indicating the error that occurred
+            return $this->handleResponse(['isvalid' => false], $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR, []);
+        }
+    }
+
+    public function sendTestEmail(Request $request)
+    {
+        try {
+            $log_headers = $this->getHttpData($request);
+
+            // Retrieve template ID and name from the request
+            $templateId = !empty($request->input('template_id')) ? $request->input('template_id') : '';
+            $templateEmail = !empty($request->input('test_email')) ? $request->input('test_email') : '';
+
+            if(!empty($templateId) && !empty($templateEmail))
+            {
+                $testEmailTemplate = $this->emailTemplateService->testEmailTemplate($templateEmail, $templateId, $log_headers);
+
+                if ($testEmailTemplate['success']) {
+                    return response()->json([
+                        'status' => [
+                            'code' => 200,
+                            'message' => $testEmailTemplate['message']
+                        ],
+                    ], Response::HTTP_OK);
+                }else{
+                    return response()->json([
+                        'status' => [
+                            'code' => 400,
+                            'message' => $testEmailTemplate['message']
+                        ]
+                    ], Response::HTTP_BAD_REQUEST);
+                }
+            }else{
+                return response()->json([
+                    'status' => [
+                        'code' => 400,
+                        'message' => 'All required parameters are not provided.'
+                    ],
+                    'data' => []
+                ], Response::HTTP_BAD_REQUEST);
+            }
         } catch (\Exception $e) {
             // Handle any exceptions that occur
             $this->helper->handleException($e);
