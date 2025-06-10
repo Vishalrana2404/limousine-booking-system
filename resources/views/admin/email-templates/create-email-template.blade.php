@@ -40,7 +40,6 @@
                                 </div>
                             </div>
                             <div class="card-body px-0">
-                                <input type="hidden" name="description" id="description">
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group">
@@ -98,7 +97,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group" >
                                             <label for="header">Message <span class="text-danger">*</span></label>
-                                            <textarea id="header" name="header" class="form-control @error('header') is-invalid @enderror" placeholder="Message" style="min-height: 200px;">{{ old('header') }}</textarea>
+                                            <textarea id="header" name="header" class="form-control @error('header') is-invalid @enderror ckeditor" placeholder="Message" style="min-height: 200px;">{{ old('header') }}</textarea>
                                             @error('header')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -109,8 +108,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group" id="footerDiv">
                                             <label for="footer">Footer <span class="text-danger">*</span></label>
-                                            <textarea id="footer" name="footer" class="form-control">{{ old('footer') }}</textarea>
-                                            <input type="hidden" name="footer_content" id="footer_content">
+                                            <textarea id="footer" name="footer" class="form-control  @error('header') is-invalid @enderror ckeditor" placeholder="Foooter" style="min-height: 200px;">{{ old('footer') }}</textarea>
                                             @error('footer')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -135,4 +133,13 @@
         },
     };
 </script>
+
+<script> 
+    var editor = new FroalaEditor('#header');
+    var editor2 = new FroalaEditor('#footer');
+</script>
+
+
+
+
 @endsection

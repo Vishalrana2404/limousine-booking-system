@@ -136,17 +136,8 @@
 </script>
 
 
-    <script>
-      tinymce.init({
-        selector: '#header',
-        license_key: 'gpl|<your-license-key>'
-      });
-    </script>
-    
-    <script>
-      tinymce.init({
-        selector: '#footer',
-        license_key: 'gpl|<your-license-key>'
-      });
-    </script>
+<script> 
+    var editor = new FroalaEditor('#header');
+    var editor2 = new FroalaEditor('#footer');
+</script>
 @endsection

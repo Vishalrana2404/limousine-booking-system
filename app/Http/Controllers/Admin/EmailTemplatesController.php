@@ -40,7 +40,7 @@ class EmailTemplatesController extends Controller
         return view('admin.email-templates.create-email-template');
     }
 
-    public function store(Request $request)
+    public function store(AddEmailTemplateRequest $request)
     {
         try {
             $log_headers = $this->getHttpData($request);

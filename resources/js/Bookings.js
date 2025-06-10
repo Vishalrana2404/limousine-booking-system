@@ -570,12 +570,12 @@ export default class Bookings extends BaseClass {
                 html += `</form>`;
                 $(target).html(html);
                 break;
-            case "client_instructions":
-                html += `<form id="inlineEditTableForm">`;
-                html += this.createInput(old, name, "Client Instructions");
-                html += `</form>`;
-                $(target).html(html);
-                break;
+            // case "client_instructions":
+            //     html += `<form id="inlineEditTableForm">`;
+            //     html += this.createInput(old, name, "Client Instructions");
+            //     html += `</form>`;
+            //     $(target).html(html);
+            //     break;
             case "latest_admin_comment":
                 html += `<form id="inlineEditTableForm">`;
                 html += this.createInput(old, name, "Comment");

@@ -553,39 +553,35 @@ class BookingService
                 $bookingData['drop_of_location'] = $requestData['drop_of_location'];
             if (isset($requestData['vehicle_type_id']))
                 $bookingData['vehicle_type_id'] = $requestData['vehicle_type_id'];
-            if (isset($requestData['driver_id'])) {
+            if (array_key_exists('driver_id', $requestData)) {
                 $bookingData['driver_id'] = $requestData['driver_id'];
-                $driverData = $this->driverRepository->getDriverById($bookingData['driver_id']);
-                if ($booking->driver_id && $booking->driver_id !== (int)$requestData['driver_id']) {
-                    if ($booking->is_driver_notified) {
-                        $this->removeDriverNotification($booking);
+                if(!empty($bookingData['driver_id']))
+                {
+                    $driverData = $this->driverRepository->getDriverById($bookingData['driver_id']);
+                    if ($booking->driver_id && $booking->driver_id !== (int)$requestData['driver_id']) {
+                        if ($booking->is_driver_notified) {
+                            $this->removeDriverNotification($booking);
+                        }
+                        // $this->addDriverNotification($booking, $driverData);
+                        $bookingData['is_driver_notified'] = 0;
+                        $bookingData['is_driver_acknowledge'] = 0;
+                        $bookingData['status'] = Booking::PENDING;
                     }
-                    // $this->addDriverNotification($booking, $driverData);
-                    $bookingData['is_driver_notified'] = 0;
-                    $bookingData['is_driver_acknowledge'] = 0;
-                    $bookingData['status'] = Booking::PENDING;
+                }else{
+                    $bookingData['vehicle_id'] = null;
                 }
                 //  elseif (!$booking->driver_id) {
                 //     $this->addDriverNotification($booking, $driverData);
                 // }
-                if (isset($requestData['vehicle_id'])){
-                    $bookingData['vehicle_id'] = $requestData['vehicle_id'];
-                }else{
-                    $bookingData['vehicle_id'] = NULL;
-                }
-            }else{
-                $bookingData['driver_id'] = NULL;
-                $bookingData['vehicle_id'] = NULL;
             }
             if(($userTypeSlug === 'client-staff' ||  $userTypeSlug === 'client-admin'))
             {
                 $bookingData['status'] = Booking::PENDING;
             }
-            if (isset($requestData['driver_contact'])){
+            if (isset($requestData['driver_contact']))
                 $bookingData['driver_contact'] = $requestData['driver_contact'];
-            }else{
-                $bookingData['driver_contact'] = NULL;
-            }
+            if (isset($requestData['vehicle_id']))
+                $bookingData['vehicle_id'] = $requestData['vehicle_id'];
             if (isset($requestData['client_instructions']))
                 $bookingData['client_instructions'] = $requestData['client_instructions'];
     
@@ -880,6 +876,7 @@ class BookingService
             $bookingId = $requestData['booking_id'];
             if ($bookingId) {
                 $booking = $this->bookingRepository->getBookingById($bookingId);
+                $bookingData = [];
                 if (isset($requestData['internal_remark']) && !empty($requestData['internal_remark']))
                     $bookingData['internal_remark'] = $requestData['internal_remark'];
                 if (isset($requestData['guest_name']) && !empty($requestData['guest_name']))
@@ -902,42 +899,38 @@ class BookingService
                     $bookingData['drop_off_location_id'] = $requestData['drop_off_location_id'];
                 if (isset($requestData['phone']) && !empty($requestData['phone']))
                     $bookingData['phone'] = $requestData['phone'];
-                if (isset($requestData['driver_id']) && !empty($requestData['driver_id'])) {
+                if (array_key_exists('driver_id', $requestData)) {
                     $bookingData['driver_id'] = $requestData['driver_id'];
-                    $driverData = $this->driverRepository->getDriverById($bookingData['driver_id']);
-                    $bookingData['vehicle_id'] = $driverData->vehicle_id ?? null;
-                    if ($booking->driver_id && $booking->driver_id !== (int)$requestData['driver_id']) {
-                        if ($booking->is_driver_notified) {
-                            $this->removeDriverNotification($booking);
+                    if(!empty($bookingData['driver_id']))
+                    {
+                        $driverData = $this->driverRepository->getDriverById($bookingData['driver_id']);
+                        $bookingData['vehicle_id'] = $driverData->vehicle_id ?? null;
+                        if ($booking->driver_id && $booking->driver_id !== (int)$requestData['driver_id']) {
+                            if ($booking->is_driver_notified) {
+                                $this->removeDriverNotification($booking);
+                            }
+                            // $this->addDriverNotification($booking, $driverData);
+                            $bookingData['is_driver_notified'] = 0;
+                            $bookingData['is_driver_acknowledge'] = 0;
+                            $bookingData['status'] = Booking::PENDING;
                         }
-                        // $this->addDriverNotification($booking, $driverData);
-                        $bookingData['is_driver_notified'] = 0;
-                        $bookingData['is_driver_acknowledge'] = 0;
-                        $bookingData['status'] = Booking::PENDING;
+                    }else{
+                        $bookingData['vehicle_id'] = null;
                     }
                     // elseif (!$booking->driver_id) {
                     //     $this->addDriverNotification($booking, $driverData);
                     // }
-                }else{
-                    $bookingData['driver_id'] = NULL;
-                    $bookingData['vehicle_id'] = NULL;
-                    $bookingData['driver_remark'] = NULL;
                 }
+
                 if (isset($requestData['vehicle_id']) && !empty($requestData['vehicle_id']))
-                {
                     $bookingData['vehicle_id'] = $requestData['vehicle_id'];
-                }else{
-                    $bookingData['vehicle_id'] = NULL;
-                }
-                if (isset($requestData['driver_remark']) && !empty($requestData['driver_remark']))
-                {
-                    $bookingData['driver_remark'] = $requestData['driver_remark'];
-                }else{
-                    $bookingData['driver_remark'] = NULL;
-                }
 
                 if (isset($requestData['vehicle_type_id']) && !empty($requestData['vehicle_type_id']))
                     $bookingData['vehicle_type_id'] = $requestData['vehicle_type_id'];
+
+                if (isset($requestData['driver_remark']) && !empty($requestData['driver_remark']))
+                    $bookingData['driver_remark'] = $requestData['driver_remark'];
+
                 if (isset($requestData['status']) && !empty($requestData['status'])){
                     $bookingData['status'] = $requestData['status'];
                     $bookingData['client_asked_to_cancel'] = 'no';
